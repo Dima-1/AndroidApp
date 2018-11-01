@@ -7,6 +7,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+	private val app get() = application as StrikeLinesApplication
+	private val osmandHelper get() = app.osmandHelper
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -14,5 +17,14 @@ class MainActivity : AppCompatActivity() {
 		fab.setOnClickListener { view ->
 			Toast.makeText(view.context, "Open map", Toast.LENGTH_SHORT).show()
 		}
+
+		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
+			osmandHelper.connectOsmand()
+		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		app.cleanupResources()
 	}
 }

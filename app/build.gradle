@@ -6,6 +6,15 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+    sourceSets {
+        main {
+            manifest.srcFile "src/main/AndroidManifest.xml"
+            aidl.srcDirs = ["src/main/java"]
+            java.srcDirs = ["src/main/java"]
+            resources.srcDirs = ["src/main/resources"]
+            res.srcDirs = ["src/main/res"]
+        }
+    }
     defaultConfig {
         applicationId "com.strikelines.strikelines"
         minSdkVersion 14
