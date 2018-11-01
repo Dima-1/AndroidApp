@@ -1,4 +1,4 @@
 <resources>
+	<string name="open_map">Open map</string>
 	<string name="app_name">StrikeLines</string>
-	<string name="action_settings">Settings</string>
 </resources>

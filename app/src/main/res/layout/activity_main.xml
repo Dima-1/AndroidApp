@@ -1,34 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:orientation="vertical"
 	tools:context=".MainActivity">
 
 	<android.support.design.widget.AppBarLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/AppTheme.AppBarOverlay">
+		android:layout_height="@dimen/action_bar_height"
+		android:background="@color/card_bg"
+		android:gravity="center_vertical">
 
-		<android.support.v7.widget.Toolbar
-			android:id="@+id/toolbar"
+		<TextView
 			android:layout_width="match_parent"
-			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/colorPrimary"
-			app:popupTheme="@style/AppTheme.PopupOverlay"/>
+			android:layout_height="wrap_content"
+			android:ellipsize="end"
+			android:maxLines="1"
+			android:paddingLeft="@dimen/content_padding_standard"
+			android:paddingRight="@dimen/content_padding_standard"
+			android:text="@string/app_name"
+			android:textColor="@color/app_bar_title"
+			android:textSize="@dimen/title_text_size"/>
 
 	</android.support.design.widget.AppBarLayout>
 
-	<include layout="@layout/content_main"/>
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
-	<android.support.design.widget.FloatingActionButton
-		android:id="@+id/fab"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|end"
-		android:layout_margin="@dimen/fab_margin"
-		app:srcCompat="@android:drawable/ic_dialog_email"/>
+		<TextView
+			android:id="@+id/fab"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom|center_horizontal"
+			android:background="@drawable/extended_fab_bg"
+			android:drawablePadding="8dp"
+			android:gravity="center"
+			android:paddingLeft="32dp"
+			android:paddingRight="32dp"
+			android:text="@string/open_map"
+			android:textColor="@color/fab_text"/>
 
-</android.support.design.widget.CoordinatorLayout>
+	</FrameLayout>
+
+</LinearLayout>
