@@ -1,4 +1,4 @@
-package com.strikelines.strikelines
+package com.strikelines.app
 
 import android.app.Application
 

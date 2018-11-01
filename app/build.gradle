@@ -16,7 +16,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId "com.strikelines.strikelines"
+        applicationId "com.strikelines.app"
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 1
