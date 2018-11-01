@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.widget.Toast
 import net.osmand.aidl.IOsmAndAidlInterface
 
 class OsmandHelper(private val app: Application) {
@@ -41,7 +40,6 @@ class OsmandHelper(private val app: Application) {
 			mIOsmAndAidlInterface = IOsmAndAidlInterface.Stub.asInterface(service)
 			initialized = true
 			listener?.onOsmandConnectionStateChanged(true)
-			Toast.makeText(app, "OsmAnd connected", Toast.LENGTH_SHORT).show()
 		}
 
 		override fun onServiceDisconnected(name: ComponentName) {
