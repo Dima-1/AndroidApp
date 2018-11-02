@@ -15,9 +15,16 @@ class MainActivity : AppCompatActivity() {
 		setContentView(R.layout.activity_main)
 
 		fab.setOnClickListener { view ->
-			osmandHelper.openOsmand {
-				// TODO: use strings.xml
-				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
+			osmandHelper.apply {
+				setNavDrawerLogo(
+					AndroidUtils.resourceToUri(
+						view.context, R.drawable.img_strikelines_nav_drawer_logo
+					)
+				)
+				openOsmand {
+					// TODO: use strings.xml
+					Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
+				}
 			}
 		}
 

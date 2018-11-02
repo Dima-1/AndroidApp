@@ -5,7 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import android.os.IBinder
+import android.os.RemoteException
 import net.osmand.aidl.IOsmAndAidlInterface
 
 class OsmandHelper(private val app: Application) {
@@ -85,6 +87,16 @@ class OsmandHelper(private val app: Application) {
 			app.startActivity(intent)
 		} else {
 			onOsmandMissingAction?.invoke()
+		}
+	}
+
+	fun setNavDrawerLogo(uri: Uri) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setNavDrawerLogo(uri.toString())
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
 		}
 	}
 
