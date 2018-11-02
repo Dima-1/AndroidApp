@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 					)
 				)
 				openOsmand {
-					// TODO: use strings.xml
+					// TODO: open OsmAnd on Google Play Store
 					Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
 				}
 			}
