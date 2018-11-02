@@ -15,7 +15,10 @@ class MainActivity : AppCompatActivity() {
 		setContentView(R.layout.activity_main)
 
 		fab.setOnClickListener { view ->
-			Toast.makeText(view.context, "Open map", Toast.LENGTH_SHORT).show()
+			osmandHelper.openOsmand {
+				// TODO: use strings.xml
+				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
+			}
 		}
 
 		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {

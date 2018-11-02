@@ -79,6 +79,15 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
+	fun openOsmand(onOsmandMissingAction: (() -> Unit)?) {
+		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
+		if (intent != null) {
+			app.startActivity(intent)
+		} else {
+			onOsmandMissingAction?.invoke()
+		}
+	}
+
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
 			val intent = Intent("net.osmand.aidl.OsmandAidlService")
