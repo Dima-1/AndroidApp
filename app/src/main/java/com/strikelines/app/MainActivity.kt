@@ -15,16 +15,10 @@ class MainActivity : AppCompatActivity() {
 		setContentView(R.layout.activity_main)
 
 		fab.setOnClickListener { view ->
-			osmandHelper.apply {
-				setNavDrawerLogo(
-					AndroidUtils.resourceToUri(
-						view.context, R.drawable.img_strikelines_nav_drawer_logo
-					)
-				)
-				openOsmand {
-					// TODO: open OsmAnd on Google Play Store
-					Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
-				}
+			setupOsmand()
+			osmandHelper.openOsmand {
+				// TODO: open OsmAnd on Google Play Store
+				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
 			}
 		}
 
@@ -36,5 +30,24 @@ class MainActivity : AppCompatActivity() {
 	override fun onDestroy() {
 		super.onDestroy()
 		app.cleanupResources()
+	}
+
+	private fun setupOsmand() {
+		val logoUri = AndroidUtils.resourceToUri(
+			this@MainActivity, R.drawable.img_strikelines_nav_drawer_logo
+		)
+		osmandHelper.apply {
+			setNavDrawerLogo(logoUri)
+			setDisabledPatterns(listOf(OsmandCustomizationConstants.DRAWER_ITEM_ID_SCHEME))
+			setEnabledIds(
+				listOf(
+					OsmandCustomizationConstants.DRAWER_MAP_MARKERS_ID,
+					OsmandCustomizationConstants.DRAWER_MEASURE_DISTANCE_ID,
+					OsmandCustomizationConstants.DRAWER_CONFIGURE_MAP_ID,
+					OsmandCustomizationConstants.DRAWER_CONFIGURE_SCREEN_ID,
+					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID
+				)
+			)
+		}
 	}
 }

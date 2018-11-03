@@ -1,0 +1,73 @@
+package com.strikelines.app
+
+object OsmandCustomizationConstants {
+
+	// Navigation Drawer:
+
+	val DRAWER_ITEM_ID_SCHEME = "drawer.action."
+	val DRAWER_DASHBOARD_ID = DRAWER_ITEM_ID_SCHEME + "dashboard"
+	val DRAWER_MAP_MARKERS_ID = DRAWER_ITEM_ID_SCHEME + "map_markers"
+	val DRAWER_MY_PLACES_ID = DRAWER_ITEM_ID_SCHEME + "my_places"
+	val DRAWER_SEARCH_ID = DRAWER_ITEM_ID_SCHEME + "search"
+	val DRAWER_DIRECTIONS_ID = DRAWER_ITEM_ID_SCHEME + "directions"
+	val DRAWER_CONFIGURE_MAP_ID = DRAWER_ITEM_ID_SCHEME + "configure_map"
+	val DRAWER_DOWNLOAD_MAPS_ID = DRAWER_ITEM_ID_SCHEME + "download_maps"
+	val DRAWER_OSMAND_LIVE_ID = DRAWER_ITEM_ID_SCHEME + "osmand_live"
+	val DRAWER_TRAVEL_GUIDES_ID = DRAWER_ITEM_ID_SCHEME + "travel_guides"
+	val DRAWER_MEASURE_DISTANCE_ID = DRAWER_ITEM_ID_SCHEME + "measure_distance"
+	val DRAWER_CONFIGURE_SCREEN_ID = DRAWER_ITEM_ID_SCHEME + "configure_screen"
+	val DRAWER_PLUGINS_ID = DRAWER_ITEM_ID_SCHEME + "plugins"
+	val DRAWER_SETTINGS_ID = DRAWER_ITEM_ID_SCHEME + "settings"
+	val DRAWER_HELP_ID = DRAWER_ITEM_ID_SCHEME + "help"
+	val DRAWER_BUILDS_ID = DRAWER_ITEM_ID_SCHEME + "builds"
+	val DRAWER_DIVIDER_ID = DRAWER_ITEM_ID_SCHEME + "divider"
+
+	// Configure Map:
+
+	val ITEM_ID_SCHEME = "map.configure."
+	val SHOW_ITEMS_ID_SCHEME = ITEM_ID_SCHEME + "show."
+	val RENDERING_ITEMS_ID_SCHEME = ITEM_ID_SCHEME + "rendering."
+	val CUSTOM_RENDERING_ITEMS_ID_SCHEME = RENDERING_ITEMS_ID_SCHEME + "custom."
+
+	val APP_PROFILES_ID = ITEM_ID_SCHEME + "app_profiles"
+
+	val SHOW_CATEGORY_ID = SHOW_ITEMS_ID_SCHEME + "category"
+	val FAVORITES_ID = SHOW_ITEMS_ID_SCHEME + "favorites"
+	val POI_OVERLAY_ID = SHOW_ITEMS_ID_SCHEME + "poi_overlay"
+	val POI_OVERLAY_LABELS_ID = SHOW_ITEMS_ID_SCHEME + "poi_overlay_labels"
+	val TRANSPORT_ID = SHOW_ITEMS_ID_SCHEME + "transport"
+	val GPX_FILES_ID = SHOW_ITEMS_ID_SCHEME + "gpx_files"
+	val MAP_MARKERS_ID = SHOW_ITEMS_ID_SCHEME + "map_markers"
+	val MAP_SOURCE_ID = SHOW_ITEMS_ID_SCHEME + "map_source"
+	val RECORDING_LAYER = SHOW_ITEMS_ID_SCHEME + "recording_layer"
+	val MAPILLARY = SHOW_ITEMS_ID_SCHEME + "mapillary"
+	val OSM_NOTES = SHOW_ITEMS_ID_SCHEME + "osm_notes"
+	val OVERLAY_MAP = SHOW_ITEMS_ID_SCHEME + "overlay_map"
+	val UNDERLAY_MAP = SHOW_ITEMS_ID_SCHEME + "underlay_map"
+	val CONTOUR_LINES = SHOW_ITEMS_ID_SCHEME + "contour_lines"
+	val HILLSHADE_LAYER = SHOW_ITEMS_ID_SCHEME + "hillshade_layer"
+
+	val MAP_RENDERING_CATEGORY_ID = RENDERING_ITEMS_ID_SCHEME + "category"
+	val MAP_STYLE_ID = RENDERING_ITEMS_ID_SCHEME + "map_style"
+	val MAP_MODE_ID = RENDERING_ITEMS_ID_SCHEME + "map_mode"
+	val MAP_MAGNIFIER_ID = RENDERING_ITEMS_ID_SCHEME + "map_marnifier"
+	val ROAD_STYLE_ID = RENDERING_ITEMS_ID_SCHEME + "road_style"
+	val TEXT_SIZE_ID = RENDERING_ITEMS_ID_SCHEME + "text_size"
+	val MAP_LANGUAGE_ID = RENDERING_ITEMS_ID_SCHEME + "map_language"
+	val TRANSPORT_RENDERING_ID = RENDERING_ITEMS_ID_SCHEME + "transport"
+	val DETAILS_ID = RENDERING_ITEMS_ID_SCHEME + "details"
+	val HIDE_ID = RENDERING_ITEMS_ID_SCHEME + "hide"
+	val ROUTES_ID = RENDERING_ITEMS_ID_SCHEME + "routes"
+
+	// Map Controls:
+
+	val HUD_BTN_ID_SCHEME = "map.view."
+	val LAYERS_HUD_ID = HUD_BTN_ID_SCHEME + "layers"
+	val COMPASS_HUD_ID = HUD_BTN_ID_SCHEME + "compass"
+	val QUICK_SEARCH_HUD_ID = HUD_BTN_ID_SCHEME + "quick_search"
+	val BACK_TO_LOC_HUD_ID = HUD_BTN_ID_SCHEME + "back_to_loc"
+	val MENU_HUD_ID = HUD_BTN_ID_SCHEME + "menu"
+	val ROUTE_PLANNING_HUD_ID = HUD_BTN_ID_SCHEME + "route_planning"
+	val ZOOM_IN_HUD_ID = HUD_BTN_ID_SCHEME + "zoom_id"
+	val ZOOM_OUT_HUD_ID = HUD_BTN_ID_SCHEME + "zoom_out"
+}

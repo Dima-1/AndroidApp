@@ -100,6 +100,46 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
+	fun setEnabledIds(ids: List<String>) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setEnabledIds(ids)
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+	}
+
+	fun setDisabledIds(ids: List<String>) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setDisabledIds(ids)
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+	}
+
+	fun setEnabledPatterns(patterns: List<String>) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setEnabledPatterns(patterns)
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+	}
+
+	fun setDisabledPatterns(patterns: List<String>) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setDisabledPatterns(patterns)
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+	}
+
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
 			val intent = Intent("net.osmand.aidl.OsmandAidlService")
