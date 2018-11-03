@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID
 				)
 			)
+			setDisabledIds(listOf(OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID))
 		}
 	}
 }
