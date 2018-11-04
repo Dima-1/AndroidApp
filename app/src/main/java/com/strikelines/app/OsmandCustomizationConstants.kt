@@ -24,12 +24,12 @@ object OsmandCustomizationConstants {
 
 	// Configure Map:
 
-	const val ITEM_ID_SCHEME = "map.configure."
-	const val SHOW_ITEMS_ID_SCHEME = ITEM_ID_SCHEME + "show."
-	const val RENDERING_ITEMS_ID_SCHEME = ITEM_ID_SCHEME + "rendering."
+	const val CONFIGURE_MAP_ITEM_ID_SCHEME = "map.configure."
+	const val SHOW_ITEMS_ID_SCHEME = CONFIGURE_MAP_ITEM_ID_SCHEME + "show."
+	const val RENDERING_ITEMS_ID_SCHEME = CONFIGURE_MAP_ITEM_ID_SCHEME + "rendering."
 	const val CUSTOM_RENDERING_ITEMS_ID_SCHEME = RENDERING_ITEMS_ID_SCHEME + "custom."
 
-	const val APP_PROFILES_ID = ITEM_ID_SCHEME + "app_profiles"
+	const val APP_PROFILES_ID = CONFIGURE_MAP_ITEM_ID_SCHEME + "app_profiles"
 
 	const val SHOW_CATEGORY_ID = SHOW_ITEMS_ID_SCHEME + "category"
 	const val FAVORITES_ID = SHOW_ITEMS_ID_SCHEME + "favorites"
