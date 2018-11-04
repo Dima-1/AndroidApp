@@ -37,31 +37,31 @@ class MainActivity : AppCompatActivity() {
 			this@MainActivity, R.drawable.img_strikelines_nav_drawer_logo
 		)
 		osmandHelper.apply {
-			// Drawer menu
 			setNavDrawerLogo(logoUri)
-			setDisabledPatterns(listOf(OsmandCustomizationConstants.DRAWER_ITEM_ID_SCHEME))
+			setDisabledPatterns(
+				listOf(
+					OsmandCustomizationConstants.DRAWER_ITEM_ID_SCHEME,
+					OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
+				)
+			)
 			setEnabledIds(
 				listOf(
 					OsmandCustomizationConstants.DRAWER_MAP_MARKERS_ID,
 					OsmandCustomizationConstants.DRAWER_MEASURE_DISTANCE_ID,
 					OsmandCustomizationConstants.DRAWER_CONFIGURE_MAP_ID,
-					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID
-				)
-			)
-			// Map buttons
-			setDisabledIds(listOf(OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID))
-			setDisabledIds(listOf(OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID))
-			// Configure map
-			setDisabledPatterns(listOf(OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME))
-			setEnabledIds(
-				listOf(
+					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
 					//OsmandCustomizationConstants.SHOW_CATEGORY_ID,
 					OsmandCustomizationConstants.GPX_FILES_ID,
-					OsmandCustomizationConstants.POI_OVERLAY_LABELS_ID,
 					OsmandCustomizationConstants.MAP_SOURCE_ID,
 					OsmandCustomizationConstants.OVERLAY_MAP,
 					OsmandCustomizationConstants.UNDERLAY_MAP,
 					OsmandCustomizationConstants.CONTOUR_LINES
+				)
+			)
+			setDisabledIds(
+				listOf(
+					OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID,
+					OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
 				)
 			)
 		}
