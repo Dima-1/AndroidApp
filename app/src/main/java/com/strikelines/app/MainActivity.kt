@@ -44,11 +44,11 @@ class MainActivity : AppCompatActivity() {
 					OsmandCustomizationConstants.DRAWER_MAP_MARKERS_ID,
 					OsmandCustomizationConstants.DRAWER_MEASURE_DISTANCE_ID,
 					OsmandCustomizationConstants.DRAWER_CONFIGURE_MAP_ID,
-					OsmandCustomizationConstants.DRAWER_CONFIGURE_SCREEN_ID,
 					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID
 				)
 			)
 			setDisabledIds(listOf(OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID))
+			setDisabledIds(listOf(OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID))
 		}
 	}
 }
