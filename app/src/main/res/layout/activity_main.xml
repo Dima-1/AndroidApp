@@ -30,6 +30,13 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:src="@drawable/card"
+			android:layout_marginTop="8dp"
+			android:scaleType="fitStart"/>
+
 		<TextView
 			android:id="@+id/fab"
 			android:layout_width="wrap_content"
@@ -41,7 +48,7 @@
 			android:paddingLeft="32dp"
 			android:paddingRight="32dp"
 			android:text="@string/open_map"
-			android:textColor="@color/fab_text"/>
+			android:textColor="@color/card_bg"/>
 
 	</FrameLayout>
 
