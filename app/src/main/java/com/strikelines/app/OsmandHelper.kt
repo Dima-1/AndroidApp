@@ -9,11 +9,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
+import android.text.TextUtils
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
+import net.osmand.aidl.gpx.*
+import net.osmand.aidl.tiles.ASqliteDbFile
+import java.io.File
+import java.util.*
 
 class OsmandHelper(private val app: Application) {
+
+	private val log = PlatformUtil.getLog(OsmandHelper::class.java)
 
 	private val osmandPackages = listOf("net.osmand.plus", "net.osmand", "net.osmand.dev")
 
@@ -22,8 +29,7 @@ class OsmandHelper(private val app: Application) {
 	private var initialized = false
 	private var bound = false
 
-	var selectedOsmandPackage = ""
-		private set
+	private var selectedOsmandPackage = ""
 
 	var listener: OsmandHelperListener? = null
 
@@ -80,7 +86,7 @@ class OsmandHelper(private val app: Application) {
 				app.unbindService(mConnection)
 			}
 		} catch (e: Throwable) {
-			e.printStackTrace()
+			log.error(e)
 		}
 	}
 
@@ -99,7 +105,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setNavDrawerLogo(uri.toString())
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -109,7 +115,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setEnabledIds(ids)
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -119,7 +125,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setDisabledIds(ids)
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -129,7 +135,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setEnabledPatterns(patterns)
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -139,7 +145,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setDisabledPatterns(patterns)
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -149,7 +155,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.regWidgetVisibility(SetWidgetsParams(widgetId, appModesKeys))
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -159,7 +165,7 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.regWidgetAvailability(SetWidgetsParams(widgetId, appModesKeys))
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
 	}
@@ -169,9 +175,218 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.customizeOsmandSettings(OsmandSettingsParams(sharedPreferencesName, bundle))
 			} catch (e: RemoteException) {
-				e.printStackTrace()
+				log.error(e)
 			}
 		}
+	}
+
+	/**
+	 * Get list of active GPX files.
+	 *
+	 * @return list of active gpx files.
+	 */
+	val activeGpxFiles: List<ASelectedGpxFile>?
+		get() {
+			if (mIOsmAndAidlInterface != null) {
+				try {
+					val res = mutableListOf<ASelectedGpxFile>()
+					if (mIOsmAndAidlInterface!!.getActiveGpx(res)) {
+						return res
+					}
+				} catch (e: Throwable) {
+					log.error(e)
+				}
+
+			}
+			return null
+		}
+
+	/**
+	 * Get list of all imported GPX files.
+	 *
+	 * @return list of imported gpx files.
+	 */
+	val importedGpxFiles: List<AGpxFile>?
+		get() {
+			if (mIOsmAndAidlInterface != null) {
+				try {
+					val files = mutableListOf<AGpxFile>()
+					mIOsmAndAidlInterface!!.getImportedGpx(files)
+					return files
+				} catch (e: RemoteException) {
+					log.error(e)
+				}
+			}
+			return null
+		}
+
+	/**
+	 * Import GPX file to OsmAnd.
+	 * OsmAnd must have rights to access location. Not recommended.
+	 *
+	 * @param file      - File which represents GPX track.
+	 * @param fileName  - Destination file name. May contain dirs.
+	 * @param color     - color of gpx. Can be one of: "red", "orange", "lightblue", "blue", "purple",
+	 * "translucent_red", "translucent_orange", "translucent_lightblue",
+	 * "translucent_blue", "translucent_purple"
+	 * @param show      - show track on the map after import
+	 */
+	fun importGpxFromFile(file: File, fileName: String, color: String, show: Boolean): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.importGpx(ImportGpxParams(file, fileName, color, show))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	/**
+	 * Import GPX file to OsmAnd.
+	 *
+	 * @param gpxUri    - URI created by FileProvider.
+	 * @param fileName  - Destination file name. May contain dirs.
+	 * @param color     - color of gpx. Can be one of: "", "red", "orange", "lightblue", "blue", "purple",
+	 * "translucent_red", "translucent_orange", "translucent_lightblue",
+	 * "translucent_blue", "translucent_purple"
+	 * @param show      - show track on the map after import
+	 */
+	fun importGpxFromUri(gpxUri: Uri, fileName: String, color: String, show: Boolean): Boolean {
+		if (mIOsmAndAidlInterface != null && !TextUtils.isEmpty(selectedOsmandPackage)) {
+			try {
+				app.grantUriPermission(selectedOsmandPackage, gpxUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+				return mIOsmAndAidlInterface!!.importGpx(ImportGpxParams(gpxUri, fileName, color, show))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	/**
+	 * Import GPX file to OsmAnd.
+	 *
+	 * @param data      - Raw contents of GPX file. Sent as intent's extra string parameter.
+	 * @param fileName  - Destination file name. May contain dirs.
+	 * @param color     - color of gpx. Can be one of: "red", "orange", "lightblue", "blue", "purple",
+	 * "translucent_red", "translucent_orange", "translucent_lightblue",
+	 * "translucent_blue", "translucent_purple"
+	 * @param show      - show track on the map after import
+	 */
+	fun importGpxFromData(data: String, fileName: String, color: String, show: Boolean): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.importGpx(ImportGpxParams(data, fileName, color, show))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	/**
+	 * Show GPX file on map.
+	 *
+	 * @param fileName - file name to show. Must be imported first.
+	 */
+	fun showGpx(fileName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.showGpx(ShowGpxParams(fileName))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	/**
+	 * Hide GPX file.
+	 *
+	 * @param fileName - file name to hide.
+	 */
+	fun hideGpx(fileName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.hideGpx(HideGpxParams(fileName))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	/**
+	 * Remove GPX file.
+	 *
+	 * @param fileName - file name to remove;
+	 */
+	fun removeGpx(fileName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.removeGpx(RemoveGpxParams(fileName))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+
+		}
+		return false
+	}
+
+	val sqliteDbFiles: List<ASqliteDbFile>?
+		get() {
+			if (mIOsmAndAidlInterface != null) {
+				try {
+					val files = mutableListOf<ASqliteDbFile>()
+					mIOsmAndAidlInterface!!.getSqliteDbFiles(files)
+					return files
+				} catch (e: RemoteException) {
+					log.error(e)
+				}
+			}
+			return null
+		}
+
+	val activeSqliteDbFiles: List<ASqliteDbFile>?
+		get() {
+			if (mIOsmAndAidlInterface != null) {
+				try {
+					val files = mutableListOf<ASqliteDbFile>()
+					mIOsmAndAidlInterface!!.getActiveSqliteDbFiles(files)
+					return files
+				} catch (e: RemoteException) {
+					log.error(e)
+				}
+			}
+			return null
+		}
+
+	fun showSqliteDbFile(fileName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.showSqliteDbFile(fileName)
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
+	}
+
+	fun hideSqliteDbFile(fileName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.hideSqliteDbFile(fileName)
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
 	}
 
 	private fun bindService(packageName: String): Boolean {
@@ -208,5 +423,22 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_MILES_AND_METERS = "MILES_AND_METERS"
 		const val METRIC_CONST_MILES_AND_YARDS = "MILES_AND_YARDS"
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
+
+		fun getSqliteDbFileHumanReadableName(fileName: String): String {
+			return getFileHumanReadableName(fileName)
+		}
+
+		fun getGpxFileHumanReadableName(fileName: String): String {
+			return getFileHumanReadableName(fileName)
+		}
+
+		private fun getFileHumanReadableName(fileName: String): String {
+			var name = fileName
+			val ext = name.lastIndexOf('.')
+			if (ext != -1) {
+				name = name.substring(0, ext)
+			}
+			return name.replace('_', ' ').capitalize().trim()
+		}
 	}
 }

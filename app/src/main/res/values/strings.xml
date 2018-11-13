@@ -1,4 +1,13 @@
 <resources>
-	<string name="open_map">Open map</string>
+	<string name="navigate">Navigate</string>
 	<string name="app_name">StrikeLines</string>
+	<string name="shared_string_maps">Maps</string>
+	<string name="your_maps">Your Maps</string>
+	<string name="shop_charts">Shop Charts</string>
+	<string name="gpx_charts">GPX Charts</string>
+	<string name="charts_3d">3D Charts</string>
+	<string name="basemaps">Basemaps</string>
+	<string name="downloads_descr">Select the maps to be displayed in the navigation application</string>
+	<string name="select_multiple">Select multiple items</string>
+	<string name="select_single">Select one item</string>
 </resources>

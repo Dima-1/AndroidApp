@@ -1,8 +1,14 @@
-package com.strikelines.app
+package com.strikelines.app.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.strikelines.app.*
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BOAT
@@ -12,16 +18,51 @@ import com.strikelines.app.OsmandHelper.Companion.APP_MODE_PEDESTRIAN
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
 import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
 import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
+import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.ref.WeakReference
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	private val app get() = application as StrikeLinesApplication
 	private val osmandHelper get() = app.osmandHelper
+	private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
+
+	private var mapsTabFragment: MapsTabFragment? = null
+	private var purchasesTabFragment: PurchasesTabFragment? = null
+	private lateinit var bottomNav: BottomNavigationView
+
+	companion object {
+		const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
+
+		private const val MAPS_TAB_POS = 0
+		private const val DOWNLOADS_TAB_POS = 1
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
+
+		val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
+			swipeLocked = true
+			offscreenPageLimit = 2
+			adapter = ViewPagerAdapter(supportFragmentManager)
+		}
+
+		bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
+			setOnNavigationItemSelectedListener {
+				var pos = -1
+				when (it.itemId) {
+					R.id.action_maps -> pos = MAPS_TAB_POS
+					R.id.action_downloads -> pos = DOWNLOADS_TAB_POS
+				}
+				if (pos != -1 && pos != viewPager.currentItem) {
+					viewPager.currentItem = pos
+					return@setOnNavigationItemSelectedListener true
+				}
+				false
+			}
+		}
 
 		fab.setOnClickListener { view ->
 			setupOsmand()
@@ -39,6 +80,41 @@ class MainActivity : AppCompatActivity() {
 	override fun onDestroy() {
 		super.onDestroy()
 		app.cleanupResources()
+	}
+
+	override fun onAttachFragment(fragment: Fragment?) {
+		if (fragment is OsmandHelperListener) {
+			listeners.add(WeakReference(fragment))
+		}
+		if (fragment is MapsTabFragment) {
+			mapsTabFragment = fragment
+		} else if (fragment is PurchasesTabFragment) {
+			purchasesTabFragment = fragment
+		}
+	}
+
+	override fun onNewIntent(intent: Intent) {
+		super.onNewIntent(intent)
+		if (intent.getBooleanExtra(OPEN_DOWNLOADS_TAB_KEY, false)) {
+			AndroidUtils.dismissAllDialogs(supportFragmentManager)
+			bottomNav.selectedItemId = R.id.action_maps
+		}
+	}
+
+	override fun onResume() {
+		super.onResume()
+		osmandHelper.listener = this
+	}
+
+	override fun onPause() {
+		super.onPause()
+		osmandHelper.listener = null
+	}
+
+	override fun onOsmandConnectionStateChanged(connected: Boolean) {
+		listeners.forEach {
+			it.get()?.onOsmandConnectionStateChanged(connected)
+		}
 	}
 
 	private fun setupOsmand() {
@@ -129,5 +205,14 @@ class MainActivity : AppCompatActivity() {
 			}
 			customizeOsmandSettings("strikelines", bundle)
 		}
+	}
+
+	inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+
+		private val fragments = listOf<Fragment>(MapsTabFragment(), PurchasesTabFragment())
+
+		override fun getItem(position: Int) = fragments[position]
+
+		override fun getCount() = fragments.size
 	}
 }

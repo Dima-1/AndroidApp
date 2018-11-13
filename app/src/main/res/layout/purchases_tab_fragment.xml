@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:orientation="vertical">
+
+	<android.support.design.widget.AppBarLayout
+		android:id="@+id/app_bar_layout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/app_bar_bg"
+		android:gravity="center_vertical">
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:ellipsize="end"
+			android:maxLines="1"
+			android:paddingLeft="@dimen/content_padding_standard"
+			android:paddingRight="@dimen/content_padding_standard"
+			android:paddingTop="16dp"
+			android:paddingBottom="8dp"
+			android:text="@string/app_name"
+			android:textStyle="bold"
+			android:textColor="@color/app_bar_title"
+			android:textSize="@dimen/title_text_size"/>
+
+		<android.support.design.widget.TabLayout
+			android:id="@+id/tab_layout"
+			android:layout_width="match_parent"
+			android:layout_height="42dp"
+			android:layout_marginLeft="16dp"
+			android:layout_marginRight="16dp"
+			android:layout_marginTop="4dp"
+			android:layout_marginBottom="8dp"
+			app:tabBackground="@drawable/tab_selector"
+			app:tabTextAppearance="@style/NoAllCapsTextAppearance"
+			app:tabTextColor="@color/app_bar_descr"
+			app:tabSelectedTextColor="@color/accent_color"
+			app:tabIndicatorColor="@color/accent_color"
+			app:tabIndicatorHeight="1dp"
+			app:tabGravity="fill"
+			app:tabMaxWidth="0dp"
+			app:tabMode="fixed"/>
+
+	</android.support.design.widget.AppBarLayout>
+
+	<LinearLayout
+		android:id="@+id/tabs_view"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:orientation="vertical">
+
+		<com.strikelines.app.ui.LockableViewPager
+			android:id="@+id/pager"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1" />
+
+	</LinearLayout>
+
+</LinearLayout>
