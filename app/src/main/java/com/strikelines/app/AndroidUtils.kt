@@ -80,12 +80,10 @@ object AndroidUtils {
 	fun formatSize(sizeBytes: Long): String {
 		val sizeKb = (sizeBytes + 512 shr 10).toInt()
 		return if (sizeKb > 0) {
-			if (sizeKb > 1 shl 20) {
-				FORMAT_GB.format(arrayOf<Any>(sizeKb.toFloat() / (1 shl 20)))
-			} else if (sizeBytes > 100 * (1 shl 10)) {
-				FORMAT_MB.format(arrayOf<Any>(sizeBytes.toFloat() / (1 shl 20)))
-			} else {
-				FORMAT_KB.format(arrayOf<Any>(sizeBytes.toFloat() / (1 shl 10)))
+			when {
+				sizeKb > 1 shl 20 -> FORMAT_GB.format(arrayOf<Any>(sizeKb.toFloat() / (1 shl 20)))
+				sizeBytes > 100 * (1 shl 10) -> FORMAT_MB.format(arrayOf<Any>(sizeBytes.toFloat() / (1 shl 20)))
+				else -> FORMAT_KB.format(arrayOf<Any>(sizeBytes.toFloat() / (1 shl 10)))
 			}
 		} else ""
 	}
