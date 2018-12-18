@@ -23,9 +23,9 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         const val TITLE = 0
     }
 
-    private val gson by lazy { GsonBuilder().setLenient().create() }
-    private val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
-    private val chartsList = mutableListOf<Chart>()
+    protected val gson by lazy { GsonBuilder().setLenient().create() }
+    protected val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
+    protected val chartsList = mutableListOf<Chart>()
 
     lateinit var recycleView: RecyclerView
     lateinit var adapter: ShopAdapter
@@ -37,18 +37,16 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
 //        val activity = activity
         val view = inflater.inflate(R.layout.recycler_list_fragment, container, false)
+        recycleView = view.findViewById(R.id.recycler_view)
+        adapter = ShopAdapter(listener)
+        recycleView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
+        recycleView.adapter = this.adapter
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recycleView = view.findViewById(R.id.recycler_view)
-        adapter = ShopAdapter(listener)
-        recycleView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
-    }
-
-    override fun onResume() {
-        super.onResume()
+        requestChartsFromApi()
     }
 
     val listener: ShopListener? = object : ShopListener {
@@ -83,16 +81,9 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         GetRequestAsync(url, cardListener).execute()
 
 
+    abstract fun onRequestResult(result:String)
 
-    private fun onRequestResult(result: String?) {
-        Log.i("Fragment", result)
-
-        chartsList.addAll(parseJson(result))
-        chartsList.forEach { Log.d("Chart", it.name) }
-        adapter.setData(chartsList)
-    }
-
-    private fun parseJson(response: String?): List<Chart> {
+    protected fun parseJson(response: String?): List<Chart> {
         return if (response != null) {
             val charts: Charts = gson.fromJson(response, Charts::class.java)
             charts.charts
