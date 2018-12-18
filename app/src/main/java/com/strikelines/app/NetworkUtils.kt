@@ -1,6 +1,7 @@
 package com.strikelines.app
 
 import android.os.AsyncTask
+import android.util.Log
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -33,14 +34,14 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
     }
 
     override fun onPostExecute(result: String) {
-        //Log.d("Async results", result)
+        Log.d("Async results", result)
         listener.onRequest(false)
         listener.onResult(result)
     }
 
     fun getRequest(url: String): String {
         val obj = URL(url)
-        val response = StringBuffer()
+        val response = StringBuilder()
         with(obj.openConnection() as HttpURLConnection) {
             requestMethod = "GET"
 

@@ -86,7 +86,9 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
     private fun onRequestResult(result: String?) {
         Log.i("Fragment", result)
+
         chartsList.addAll(parseJson(result))
+        chartsList.forEach { Log.d("Chart", it.name) }
         adapter.setData(chartsList)
     }
 
