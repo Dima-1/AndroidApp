@@ -79,24 +79,22 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         }
     }
 
-    fun requestChartsFromApi() {
+    fun requestChartsFromApi() =
         GetRequestAsync(url, cardListener).execute()
 
 
-    }
 
     private fun onRequestResult(result: String?) {
         Log.i("Fragment", result)
-//        chartsList.addAll(parseJson(result))
-//        adapter.setData(chartsList)
+        chartsList.addAll(parseJson(result))
+        adapter.setData(chartsList)
     }
 
-    private fun parseJson(response: String?){//: List<Chart> {
-
-        if (response != null) {
-//            val charts: Charts = gson.fromJson(response, Charts::class.java)
-//            return charts.charts
-        } //else return emptyList()
+    private fun parseJson(response: String?): List<Chart> {
+        return if (response != null) {
+            val charts: Charts = gson.fromJson(response, Charts::class.java)
+            charts.charts
+        } else emptyList()
 
     }
 

@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.strikelines.app.R
 
-class PurchaseGpxFilesFragment : Fragment() {
+class PurchaseGpxFilesFragment : PurchaseSqliteDbFilesFragment() {
 
 	companion object {
 		const val TITLE = R.string.gpx_charts
