@@ -9,9 +9,9 @@ import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
+import com.strikelines.app.StrikeLinesApplication
 
 class PurchasesTabFragment : Fragment(), OsmandHelperListener {
 
@@ -53,7 +53,11 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
 
 	inner class PurchasesFragmentPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
-		private val fragments = listOf(PurchaseGpxFilesFragment(), Purchase3DChartsFragment(), PurchaseBasemapsFragment())
+		private val fragments = listOf(
+                PurchaseGpxFilesFragment(),
+                Purchase3DChartsFragment(),
+                PurchaseBasemapsFragment()
+		)
 
 		private val titleIds = intArrayOf(
 			PurchaseGpxFilesFragment.TITLE,

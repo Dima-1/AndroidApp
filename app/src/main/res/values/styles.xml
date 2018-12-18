@@ -24,4 +24,14 @@
 		<item name="textAllCaps">false</item>
 	</style>
 
+	<style name="SpinnerItem">
+		<item name="android:textColor">#ffc100</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="SpinnerDropDownItem">
+		<item name="android:textColor">#ffc100</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
 </resources>

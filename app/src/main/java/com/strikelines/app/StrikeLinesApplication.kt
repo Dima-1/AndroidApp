@@ -1,7 +1,10 @@
 package com.strikelines.app
 
 import android.app.Application
+import android.content.Context
 import android.os.Handler
+import android.widget.Toast
+import com.strikelines.app.domain.Repository
 
 class StrikeLinesApplication : Application() {
 
@@ -11,6 +14,7 @@ class StrikeLinesApplication : Application() {
 	override fun onCreate() {
 		super.onCreate()
 		osmandHelper = OsmandHelper(this)
+
 	}
 
 	fun cleanupResources() {
@@ -24,4 +28,15 @@ class StrikeLinesApplication : Application() {
 	fun runInUI(action: (() -> Unit), delay: Long) {
 		uiHandler.postDelayed(action, delay)
 	}
+
+	fun showToastMessage(msg: String) {
+		uiHandler.post { Toast.makeText(this@StrikeLinesApplication, msg, Toast.LENGTH_LONG).show() }
+	}
+
+    companion object {
+        private var instance: StrikeLinesApplication? = null
+
+        fun applicationContext(): Context = instance!!.applicationContext
+
+    }
 }

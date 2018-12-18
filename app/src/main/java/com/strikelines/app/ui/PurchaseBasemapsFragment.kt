@@ -1,6 +1,7 @@
 package com.strikelines.app.ui
 
 import com.strikelines.app.R
+import com.strikelines.app.ui.PurchaseSqliteDbFilesFragment
 
 class PurchaseBasemapsFragment : PurchaseSqliteDbFilesFragment() {
 

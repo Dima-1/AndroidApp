@@ -3,6 +3,7 @@ package com.strikelines.app
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -89,4 +90,6 @@ object AndroidUtils {
 			}
 		} else ""
 	}
+
+	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 }

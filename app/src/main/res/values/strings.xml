@@ -10,4 +10,31 @@
 	<string name="downloads_descr">Select the maps to be displayed in the navigation application</string>
 	<string name="select_multiple">Select multiple items</string>
 	<string name="select_single">Select one item</string>
+
+	<!--Network Utils-->
+	<string name="failed_op">failed</string>
+	<string name="auth_failed">Authorization failed</string>
+	<string name="shared_string_action_template">Action {0}</string>
+	<string name="shared_string_io_error">I/O error</string>
+	<string name="shared_string_unexpected_error">Unexpected error</string>
+
+	<!--Shop card-->
+	
+	
+	<!--spinners-->
+	<string-array name="filter_region">
+		<item>All Regions</item>
+		<item>Region 1</item>
+		<item>Region 2</item>
+		<item>Region 3</item>
+	</string-array>
+
+	<string-array name="filter_type">
+		<item>All type</item>
+		<item>Free</item>
+		<item>less $100</item>
+		<item>less $200</item>
+
+	</string-array>
+
 </resources>

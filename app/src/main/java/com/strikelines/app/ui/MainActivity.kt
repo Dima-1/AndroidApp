@@ -19,6 +19,7 @@ import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
 import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
 import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
+import com.strikelines.app.domain.Repository
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 
@@ -75,7 +76,11 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
 			osmandHelper.connectOsmand()
 		}
+
+		//getShopList()
 	}
+
+
 
 	override fun onDestroy() {
 		super.onDestroy()
@@ -207,6 +212,10 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
+//	private fun getShopList() {
+//		Repository.getInstance(applicationContext).requestChartsFromApi()
+//	}
+
 	inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
 		private val fragments = listOf<Fragment>(MapsTabFragment(), PurchasesTabFragment())
@@ -214,5 +223,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		override fun getItem(position: Int) = fragments[position]
 
 		override fun getCount() = fragments.size
+	}
+
+	fun showToastMessage(msg: String) {
+		Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
 	}
 }
