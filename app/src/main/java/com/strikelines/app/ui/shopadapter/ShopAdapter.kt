@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.strikelines.app.*
-import com.strikelines.app.R.id.*
 import com.strikelines.app.domain.GlideApp
 import com.strikelines.app.domain.models.Chart
-import org.w3c.dom.Text
+import com.strikelines.app.utils.clearTitleForWrecks
+import com.strikelines.app.utils.descriptionFilter
 
 
 class ShopAdapter(val listener:ShopListener?):RecyclerView.Adapter<ShopItemViewHolder>() {

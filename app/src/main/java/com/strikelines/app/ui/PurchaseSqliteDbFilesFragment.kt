@@ -1,10 +1,10 @@
 package com.strikelines.app.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +15,9 @@ import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
 import com.strikelines.app.ui.shopadapter.ShopAdapter
 import com.strikelines.app.ui.shopadapter.ShopListener
+import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.GetRequestAsync
+import com.strikelines.app.utils.OnRequestResultListener
 import kotlinx.android.synthetic.main.recycler_list_fragment.*
 
 abstract class PurchaseSqliteDbFilesFragment : Fragment() {
@@ -22,6 +25,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     companion object {
         const val TITLE = 0
         const val LIST_STATE_KEY = "recycle_state"
+        private const val CHART_BUNDLE_KEY = "chart_details"
     }
 
     protected val gson by lazy { GsonBuilder().setLenient().create() }
@@ -36,7 +40,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
 
-//        val activity = activity
+        retainInstance = true
         val view = inflater.inflate(R.layout.recycler_list_fragment, container, false)
         recycleView = view.findViewById(R.id.recycler_view)
         adapter = ShopAdapter(listener)
@@ -52,7 +56,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
     val listener: ShopListener? = object : ShopListener {
         override fun onDetailsClicked(item: Chart) {
-            openDetailsFragment(item)
+            openDetailsScreen(item)
         }
 
         override fun onDownloadClicked(url: String) {
@@ -60,15 +64,17 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         }
     }
 
-    fun openDetailsFragment(item: Chart) {
-        //todo open details view for selected item
+    fun openDetailsScreen(item: Chart) {
+        startActivity(Intent(activity, DetailedPurchaseChartScreen::class.java).apply {
+            putExtra(CHART_BUNDLE_KEY, item)
+        })
     }
 
     fun openBrowser(url: String) {
         startActivity(AndroidUtils.getIntentForBrowser(url))
     }
 
-    val cardListener = object : OnRequestResultListener {
+    private val cardListener = object : OnRequestResultListener {
         override fun onRequest(status: Boolean) =
                 if (status) progress_bg.visibility = View.VISIBLE
                 else progress_bg.visibility = View.GONE

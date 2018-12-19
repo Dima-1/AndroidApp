@@ -2,8 +2,8 @@ package com.strikelines.app.domain
 
 import android.content.Context
 import com.google.gson.GsonBuilder
-import com.strikelines.app.PlatformUtil
-import com.strikelines.app.SingletonHolder
+import com.strikelines.app.utils.PlatformUtil
+import com.strikelines.app.utils.SingletonHolder
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
 

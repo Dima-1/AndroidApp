@@ -1,4 +1,4 @@
-package com.strikelines.app
+package com.strikelines.app.utils
 
 
 /**

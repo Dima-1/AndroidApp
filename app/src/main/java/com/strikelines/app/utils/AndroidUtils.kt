@@ -1,4 +1,4 @@
-package com.strikelines.app
+package com.strikelines.app.utils
 
 import android.app.Activity
 import android.content.ContentResolver
@@ -92,4 +92,6 @@ object AndroidUtils {
 	}
 
 	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+
 }

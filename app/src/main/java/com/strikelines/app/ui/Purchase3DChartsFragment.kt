@@ -15,7 +15,6 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 
     companion object {
 		const val TITLE = R.string.charts_3d
-
 	}
 
     override fun onRequestResult(result: String) {
@@ -30,6 +29,10 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
         outState.putParcelable(LIST_STATE_KEY, recycleView.layoutManager?.onSaveInstanceState())
     }
 
+    override fun onResume() {
+        super.onResume()
+
+    }
 
 
 }

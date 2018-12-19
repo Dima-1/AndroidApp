@@ -5,6 +5,7 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
@@ -51,7 +52,7 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
 		return view
 	}
 
-	inner class PurchasesFragmentPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+	inner class PurchasesFragmentPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
 		private val fragments = listOf(
                 PurchaseGpxFilesFragment(),

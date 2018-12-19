@@ -10,13 +10,14 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
+import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
-import java.util.*
 
 class OsmandHelper(private val app: Application) {
 

@@ -1,4 +1,4 @@
-package com.strikelines.app
+package com.strikelines.app.utils
 
 import android.content.Context
 import android.graphics.*
@@ -14,10 +14,19 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.view.Surface
 import android.view.WindowManager
+import android.widget.ImageView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
+import android.widget.LinearLayout
+import android.graphics.drawable.BitmapDrawable
+import android.opengl.ETC1.getHeight
+import android.opengl.ETC1.getWidth
+import android.graphics.Bitmap
+import android.provider.MediaStore.Images.Media.getBitmap
+
+
 
 const val GRAYSCALE_PHOTOS_DIR = "grayscale_photos/"
 
@@ -71,16 +80,6 @@ class UiUtils(private val app: Context) {
     fun getIcon(@DrawableRes id: Int, @ColorRes colorId: Int): Drawable? {
         return getDrawable(id, colorId)
     }
-
-//    fun getIcon(@DrawableRes backgroundId: Int, @DrawableRes id: Int, @ColorRes colorId: Int): Drawable {
-//        val b = getDrawable(backgroundId, 0)
-//        val f = getDrawable(id, colorId)
-//        val layers = arrayOfNulls<Drawable>(2)
-//        layers[0] = b
-//        layers[1] = f
-//        return LayerDrawable(layers)
-//    }
-
 
 
     private fun getScreenOrientation(): Int {

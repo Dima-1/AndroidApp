@@ -19,7 +19,7 @@ import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
 import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
 import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
-import com.strikelines.app.domain.Repository
+import com.strikelines.app.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 
