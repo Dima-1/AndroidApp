@@ -13,6 +13,7 @@ class StrikeLinesApplication : Application() {
 
 	override fun onCreate() {
 		super.onCreate()
+		val context:Context = StrikeLinesApplication.applicationContext()
 		osmandHelper = OsmandHelper(this)
 
 	}
@@ -39,4 +40,8 @@ class StrikeLinesApplication : Application() {
         fun applicationContext(): Context = instance!!.applicationContext
 
     }
+
+	init {
+		instance = this
+	}
 }

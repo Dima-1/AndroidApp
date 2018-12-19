@@ -7,9 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.strikelines.app.R
-import com.strikelines.app.R.id.shop_card_image
-import com.strikelines.app.R.id.shop_card_title
+import com.strikelines.app.*
+import com.strikelines.app.R.id.*
 import com.strikelines.app.domain.GlideApp
 import com.strikelines.app.domain.models.Chart
 import org.w3c.dom.Text
@@ -47,6 +46,7 @@ class ShopItemViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
     val contentParams: TextView = itemView.findViewById(R.id.shop_card_content_params)
     val detailsButton: TextView = itemView.findViewById(R.id.detailsBtn)
     val downloadButton: View = itemView.findViewById(R.id.downloadBtn)
+    val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
 
     fun bind(item:Chart, listener: ShopListener?) {
         GlideApp.with(itemView)
@@ -54,15 +54,19 @@ class ShopItemViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
                 .centerCrop()
                 .into(imageView)
 
-        title.text = item.name
-        description.text = item.description
+        title.text = clearTitleForWrecks(item.name)
+        description.text = descriptionFilter(item)
         description.movementMethod = ScrollingMovementMethod()
-
+//        downloadIcon.setBackgroundResource(UiUtils(
+//                StrikeLinesApplication.applicationContext())
+//                .getIcon(R.drawable.ic_download_chart, R.color.fab_text))
         contentParams.text = "NO DATA" //todo fix after data become available in api
         detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
         downloadButton.setOnClickListener { listener?.onDownloadClicked(item.weburl) } //todo:change to download link if needed
 
     }
+
+
 
 }
 

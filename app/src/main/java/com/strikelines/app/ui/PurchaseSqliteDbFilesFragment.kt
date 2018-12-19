@@ -21,6 +21,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
     companion object {
         const val TITLE = 0
+        const val LIST_STATE_KEY = "recycle_state"
     }
 
     protected val gson by lazy { GsonBuilder().setLenient().create() }
@@ -82,6 +83,8 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
 
     abstract fun onRequestResult(result:String)
+
+    abstract fun sortResults(results:List<Chart>):List<Chart>
 
     protected fun parseJson(response: String?): List<Chart> {
         return if (response != null) {
