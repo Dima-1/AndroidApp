@@ -5,12 +5,15 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.google.gson.GsonBuilder
 import com.strikelines.app.*
+import com.strikelines.app.domain.RepoCallback
+import com.strikelines.app.domain.Repository
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
 import com.strikelines.app.ui.shopadapter.ShopAdapter
@@ -28,12 +31,18 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         private const val CHART_BUNDLE_KEY = "chart_details"
     }
 
+    protected var repo:Repository? = null
+
     protected val gson by lazy { GsonBuilder().setLenient().create() }
     protected val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
     protected val chartsList = mutableListOf<Chart>()
 
     lateinit var recycleView: RecyclerView
     lateinit var adapter: ShopAdapter
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        repo = Repository.getInstance(StrikeLinesApplication.applicationContext(), repoCallback)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -49,10 +58,6 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        requestChartsFromApi()
-    }
 
     val listener: ShopListener? = object : ShopListener {
         override fun onDetailsClicked(item: Chart) {
@@ -74,21 +79,18 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         startActivity(AndroidUtils.getIntentForBrowser(url))
     }
 
-    private val cardListener = object : OnRequestResultListener {
-        override fun onRequest(status: Boolean) =
-                if (status) progress_bg.visibility = View.VISIBLE
-                else progress_bg.visibility = View.GONE
 
-        override fun onResult(result: String) {
-            onRequestResult(result = result)
+    private val repoCallback =  object:RepoCallback{
+        override fun onLoadingComplete(status: String) {
+            Log.w("inFragment", status)
+        }
+
+        override fun isResourcesLoading(status: Boolean) {
+            Log.w("inFragment loading", status.toString())
         }
     }
 
-    fun requestChartsFromApi() =
-        GetRequestAsync(url, cardListener).execute()
-
-
-    abstract fun onRequestResult(result:String)
+    abstract fun onRequestResult(result: List<Chart>)
 
     abstract fun sortResults(results:List<Chart>):List<Chart>
 

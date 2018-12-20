@@ -1,5 +1,6 @@
 package com.strikelines.app.ui
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
@@ -7,6 +8,8 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.view.View
 import android.widget.Toast
 import com.strikelines.app.*
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
@@ -19,6 +22,8 @@ import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
 import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
 import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
+import com.strikelines.app.domain.RepoCallback
+import com.strikelines.app.domain.Repository
 import com.strikelines.app.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
@@ -43,6 +48,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
+
+		getDataToCache(this, repoListener!!)
 
 		val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
 			swipeLocked = true
@@ -105,6 +112,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 			bottomNav.selectedItemId = R.id.action_maps
 		}
 	}
+
 
 	override fun onResume() {
 		super.onResume()
@@ -213,7 +221,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	}
 
 //	private fun getShopList() {
-//		Repository.getInstance(applicationContext).requestChartsFromApi()
+//		Repository.getInstance(applicationContext).requestCharts()
 //	}
 
 	inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
@@ -227,5 +235,21 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	fun showToastMessage(msg: String) {
 		Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
+	}
+
+	private fun getDataToCache(context:Context, repoListener: RepoCallback) {
+		Log.d("Main activity", "Call to repo")
+		Repository.getInstance(context, repoListener).requestCharts()
+	}
+
+	val repoListener:RepoCallback? = object:RepoCallback{
+		override fun isResourcesLoading(status: Boolean) {
+			loading_indicator.visibility = if(status) View.VISIBLE else View.GONE
+		}
+
+		override fun onLoadingComplete(status: String) {
+			showToastMessage(status)
+		}
+
 	}
 }

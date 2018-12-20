@@ -13,15 +13,13 @@ import java.lang.Exception
 import android.view.WindowManager
 import android.os.Build
 import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.clearGarbadge
 
 
 class DetailedPurchaseChartScreen : AppCompatActivity() {
 
     companion object {
         private const val CHART_BUNDLE_KEY = "chart_details"
-//        fun newInstance(chart: Chart) = DetailedPurchaseChartScreen().apply {
-//            this.chart = chart
-//        }
     }
 
     var chart: Chart? = null
@@ -33,8 +31,8 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             val w = window // in Activity's onCreate() for instance
             w.setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
             )
         }
 
@@ -52,10 +50,25 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         details_back_btn.setOnClickListener { onBackPressed() }
         details_title.text = clearTitleForWrecks(chart.name)
         details_chart_price.text = if (chart.price.toInt() > 0) "$${chart.price}" else "FREE"
-        details_description.text = Html.fromHtml(chart.description)
-        GlideApp.with(details_image).load(chart.imageurl).into(details_image)
-        get_chart_btn.setOnClickListener { startActivity(AndroidUtils.getIntentForBrowser(chart.imageurl))}
+        details_description.text =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    Html.fromHtml(chart.description.clearGarbadge(), 0)
+                else Html.fromHtml(chart.description.clearGarbadge())
+        GlideApp.with(details_image)
+                .load(chart.imageurl).placeholder(R.drawable.img_placeholder).into(details_image)
+        if (chart.downloadurl.isEmpty()) {
+            get_chart_btn.setOnClickListener { startActivity(AndroidUtils.getIntentForBrowser(chart.weburl)) }
+            get_chart_btn.text = "GET CHART - $${chart.price}"
+        } else {
+            get_chart_btn.setOnClickListener { downloadFreeChart(chart.downloadurl) }
+            get_chart_btn.text = "ADD CHART - FREE"
+        }
 
+
+    }
+
+    private fun downloadFreeChart(downloadurl: String) {
+        //todo download chart
     }
 
     private fun getIntentContents(bundle: Bundle?) {
@@ -66,5 +79,6 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
 }
 

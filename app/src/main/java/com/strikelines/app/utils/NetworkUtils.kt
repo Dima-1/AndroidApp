@@ -18,28 +18,24 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
             return getRequest(url)
         } catch (e: NullPointerException) {
             e.printStackTrace()
-
         } catch (e: MalformedURLException) {
             e.printStackTrace()
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
         return "Request Failed!"
     }
 
     override fun onProgressUpdate(vararg values: Void?) {
         super.onProgressUpdate(*values)
-        listener.onRequest(true)
     }
 
     override fun onPostExecute(result: String) {
         Log.d("Async results", result)
-        listener.onRequest(false)
         listener.onResult(result)
     }
 
-    fun getRequest(url: String): String {
+    private fun getRequest(url: String): String {
         val obj = URL(url)
         val response = StringBuilder()
         with(obj.openConnection() as HttpURLConnection) {
@@ -60,7 +56,7 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
             }
 
         }
-        return if (response.toString().isNotEmpty()) response.toString() else ""
+        return if (response.toString().isNotEmpty()) response.toString() else "Request Failed!"
     }
 }
 
