@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager
 import android.text.format.DateFormat
 import android.view.View
 import android.view.WindowManager
+import java.io.IOException
 import java.text.MessageFormat
 import java.util.*
 
@@ -93,5 +94,20 @@ object AndroidUtils {
 
 	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
+	private fun loadJSONFromAsset(context:Context): String? {
+		var json: String? = null
+		try {
+			val inputStream = context.assets.open("json/strike.json")
+			val size = inputStream.available()
+			val buffer = ByteArray(size)
+			inputStream.read(buffer)
+			inputStream.close()
+			json = String(buffer)
+		} catch (ex: IOException) {
+			ex.printStackTrace()
+			return null
+		}
 
+		return json
+	}
 }

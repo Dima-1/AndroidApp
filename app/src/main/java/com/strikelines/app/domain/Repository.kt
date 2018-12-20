@@ -30,13 +30,6 @@ class Repository private constructor(val context: Context, val callback: RepoCal
 
     private val sp:SharedPreferences = context.getSharedPreferences(spName, 0)
 
-
-    fun getGPXChart(): List<Chart> = chartsList //apply filter when available
-
-    fun get3dcharts(): List<Chart> = chartsList //apply filter when available
-
-    fun getBaseMaps(): List<Chart> = chartsList //apply filter when available
-
     fun requestCharts(){
             if(sp.contains(chartsDataKey) && sp.getString(chartsDataKey, "{}")!="{}") {
                 Log.i("Repo requestCharts", sp.getString(chartsDataKey, "{}"))

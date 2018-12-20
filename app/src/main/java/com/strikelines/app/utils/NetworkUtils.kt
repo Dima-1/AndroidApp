@@ -41,8 +41,8 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
         with(obj.openConnection() as HttpURLConnection) {
             requestMethod = "GET"
 
-            println("URL : $url")
-            println("Response Code : $responseCode")
+            Log.d("URL", url)
+            Log.d("Response Code", responseCode.toString())
 
             BufferedReader(InputStreamReader(inputStream), 1024).use {
                 var inputLine = it.readLine()
