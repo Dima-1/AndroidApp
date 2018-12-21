@@ -5,6 +5,7 @@ import android.util.Log
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -16,12 +17,8 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
     override fun doInBackground(vararg p0: Void?): String? {
         try {
             return getRequest(url)
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        } catch (e: MalformedURLException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
+        } catch (e: Exception) {
+            Log.w(e.message, e)
         }
         return "Request Failed!"
     }
