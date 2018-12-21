@@ -73,7 +73,6 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
     private fun getIntentContents(bundle: Bundle?) {
         try {
             chart = StrikeLinesApplication.chartsList.first { it.name == bundle?.getString(CHART_BUNDLE_KEY)}
-//            Log.d("Details", chart.toString())
         } catch (e: Exception) {
             e.printStackTrace()
         }
