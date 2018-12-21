@@ -26,12 +26,8 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
         return "Request Failed!"
     }
 
-    override fun onProgressUpdate(vararg values: Void?) {
-        super.onProgressUpdate(*values)
-    }
-
     override fun onPostExecute(result: String) {
-        Log.d("Async results", result)
+        //Log.d("Async results", result)
         listener.onResult(result)
     }
 
@@ -41,7 +37,6 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
         with(obj.openConnection() as HttpURLConnection) {
             requestMethod = "GET"
 
-            Log.d("URL", url)
             Log.d("Response Code", responseCode.toString())
 
             BufferedReader(InputStreamReader(inputStream), 1024).use {
@@ -61,7 +56,6 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
 }
 
 interface OnRequestResultListener {
-    fun onRequest(status: Boolean)
     fun onResult(result: String)
 }
 

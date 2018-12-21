@@ -17,7 +17,7 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<TextView
+			<com.strikelines.app.utils.StyledBoldTextView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:ellipsize="end"
@@ -31,7 +31,7 @@
 				android:textColor="@color/app_bar_title"
 				android:textSize="@dimen/title_text_size"/>
 
-			<TextView
+			<com.strikelines.app.utils.StyledTextView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:paddingLeft="@dimen/content_padding_standard"

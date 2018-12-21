@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.detailed_chart_screen.*
 import java.lang.Exception
 import android.view.WindowManager
 import android.os.Build
+import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.clearGarbadge
 
@@ -29,7 +30,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         setContentView(R.layout.detailed_chart_screen)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            val w = window // in Activity's onCreate() for instance
+            val w = window
             w.setFlags(
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -58,23 +59,21 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
                 .load(chart.imageurl).placeholder(R.drawable.img_placeholder).into(details_image)
         if (chart.downloadurl.isEmpty()) {
             get_chart_btn.setOnClickListener { startActivity(AndroidUtils.getIntentForBrowser(chart.weburl)) }
-            get_chart_btn.text = "GET CHART - $${chart.price}"
+            get_chart_btn.text = "${getString(R.string.shop_details_btn_tag_price_of_chart)}${chart.price}"
         } else {
             get_chart_btn.setOnClickListener { downloadFreeChart(chart.downloadurl) }
-            get_chart_btn.text = "ADD CHART - FREE"
+            get_chart_btn.text = getString(R.string.shop_details_btn_tag_free_chart)
         }
-
-
     }
 
     private fun downloadFreeChart(downloadurl: String) {
-        //todo download chart
+
     }
 
     private fun getIntentContents(bundle: Bundle?) {
         try {
-            chart = bundle?.getParcelable(CHART_BUNDLE_KEY)
-            Log.d("Details", chart.toString())
+            chart = StrikeLinesApplication.chartsList.first { it.name == bundle?.getString(CHART_BUNDLE_KEY)}
+//            Log.d("Details", chart.toString())
         } catch (e: Exception) {
             e.printStackTrace()
         }

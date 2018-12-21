@@ -10,18 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.google.gson.GsonBuilder
 import com.strikelines.app.*
-import com.strikelines.app.domain.RepoCallback
-import com.strikelines.app.domain.Repository
 import com.strikelines.app.domain.models.Chart
-import com.strikelines.app.domain.models.Charts
-import com.strikelines.app.ui.shopadapter.ShopAdapter
-import com.strikelines.app.ui.shopadapter.ShopListener
+import com.strikelines.app.ui.adapters.ShopAdapter
+import com.strikelines.app.ui.adapters.ShopListener
 import com.strikelines.app.utils.AndroidUtils
-import com.strikelines.app.utils.GetRequestAsync
-import com.strikelines.app.utils.OnRequestResultListener
-import kotlinx.android.synthetic.main.recycler_list_fragment.*
 
 abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
@@ -31,18 +24,11 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         private const val CHART_BUNDLE_KEY = "chart_details"
     }
 
-    protected var repo:Repository? = null
-
-    protected val gson by lazy { GsonBuilder().setLenient().create() }
-    protected val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
     protected val chartsList = mutableListOf<Chart>()
 
     lateinit var recycleView: RecyclerView
-    lateinit var adapter: ShopAdapter
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        repo = Repository.getInstance(StrikeLinesApplication.applicationContext(), repoCallback)
-    }
+    var adapter: ShopAdapter? = null
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -59,19 +45,20 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     }
 
 
-    val listener: ShopListener? = object : ShopListener {
-        override fun onDetailsClicked(item: Chart) {
-            openDetailsScreen(item)
-        }
-
-        override fun onDownloadClicked(url: String) {
-            openBrowser(url)
-        }
+    override fun onResume() {
+        super.onResume()
+        getData()
     }
 
-    fun openDetailsScreen(item: Chart) {
+    private val listener: ShopListener? = object : ShopListener {
+        override fun onDetailsClicked(item: Chart) = openDetailsScreen(item.name)
+
+        override fun onDownloadClicked(url: String) = openBrowser(url)
+    }
+
+    fun openDetailsScreen(chartsName: String) {
         startActivity(Intent(activity, DetailedPurchaseChartScreen::class.java).apply {
-            putExtra(CHART_BUNDLE_KEY, item)
+            putExtra(CHART_BUNDLE_KEY, chartsName)
         })
     }
 
@@ -79,28 +66,22 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         startActivity(AndroidUtils.getIntentForBrowser(url))
     }
 
-
-    private val repoCallback =  object:RepoCallback{
-        override fun onLoadingComplete(status: String) {
-            Log.w("inFragment", status)
-        }
-
-        override fun isResourcesLoading(status: Boolean) {
-            Log.w("inFragment loading", status.toString())
+    fun getData() {
+        if(MainActivity.chartsDataIsReady) {
+            onRequestResult(StrikeLinesApplication.chartsList)
+        } else {
+            onRequestResult(emptyList())
         }
     }
 
-    abstract fun onRequestResult(result: List<Chart>)
+    private fun onRequestResult(result: List<Chart>) {
+        chartsList.clear()
+        chartsList.addAll(sortResults(result))
+        adapter?.setData(chartsList)
+    }
 
     abstract fun sortResults(results:List<Chart>):List<Chart>
 
-    protected fun parseJson(response: String?): List<Chart> {
-        return if (response != null) {
-            val charts: Charts = gson.fromJson(response, Charts::class.java)
-            charts.charts
-        } else emptyList()
-
-    }
 
 
 }

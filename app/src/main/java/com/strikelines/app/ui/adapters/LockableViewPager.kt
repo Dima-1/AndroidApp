@@ -1,4 +1,4 @@
-package com.strikelines.app.ui
+package com.strikelines.app.ui.adapters
 
 import android.content.Context
 import android.support.v4.view.ViewPager

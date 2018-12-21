@@ -1,6 +1,5 @@
 package com.strikelines.app.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
@@ -22,8 +21,7 @@ import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
 import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
 import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
-import com.strikelines.app.domain.RepoCallback
-import com.strikelines.app.domain.Repository
+import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
@@ -33,14 +31,16 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	private val app get() = application as StrikeLinesApplication
 	private val osmandHelper get() = app.osmandHelper
 	private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
-
 	private var mapsTabFragment: MapsTabFragment? = null
 	private var purchasesTabFragment: PurchasesTabFragment? = null
 	private lateinit var bottomNav: BottomNavigationView
 
 	companion object {
-		const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
 
+        val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
+
+		const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
+        var chartsDataIsReady = false
 		private const val MAPS_TAB_POS = 0
 		private const val DOWNLOADS_TAB_POS = 1
 	}
@@ -48,15 +48,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
-
-		getDataToCache(this, repoListener!!)
-
+        getChartsList()
 		val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
 			swipeLocked = true
 			offscreenPageLimit = 2
 			adapter = ViewPagerAdapter(supportFragmentManager)
 		}
-
 		bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
 			setOnNavigationItemSelectedListener {
 				var pos = -1
@@ -71,7 +68,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				false
 			}
 		}
-
 		fab.setOnClickListener { view ->
 			setupOsmand()
 			osmandHelper.openOsmand {
@@ -79,15 +75,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
 			}
 		}
-
 		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
 			osmandHelper.connectOsmand()
 		}
 
-		//getShopList()
+
 	}
-
-
 
 	override fun onDestroy() {
 		super.onDestroy()
@@ -113,15 +106,16 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-
 	override fun onResume() {
 		super.onResume()
 		osmandHelper.listener = this
+		StrikeLinesApplication.mainActivityListener = appListener
 	}
 
 	override fun onPause() {
 		super.onPause()
 		osmandHelper.listener = null
+        StrikeLinesApplication.mainActivityListener = null
 	}
 
 	override fun onOsmandConnectionStateChanged(connected: Boolean) {
@@ -220,36 +214,38 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-//	private fun getShopList() {
-//		Repository.getInstance(applicationContext).requestCharts()
-//	}
-
 	inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-
 		private val fragments = listOf<Fragment>(MapsTabFragment(), PurchasesTabFragment())
-
 		override fun getItem(position: Int) = fragments[position]
-
 		override fun getCount() = fragments.size
 	}
 
-	fun showToastMessage(msg: String) {
-		Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
-	}
+    fun showToastMessage(msg: String) {
+        Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
+    }
 
-	private fun getDataToCache(context:Context, repoListener: RepoCallback) {
-		Log.d("Main activity", "Call to repo")
-		Repository.getInstance(context, repoListener).requestCharts()
-	}
+	fun getChartsList(){
+		if(StrikeLinesApplication.isDataReadyFlag) {
+            chartsDataIsReady = true
+            loading_indicator.visibility = View.GONE
+            fragmentNotifier.forEach{(k,v) -> v?.onDataReady(true)}
 
-	val repoListener:RepoCallback? = object:RepoCallback{
-		override fun isResourcesLoading(status: Boolean) {
-			loading_indicator.visibility = if(status) View.VISIBLE else View.GONE
 		}
-
-		override fun onLoadingComplete(status: String) {
-			showToastMessage(status)
-		}
-
 	}
+
+	var appListener = object: MainActivityListener {
+        override fun isDataReady(status: Boolean) {
+            Log.i("MainActivity", "Data is ready - $status")
+            if(status) getChartsList()
+            else showToastMessage(resources.getString(R.string.error_loading_res))
+        }
+    }
+
+	interface MainActivityListener{
+		fun isDataReady(status:Boolean)
+	}
+
+    interface FragmentDataNotifier{
+        fun onDataReady(status:Boolean)
+    }
 }

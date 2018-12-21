@@ -20,7 +20,7 @@
     app:layout_constraintTop_toTopOf="parent"
     app:srcCompat="@drawable/placeholder_item_image"/>
 
-  <TextView
+  <com.strikelines.app.utils.StyledBoldTextView
     android:id="@+id/shop_card_title"
     android:textStyle="bold"
     android:layout_width="0dp"
@@ -36,7 +36,8 @@
     app:layout_constraintStart_toEndOf="@+id/shop_card_image"
     app:layout_constraintTop_toTopOf="parent"
     tools:text="3D Block Island and Rhode Island Sound"/>
-  <TextView
+
+  <com.strikelines.app.utils.StyledTextView
     android:id="@+id/shop_card_description"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -52,7 +53,7 @@
     app:layout_constraintTop_toBottomOf="@+id/shop_card_title"
     tools:text="High definition 3D images of the seafloor. Coverage: Block Island Sound and Rhode Island Sound"/>
 
-  <TextView
+  <com.strikelines.app.utils.StyledBoldTextView
     android:id="@+id/shop_card_content_params"
     android:textStyle="bold"
     android:layout_width="0dp"
@@ -79,7 +80,7 @@
     android:orientation="horizontal"
     app:layout_constraintGuide_end="@dimen/padding_48dp"/>
 
-  <TextView
+  <com.strikelines.app.utils.StyledBoldTextView
     android:id="@+id/detailsBtn"
     android:textStyle="bold"
     android:layout_width="wrap_content"
@@ -112,7 +113,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="@+id/guideline2">
 
-    <TextView
+    <com.strikelines.app.utils.StyledBoldTextView
       android:id="@+id/downloadTV"
       android:textStyle="bold"
       android:layout_width="wrap_content"

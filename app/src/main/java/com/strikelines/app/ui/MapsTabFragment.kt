@@ -13,7 +13,8 @@ import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
-import com.strikelines.app.ui.LocalItemsViewAdapter.*
+import com.strikelines.app.ui.adapters.LocalItemsViewAdapter
+import com.strikelines.app.ui.adapters.LocalItemsViewAdapter.*
 import net.osmand.aidl.gpx.AGpxFile
 import net.osmand.aidl.tiles.ASqliteDbFile
 

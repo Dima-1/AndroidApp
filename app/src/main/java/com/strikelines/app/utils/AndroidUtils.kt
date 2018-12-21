@@ -94,20 +94,4 @@ object AndroidUtils {
 
 	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
-	private fun loadJSONFromAsset(context:Context): String? {
-		var json: String? = null
-		try {
-			val inputStream = context.assets.open("json/strike.json")
-			val size = inputStream.available()
-			val buffer = ByteArray(size)
-			inputStream.read(buffer)
-			inputStream.close()
-			json = String(buffer)
-		} catch (ex: IOException) {
-			ex.printStackTrace()
-			return null
-		}
-
-		return json
-	}
 }

@@ -1,7 +1,8 @@
-package com.strikelines.app.ui.shopadapter
+package com.strikelines.app.ui.adapters
 
 import android.support.v7.widget.RecyclerView
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,16 +21,15 @@ class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemVi
     private val dataList = mutableListOf<Chart>()
 
     fun setData(list: List<Chart>) {
-        //todo: add diffUtil?
         dataList.clear()
         dataList.addAll(list)
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ShopItemViewHolder(
-            LayoutInflater
-                    .from(parent.context)
-                    .inflate(R.layout.item_shopchart, parent, false)
+        LayoutInflater
+            .from(parent.context)
+            .inflate(R.layout.item_shopchart, parent, false)
     )
 
     override fun getItemCount(): Int = dataList.size
@@ -52,21 +52,22 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(item: Chart, listener: ShopListener?) {
         GlideApp.with(itemView)
-                .load(item.imageurl)
-                .placeholder(R.drawable.img_placeholder)
-                .centerCrop()
-                .into(imageView)
+            .load(item.imageurl)
+            .placeholder(R.drawable.img_placeholder)
+            .centerCrop()
+            .into(imageView)
 
         title.text = clearTitleForWrecks(item.name)
         description.text = descriptionFilter(item)
         description.movementMethod = ScrollingMovementMethod()
         downloadIcon.setImageDrawable(
-                UiUtils(
-                        StrikeLinesApplication.applicationContext()
-                )
-                        .getIcon(R.drawable.ic_download_chart, R.color.fab_text)
+            UiUtils(
+                StrikeLinesApplication.applicationContext()
+            )
+                .getIcon(R.drawable.ic_download_chart, R.color.fab_text)
         )
-        contentParams.text = if(item.price.toInt()!=0) "$${item.price}" else "FREE"
+        contentParams.text = if (item.price.toInt() != 0) "$${item.price}"
+        else itemView.context.getString(R.string.shop_item_tag_freemap)
         detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
         downloadButton.setOnClickListener { listener?.onDownloadClicked(item.weburl) } //todo:change to download link if needed
 
