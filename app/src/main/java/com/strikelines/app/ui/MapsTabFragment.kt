@@ -8,12 +8,13 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.strikelines.app.AndroidUtils
+import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
-import com.strikelines.app.ui.LocalItemsViewAdapter.*
+import com.strikelines.app.ui.adapters.LocalItemsViewAdapter
+import com.strikelines.app.ui.adapters.LocalItemsViewAdapter.*
 import net.osmand.aidl.gpx.AGpxFile
 import net.osmand.aidl.tiles.ASqliteDbFile
 

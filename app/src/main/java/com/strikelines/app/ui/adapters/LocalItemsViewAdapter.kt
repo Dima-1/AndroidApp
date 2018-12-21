@@ -1,4 +1,4 @@
-package com.strikelines.app.ui
+package com.strikelines.app.ui.adapters
 
 import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt

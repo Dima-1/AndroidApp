@@ -8,4 +8,6 @@
 	<color name="app_bar_title">#ffffff</color>
 	<color name="app_bar_descr">#7499cd</color>
 	<color name="white_50">#20ffc100</color>
+  	<color name="dark_blue_bg">#002e62</color>
+	<color name="transparent_bg">#84000000</color>
 </resources>
