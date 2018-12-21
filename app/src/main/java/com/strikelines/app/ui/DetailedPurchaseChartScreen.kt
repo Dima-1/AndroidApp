@@ -74,7 +74,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         try {
             chart = StrikeLinesApplication.chartsList.first { it.name == bundle?.getString(CHART_BUNDLE_KEY)}
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.w(e.message, e)
         }
     }
 

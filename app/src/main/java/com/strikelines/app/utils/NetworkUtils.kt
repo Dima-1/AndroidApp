@@ -39,11 +39,9 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
             BufferedReader(InputStreamReader(inputStream), 1024).use {
                 var inputLine = it.readLine()
                 while (inputLine != null) {
-
                     response.append(inputLine)
                     inputLine = it.readLine()
                 }
-
                 it.close()
             }
 

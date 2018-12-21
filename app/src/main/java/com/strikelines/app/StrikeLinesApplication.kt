@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -91,7 +92,7 @@ class StrikeLinesApplication : Application() {
             inputStream.close()
             json = String(buffer)
         } catch (ex: IOException) {
-            ex.printStackTrace()
+            Log.w(ex.message,ex)
             return null
         }
         return json
