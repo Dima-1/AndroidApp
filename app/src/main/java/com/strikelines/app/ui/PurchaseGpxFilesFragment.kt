@@ -1,12 +1,10 @@
 package com.strikelines.app.ui
 
 import android.os.Bundle
-import android.util.Log
 import com.strikelines.app.R
 import com.strikelines.app.domain.models.Chart
 
 class PurchaseGpxFilesFragment : PurchaseSqliteDbFilesFragment() {
-
 
 
     companion object {
@@ -26,7 +24,7 @@ class PurchaseGpxFilesFragment : PurchaseSqliteDbFilesFragment() {
 
     override fun onResume() {
         super.onResume()
-        MainActivity.fragmentNotifier.put(TITLE, fragmentNotifier)
+        MainActivity.fragmentNotifier[TITLE] = fragmentNotifier
     }
 
     override fun onPause() {
@@ -34,6 +32,13 @@ class PurchaseGpxFilesFragment : PurchaseSqliteDbFilesFragment() {
         MainActivity.fragmentNotifier.remove(TITLE)
     }
 
-    override fun sortResults(results: List<Chart>) =
-        results.filterNot { it.name.contains("3D ") }.filterNot { it.price.toInt() == 0 }
+
+    override fun sortResults(results: List<Chart>): List<Chart> {
+        val filteredResults
+                = results.filterNot { it.name.contains("3D ") }
+                .filterNot { it.price.toInt() == 0 }
+        return if ((activity!! as MainActivity).regionToFilter != "")
+            filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }
+        else filteredResults
+    }
 }

@@ -27,7 +27,7 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 
     override fun onResume() {
         super.onResume()
-        MainActivity.fragmentNotifier.put(TITLE, fragmentNotifier)
+        MainActivity.fragmentNotifier[TITLE] = fragmentNotifier
     }
 
     override fun onPause() {
@@ -35,7 +35,13 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
         MainActivity.fragmentNotifier.remove(PurchaseGpxFilesFragment.TITLE)
     }
 
-    override fun sortResults(results: List<Chart>): List<Chart> = results.filter { it.name.contains("3D ") }
+    override fun sortResults(results: List<Chart>): List<Chart> {
+        val filteredResults = results.filter { it.name.contains("3D ") }
+        return if ((activity!! as MainActivity).regionToFilter!="")
+            filteredResults.filter {it.region == (activity!! as MainActivity).regionToFilter}
+        else filteredResults
+    }
+
 
 
 

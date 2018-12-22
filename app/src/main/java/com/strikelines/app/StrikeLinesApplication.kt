@@ -40,7 +40,7 @@ class StrikeLinesApplication : Application() {
             chartsList.clear()
             chartsList.addAll(parseJson(sp.getString(chartsDataKey, "{}")))
             isDataReadyFlag = true
-            mainActivityListener?.isDataReady(true)
+            listener?.isDataReady(true)
             if(!isUpdatedInThisSession) GetRequestAsync(url, onRequestResultListener).execute()
         } else {
             GetRequestAsync(url, onRequestResultListener).execute()
@@ -74,8 +74,6 @@ class StrikeLinesApplication : Application() {
 		uiHandler.post { Toast.makeText(this@StrikeLinesApplication, msg, Toast.LENGTH_LONG).show() }
 	}
 
-    fun getChartsList():List<Chart> = chartsList
-
     private fun parseJson(response: String?): List<Chart> {
         val charts: Charts = gson.fromJson(response, Charts::class.java)
         return charts.charts
@@ -103,10 +101,14 @@ class StrikeLinesApplication : Application() {
             when{
                 result.startsWith("{") -> updateData(result) //need more sophisticated check for Json validity
                 else -> {
-                    mainActivityListener?.isDataReady(false)
+                    listener?.isDataReady(false)
                 }
             }
         }
+    }
+
+    interface AppListener{
+        fun isDataReady(status:Boolean)
     }
 
     companion object {
@@ -117,7 +119,7 @@ class StrikeLinesApplication : Application() {
         private const val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
 
         var isDataReadyFlag = false
-        var mainActivityListener: MainActivity.MainActivityListener? = null
+        var listener: AppListener? = null
         val chartsList = mutableListOf<Chart>()
 
         private var instance: StrikeLinesApplication? = null

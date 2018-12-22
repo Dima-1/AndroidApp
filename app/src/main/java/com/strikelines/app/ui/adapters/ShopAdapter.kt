@@ -1,14 +1,15 @@
 package com.strikelines.app.ui.adapters
 
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.text.method.ScrollingMovementMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.strikelines.app.*
+import com.strikelines.app.R
+import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.domain.GlideApp
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.utils.UiUtils
@@ -21,21 +22,47 @@ class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemVi
     private val dataList = mutableListOf<Chart>()
 
     fun setData(list: List<Chart>) {
-        dataList.clear()
-        dataList.addAll(list)
+        if(list.isNotEmpty()) {
+            val diffUtil= DiffUtil.calculateDiff(ChartDiff(dataList, list.toMutableList()))
+            dataList.clear()
+            dataList.addAll(list)
+            diffUtil.dispatchUpdatesTo(this)
+        } else {
+            dataList.clear()
+            notifyDataSetChanged()
+        }
+
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ShopItemViewHolder(
-        LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.item_shopchart, parent, false)
+            LayoutInflater
+                    .from(parent.context)
+                    .inflate(R.layout.item_shopchart, parent, false)
     )
 
     override fun getItemCount(): Int = dataList.size
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         holder.bind(dataList[position], listener)
+
+    }
+
+    inner class ChartDiff(
+            private val oldList: MutableList<Chart>,
+            private val newList: MutableList<Chart>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize() = oldList.size
+
+        override fun getNewListSize() = newList.size
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldList[oldItemPosition].name == newList[newItemPosition].name
+
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldList[oldItemPosition] == newList[newItemPosition]
 
     }
 }
@@ -52,22 +79,23 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(item: Chart, listener: ShopListener?) {
         GlideApp.with(itemView)
-            .load(item.imageurl)
-            .placeholder(R.drawable.img_placeholder)
-            .centerCrop()
-            .into(imageView)
+                .load(item.imageurl)
+                .placeholder(R.drawable.img_placeholder)
+                .centerCrop()
+                .into(imageView)
 
         title.text = clearTitleForWrecks(item.name)
         description.text = descriptionFilter(item)
         description.movementMethod = ScrollingMovementMethod()
         downloadIcon.setImageDrawable(
-            UiUtils(
-                StrikeLinesApplication.applicationContext()
-            )
-                .getIcon(R.drawable.ic_download_chart, R.color.fab_text)
+                UiUtils(
+                        StrikeLinesApplication.applicationContext()
+                )
+                        .getIcon(R.drawable.ic_download_chart, R.color.fab_text)
         )
-        contentParams.text = if (item.price.toInt() != 0) "$${item.price}"
-        else itemView.context.getString(R.string.shop_item_tag_freemap)
+        val contentText = "${item.region} • ${if (item.price.toInt() != 0) "$${item.price}"
+        else itemView.context.getString(R.string.shop_item_tag_freemap)}"
+        contentParams.text = contentText
         detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
         downloadButton.setOnClickListener { listener?.onDownloadClicked(item.weburl) } //todo:change to download link if needed
 
@@ -75,6 +103,7 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 
 }
+
 
 interface ShopListener {
     fun onDetailsClicked(item: Chart)
