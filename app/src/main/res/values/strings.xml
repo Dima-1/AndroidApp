@@ -26,19 +26,15 @@
 	
 	
 	<!--spinners-->
+	<string name="all_regions">"All regions"</string>
+	<string name="details_btn">Details</string>
+	<string name="download_btn">Download</string>
+
 	<string-array name="filter_region">
 		<item>All Regions</item>
 		<item>Region 1</item>
 		<item>Region 2</item>
 		<item>Region 3</item>
-	</string-array>
-
-	<string-array name="filter_type">
-		<item>All type</item>
-		<item>Free</item>
-		<item>less $100</item>
-		<item>less $200</item>
-
 	</string-array>
 
 </resources>

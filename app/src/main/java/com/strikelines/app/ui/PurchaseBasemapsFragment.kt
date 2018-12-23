@@ -1,16 +1,14 @@
 package com.strikelines.app.ui
 
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import com.strikelines.app.R
 import com.strikelines.app.domain.models.Chart
 
 class PurchaseBasemapsFragment : PurchaseSqliteDbFilesFragment() {
 
-	companion object {
-		const val TITLE = R.string.basemaps
-	}
+    companion object {
+        const val TITLE = R.string.basemaps
+    }
 
     var fragmentNotifier: MainActivity.FragmentDataNotifier? = null
 
@@ -25,7 +23,7 @@ class PurchaseBasemapsFragment : PurchaseSqliteDbFilesFragment() {
 
     override fun onResume() {
         super.onResume()
-        MainActivity.fragmentNotifier.put(TITLE, fragmentNotifier)
+        MainActivity.fragmentNotifier[TITLE] = fragmentNotifier
     }
 
     override fun onPause() {
@@ -33,8 +31,11 @@ class PurchaseBasemapsFragment : PurchaseSqliteDbFilesFragment() {
         MainActivity.fragmentNotifier.remove(TITLE)
     }
 
-
-
-	override fun sortResults(results: List<Chart>) = results.filter { it.price.toInt() == 0 }
+    override fun sortResults(results: List<Chart>): List<Chart> {
+        val filteredResults = results.filter { it.price.toInt() == 0 }
+        return if ((activity!! as MainActivity).regionToFilter != "")
+            filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }
+        else filteredResults
+    }
 
 }
