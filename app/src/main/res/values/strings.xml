@@ -29,12 +29,10 @@
 	<string name="all_regions">"All regions"</string>
 	<string name="details_btn">Details</string>
 	<string name="download_btn">Download</string>
+    <string name="get_chart_from_web_btn_tag">Get Chart</string>
 
-	<string-array name="filter_region">
+    <string-array name="filter_region">
 		<item>All Regions</item>
-		<item>Region 1</item>
-		<item>Region 2</item>
-		<item>Region 3</item>
 	</string-array>
 
 </resources>

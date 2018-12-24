@@ -1,5 +1,6 @@
 package com.strikelines.app.ui
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Html
@@ -12,8 +13,11 @@ import kotlinx.android.synthetic.main.detailed_chart_screen.*
 import java.lang.Exception
 import android.view.WindowManager
 import android.os.Build
+import android.support.v4.app.ActivityCompat
 import com.strikelines.app.StrikeLinesApplication
+import com.strikelines.app.StrikeLinesApplication.Companion.DOWNLOAD_REQUEST_CODE
 import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.DownloadFileAsync
 import com.strikelines.app.utils.clearGarbadge
 
 
@@ -21,6 +25,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 
     companion object {
         private const val CHART_BUNDLE_KEY = "chart_details"
+
     }
 
     var chart: Chart? = null
@@ -66,8 +71,25 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         }
     }
 
-    private fun downloadFreeChart(downloadurl: String) {
+    private fun downloadFreeChart(downloadUrl: String) {
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                DownloadFileAsync(downloadUrl).execute()
+            } else {
+                requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), DOWNLOAD_REQUEST_CODE)
+            }
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode == DOWNLOAD_REQUEST_CODE && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+            chart?.let{DownloadFileAsync(chart!!.downloadurl).execute()}
+        }
     }
 
     private fun getIntentContents(bundle: Bundle?) {

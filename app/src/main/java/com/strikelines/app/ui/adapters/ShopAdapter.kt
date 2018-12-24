@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.strikelines.app.R
+import com.strikelines.app.R.id.downloadTV
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.domain.GlideApp
 import com.strikelines.app.domain.models.Chart
@@ -63,7 +64,6 @@ class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemVi
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                 oldList[oldItemPosition] == newList[newItemPosition]
-
     }
 }
 
@@ -75,6 +75,7 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val contentParams: TextView = itemView.findViewById(R.id.shop_card_content_params)
     private val detailsButton: TextView = itemView.findViewById(R.id.detailsBtn)
     private val downloadButton: View = itemView.findViewById(R.id.downloadBtn)
+    private val downloadTextView: TextView = itemView.findViewById(R.id.downloadTV)
     private val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
 
     fun bind(item: Chart, listener: ShopListener?) {
@@ -88,24 +89,20 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         description.text = descriptionFilter(item)
         description.movementMethod = ScrollingMovementMethod()
         downloadIcon.setImageDrawable(
-                UiUtils(
-                        StrikeLinesApplication.applicationContext()
-                )
-                        .getIcon(R.drawable.ic_download_chart, R.color.fab_text)
-        )
+                UiUtils(StrikeLinesApplication.applicationContext())
+                        .getIcon(R.drawable.ic_download_chart, R.color.fab_text))
         val contentText = "${item.region} • ${if (item.price.toInt() != 0) "$${item.price}"
         else itemView.context.getString(R.string.shop_item_tag_freemap)}"
         contentParams.text = contentText
         detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
-        downloadButton.setOnClickListener { listener?.onDownloadClicked(item.weburl) } //todo:change to download link if needed
-
+        downloadButton.setOnClickListener { listener?.onDownloadClicked(item) }
+        if(item.downloadurl.isEmpty()) downloadTextView.text =
+                StrikeLinesApplication.applicationContext().getString(R.string.get_chart_from_web_btn_tag)
     }
-
-
 }
 
 
 interface ShopListener {
     fun onDetailsClicked(item: Chart)
-    fun onDownloadClicked(url: String)
+    fun onDownloadClicked(item: Chart)
 }

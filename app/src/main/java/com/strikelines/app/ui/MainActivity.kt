@@ -1,8 +1,11 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -25,6 +28,7 @@ import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.DownloadFileAsync
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 
@@ -250,6 +254,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             else showToastMessage(resources.getString(R.string.error_loading_res))
         }
     }
+
+
 
 
     interface FragmentDataNotifier {
