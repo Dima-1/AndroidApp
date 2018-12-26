@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     private lateinit var bottomNav: BottomNavigationView
     var regionList: MutableSet<String> = mutableSetOf()
     var regionToFilter: String = ""
-    var snackView:View? = null
+    var snackView: View? = null
 
     companion object {
 
@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         setContentView(R.layout.activity_main)
         snackView = findViewById(android.R.id.content)
         initChartsList()
-
 
 
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
@@ -233,9 +232,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
     }
 
-    fun showSnackBar(msg:String, parentLayout:View, lengths:Int = Snackbar.LENGTH_LONG, action:Int) {
+    fun showSnackBar(msg: String, parentLayout: View, lengths: Int = Snackbar.LENGTH_LONG, action: Int) {
         val snackbar = Snackbar.make(parentLayout, msg, lengths)
-        when(action) {
+        when (action) {
             1 -> snackbar.setAction("UPDATE") { app.loadCharts() }
             2 -> snackbar.setAction("OK") { snackbar.dismiss() }
         }
@@ -262,9 +261,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             Log.i("MainActivity", "Data is ready - $status")
             if (status) {
                 initChartsList()
-                snackView?.let{showSnackBar(getString(R.string.snack_msg_update_successful), snackView!!, action = 2)}
-            }
-            else snackView?.let{showSnackBar(getString(R.string.snack_msg_update_failed), snackView!!, action = 1)}
+                snackView?.let { showSnackBar(getString(R.string.snack_msg_update_successful), snackView!!, action = 2) }
+            } else snackView?.let { showSnackBar(getString(R.string.snack_msg_update_failed), snackView!!, action = 1) }
         }
     }
 

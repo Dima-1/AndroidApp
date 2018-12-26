@@ -11,8 +11,8 @@ import com.strikelines.app.domain.models.Chart
 class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 
     companion object {
-		const val TITLE = R.string.charts_3d
-	}
+        const val TITLE = R.string.charts_3d
+    }
 
     var fragmentNotifier: MainActivity.FragmentDataNotifier? = null
 
@@ -37,13 +37,10 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 
     override fun sortResults(results: List<Chart>): List<Chart> {
         val filteredResults = results.filter { it.name.contains("3D ") }
-        return if ((activity!! as MainActivity).regionToFilter!="")
-            filteredResults.filter {it.region == (activity!! as MainActivity).regionToFilter}
+        return if ((activity!! as MainActivity).regionToFilter != "")
+            filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }
         else filteredResults
     }
-
-
-
 
 
 }

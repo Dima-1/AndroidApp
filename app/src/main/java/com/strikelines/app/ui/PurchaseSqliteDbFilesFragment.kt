@@ -33,7 +33,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
     lateinit var recycleView: RecyclerView
     var adapter: ShopAdapter? = null
-    private var downloadUrl:String? = null
+    private var downloadUrl: String? = null
 
 
     override fun onCreateView(
@@ -69,7 +69,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     }
 
     fun openUrl(item: Chart) {
-        if(item.downloadurl.isEmpty()) startActivity(AndroidUtils.getIntentForBrowser(item.weburl))
+        if (item.downloadurl.isEmpty()) startActivity(AndroidUtils.getIntentForBrowser(item.weburl))
         else {
             downloadUrl = item.downloadurl
             downloadFreeChart(downloadUrl!!)
@@ -77,7 +77,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     }
 
     fun getData() {
-        if(MainActivity.chartsDataIsReady) {
+        if (MainActivity.chartsDataIsReady) {
             onRequestResult(StrikeLinesApplication.chartsList)
         } else {
             onRequestResult(emptyList())
@@ -90,19 +90,19 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         adapter?.setData(chartsList)
     }
 
-    abstract fun sortResults(results:List<Chart>):List<Chart>
+    abstract fun sortResults(results: List<Chart>): List<Chart>
 
     private fun downloadFreeChart(downloadUrl: String) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (checkSelfPermission(activity!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED
+                    == PackageManager.PERMISSION_GRANTED
             ) {
                 DownloadFileAsync(downloadUrl).execute()
             } else {
                 requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
+                        StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
                 )
             }
         }
@@ -110,8 +110,8 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0]== PackageManager.PERMISSION_GRANTED) {
-            downloadUrl.let{ DownloadFileAsync(downloadUrl!!).execute()}
+        if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            downloadUrl.let { DownloadFileAsync(downloadUrl!!).execute() }
         }
     }
 

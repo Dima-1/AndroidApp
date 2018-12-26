@@ -32,8 +32,8 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
 
         val view = inflater.inflate(R.layout.purchases_tab_fragment, container, false)
 
-        viewPager = view.findViewById(R.id.pager) as LockableViewPager
         regionSpinner = view.findViewById(R.id.regionSpinner) as Spinner
+        viewPager = view.findViewById(R.id.pager) as LockableViewPager
         viewPager.offscreenPageLimit = 3
         pagerAdapter = PurchasesFragmentPagerAdapter(childFragmentManager)
         viewPager.adapter = pagerAdapter
@@ -64,8 +64,7 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
     }
 
     private fun setupRegionSpinner() {
-        val spinnerAdapter
-                = ArrayAdapter(activity!!, R.layout.spinner_item,
+        val spinnerAdapter = ArrayAdapter(activity!!, R.layout.spinner_item,
                 ((activity!! as MainActivity).regionList).toTypedArray())
 
         spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
@@ -110,9 +109,7 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
             return this@PurchasesTabFragment.context?.getString(titleIds[position])
         }
     }
-
-
-
+    
     override fun onOsmandConnectionStateChanged(connected: Boolean) {
 
     }

@@ -91,10 +91,10 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
                     details_image.getHitRect(bounds)
 
                     val scrollBounds = Rect(scrollX, scrollY,
-                            scrollX+details_scroll_view.width,
-                            scrollY+details_scroll_view.height)
+                            scrollX + details_scroll_view.width,
+                            scrollY + details_scroll_view.height)
 
-                    if(!Rect.intersects(scrollBounds, bounds)) {
+                    if (!Rect.intersects(scrollBounds, bounds)) {
                         changeSystemBarVisibility(false)
                     } else {
                         changeSystemBarVisibility(true)
