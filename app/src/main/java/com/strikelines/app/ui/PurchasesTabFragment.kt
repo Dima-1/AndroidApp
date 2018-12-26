@@ -111,6 +111,8 @@ class PurchasesTabFragment : Fragment(), OsmandHelperListener {
         }
     }
 
+
+
     override fun onOsmandConnectionStateChanged(connected: Boolean) {
 
     }

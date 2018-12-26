@@ -22,7 +22,7 @@
 
 	<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
-	<style name="NoAllCapsTextAppearance" parent="TextAppearance.Design.Tab">
+	<style name="NoAllCapsTextAppearance" parent="@android:style/TextAppearance.Widget.TabWidget">
 		<item name="textAllCaps">false</item>
 	</style>
 
@@ -37,5 +37,11 @@
 		<item name="android:textColor">#ffc100</item>
 		<item name="android:textStyle">bold</item>
 	</style>
+
+  <style name="BottomNavViewInactiveTextStyle">
+    <item name="android:textColor">@color/inactive_bottom_nav</item>
+    <item name="android:textSize">@dimen/default_sub_text_size</item>
+  </style>
+
 
 </resources>

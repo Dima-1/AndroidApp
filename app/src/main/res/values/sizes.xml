@@ -8,8 +8,11 @@
 	<dimen name="default_sub_text_size_small">10sp</dimen>
 	<dimen name="welcome_header_text_size">23sp</dimen>
 	<dimen name="text_button_text_size">15sp</dimen>
+	<dimen name="app_bar_text">20sp</dimen>
+
 
 	<dimen name="image_width">88dp</dimen>
+	<dimen name="padding_4dp">4dp</dimen>
 	<dimen name="padding_6dp">6dp</dimen>
 	<dimen name="padding_8dp">8dp</dimen>
 	<dimen name="padding_10dp">10dp</dimen>

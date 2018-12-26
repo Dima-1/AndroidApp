@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="BottomNavViewInactiveTextStyle">
+    <item name="android:fontFamily">@font/overpass_reg</item>
+    <item name="android:textColor">@color/inactive_bottom_nav</item>
+    <item name="android:textSize">@dimen/default_sub_text_size</item>
+  </style>
+
+  <style name="BottomNavViewActiveTextStyle">
+    <item name="android:fontFamily">@font/overpass_reg</item>
+  </style>
+
+  <style name="CustomFontTabsStyle" parent="@android:style/TextAppearance.Widget.TabWidget">
+    <item name="android:fontFamily">@font/overpass_b</item>
+  </style>
+
+</resources>

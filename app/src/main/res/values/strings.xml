@@ -2,7 +2,7 @@
 	<string name="navigate">Navigate</string>
 	<string name="app_name">StrikeLines</string>
 	<string name="shared_string_maps">Maps</string>
-	<string name="your_maps">Your Maps</string>
+	<string name="your_maps">My Maps</string>
 	<string name="shop_charts">Shop Charts</string>
 	<string name="gpx_charts">GPX Charts</string>
 	<string name="charts_3d">3D Charts</string>
@@ -30,8 +30,10 @@
 	<string name="details_btn">Details</string>
 	<string name="download_btn">Download</string>
     <string name="get_chart_from_web_btn_tag">Get Chart</string>
+    <string name="snack_msg_update_successful">Charts data updated successfully</string>
+	<string name="snack_msg_update_failed">Missing Internet connection. Tap to update data.</string>
 
-    <string-array name="filter_region">
+	<string-array name="filter_region">
 		<item>All Regions</item>
 	</string-array>
 

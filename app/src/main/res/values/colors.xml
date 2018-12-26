@@ -6,8 +6,11 @@
 	<color name="accent_color">#ffc100</color>
 	<color name="fab_text">#003471</color>
 	<color name="app_bar_title">#ffffff</color>
-	<color name="app_bar_descr">#7499cd</color>
+	<color name="app_bar_descr">#8ab5e6</color>
 	<color name="white_50">#20ffc100</color>
-  	<color name="dark_blue_bg">#002e62</color>
+  <color name="dark_blue_bg">#002e62</color>
 	<color name="transparent_bg">#84000000</color>
+	<color name="active_tab_tag">#ffc100</color>
+	<color name="inactive_tab_tag">#8ab5e6</color>
+	<color name="inactive_bottom_nav">#aaadb3</color>
 </resources>

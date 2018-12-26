@@ -16,11 +16,11 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
+    <com.strikelines.app.utils.StyledBoldTextView
       android:textStyle="bold"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:paddingTop="16dp"
+      android:paddingTop="13dp"
       android:paddingBottom="8dp"
       android:paddingLeft="@dimen/content_padding_standard"
       android:paddingRight="@dimen/content_padding_standard"
@@ -28,7 +28,7 @@
       android:maxLines="1"
       android:text="@string/app_name"
       android:textColor="@color/app_bar_title"
-      android:textSize="@dimen/title_text_size"/>
+      android:textSize="@dimen/app_bar_text"/>
 
     <android.support.design.widget.TabLayout
       android:id="@+id/tab_layout"
@@ -44,8 +44,9 @@
       app:tabIndicatorHeight="1dp"
       app:tabMaxWidth="0dp"
       app:tabMode="fixed"
+
       app:tabSelectedTextColor="@color/accent_color"
-      app:tabTextAppearance="@style/NoAllCapsTextAppearance"
+      app:tabTextAppearance="@style/CustomFontTabsStyle"
       app:tabTextColor="@color/app_bar_descr"/>
   </android.support.design.widget.AppBarLayout>
 

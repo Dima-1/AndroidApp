@@ -41,7 +41,7 @@
           android:src="@drawable/ic_action_sail_boat_dark"
           android:tint="@color/fab_text"/>
 
-        <TextView
+        <com.strikelines.app.utils.StyledTextView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:gravity="center"
@@ -66,6 +66,10 @@
       android:layout_height="wrap_content"
       android:background="@color/card_bg"
       app:itemBackground="@color/card_bg"
+      app:itemIconTint="@drawable/bottom_nav_icon_colors"
+
+      app:itemTextAppearanceActive="@style/BottomNavViewActiveTextStyle"
+      app:itemTextAppearanceInactive="@style/BottomNavViewInactiveTextStyle"
       app:menu="@menu/bottom_navigation_menu"/>
 
 

@@ -35,7 +35,7 @@ class StrikeLinesApplication : Application() {
         loadCharts()
 	}
 
-    private fun loadCharts() {
+    fun loadCharts() {
         if(sp.contains(chartsDataKey) && sp.getString(chartsDataKey, "")!!.isNotEmpty()) {
             chartsList.clear()
             chartsList.addAll(parseJson(sp.getString(chartsDataKey, "{}")))

@@ -24,12 +24,12 @@
         android:maxLines="1"
         android:paddingLeft="@dimen/content_padding_standard"
         android:paddingRight="@dimen/content_padding_standard"
-        android:paddingTop="16dp"
+        android:paddingTop="13dp"
         android:paddingBottom="4dp"
         android:text="@string/app_name"
         android:textStyle="bold"
         android:textColor="@color/app_bar_title"
-        android:textSize="@dimen/title_text_size"/>
+        android:textSize="@dimen/app_bar_text"/>
 
       <com.strikelines.app.utils.StyledTextView
         android:layout_width="match_parent"
