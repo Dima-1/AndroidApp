@@ -13,4 +13,9 @@
 	<color name="active_tab_tag">#ffc100</color>
 	<color name="inactive_tab_tag">#8ab5e6</color>
 	<color name="inactive_bottom_nav">#aaadb3</color>
+
+	<color name="osmand_pressed_btn_bg">#003471</color>
+	<color name="osmand_pressed_btn_icon">#ffc100</color>
+	<color name="osmand_pressed_btn_text">#ffc100</color>
+
 </resources>

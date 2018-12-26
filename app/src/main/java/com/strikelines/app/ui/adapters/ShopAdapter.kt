@@ -8,8 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.strikelines.app.R
 import com.strikelines.app.R.id.downloadTV
+import com.strikelines.app.R.id.shop_card_back
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.domain.GlideApp
 import com.strikelines.app.domain.models.Chart
@@ -68,7 +72,7 @@ class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemVi
 }
 
 class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
+    private val bg:View = itemView.findViewById(R.id.shop_card_back)
     private val imageView: ImageView = itemView.findViewById(R.id.shop_card_image)
     private val title: TextView = itemView.findViewById(R.id.shop_card_title)
     private val description: TextView = itemView.findViewById(R.id.shop_card_description)
@@ -79,10 +83,12 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
 
     fun bind(item: Chart, listener: ShopListener?) {
+        val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(10))
+
         GlideApp.with(itemView)
                 .load(item.imageurl)
                 .placeholder(R.drawable.img_placeholder)
-                .centerCrop()
+                .apply(requestOptions)
                 .into(imageView)
 
         title.text = clearTitleForWrecks(item.name)
@@ -94,6 +100,7 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val contentText = "${item.region} • ${if (item.price.toInt() != 0) "$${item.price}"
         else itemView.context.getString(R.string.shop_item_tag_freemap)}"
         contentParams.text = contentText
+        bg.setOnClickListener {listener?.onDetailsClicked(item)}
         detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
         downloadButton.setOnClickListener { listener?.onDownloadClicked(item) }
         if(item.downloadurl.isEmpty()) downloadTextView.text =
