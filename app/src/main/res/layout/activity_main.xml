@@ -33,14 +33,13 @@
         android:paddingLeft="32dp"
         android:paddingRight="32dp"
         android:layout_marginBottom="8dp"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatImageView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:src="@drawable/ic_action_sail_boat_dark"
-          android:tint="@color/fab_text"/>
+          android:tint="@drawable/osmand_btn_colors"/>
 
         <com.strikelines.app.utils.StyledBoldTextView
           android:layout_width="wrap_content"
@@ -48,7 +47,7 @@
           android:gravity="center"
           android:paddingLeft="8dp"
           android:text="@string/navigate"
-          android:textColor="@color/fab_text"/>
+          android:textColor="@drawable/osmand_btn_colors"/>
 
       </LinearLayout>
 
@@ -68,6 +67,7 @@
       android:background="@color/card_bg"
       app:itemBackground="@color/card_bg"
       app:itemIconTint="@drawable/bottom_nav_icon_colors"
+
       app:itemTextAppearanceActive="@style/BottomNavViewActiveTextStyle"
       app:itemTextAppearanceInactive="@style/BottomNavViewInactiveTextStyle"
       app:menu="@menu/bottom_navigation_menu"/>

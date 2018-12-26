@@ -268,9 +268,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         }
     }
 
-
-
-
     interface FragmentDataNotifier {
         fun onDataReady(status: Boolean)
     }
