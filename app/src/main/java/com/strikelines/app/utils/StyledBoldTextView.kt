@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.widget.TextView
-import org.w3c.dom.Text
 
 class StyledBoldTextView: TextView{
     constructor(context: Context) : super(context) {

@@ -34,8 +34,7 @@ class PurchaseGpxFilesFragment : PurchaseSqliteDbFilesFragment() {
 
 
     override fun sortResults(results: List<Chart>): List<Chart> {
-        val filteredResults
-                = results.filterNot { it.name.contains("3D ") }
+        val filteredResults = results.filterNot { it.name.contains("3D ") }
                 .filterNot { it.price.toInt() == 0 }
         return if ((activity!! as MainActivity).regionToFilter != "")
             filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }

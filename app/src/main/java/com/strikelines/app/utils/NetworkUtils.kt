@@ -1,18 +1,17 @@
 package com.strikelines.app.utils
 
+import android.content.Context
 import android.os.AsyncTask
+import android.os.Environment
 import android.util.Log
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
+import java.io.*
 import java.lang.Exception
 import java.net.HttpURLConnection
-import java.net.MalformedURLException
 import java.net.URL
 
 
-
-class GetRequestAsync(private val url: String, private val listener: OnRequestResultListener) : AsyncTask<Void, Void, String>() {
+class GetRequestAsync(private val url: String, private val listener: OnRequestResultListener) :
+    AsyncTask<Void, Void, String>() {
 
     override fun doInBackground(vararg p0: Void?): String? {
         try {
@@ -54,3 +53,56 @@ interface OnRequestResultListener {
     fun onResult(result: String)
 }
 
+class DownloadFileAsync(
+    private val downloadUrl: String
+) : AsyncTask<String, String, String>() {
+
+    private val path = "${Environment.getExternalStorageDirectory().absolutePath}/strikelines/"
+    private val fileName = downloadUrl.substringBeforeLast('/').substringAfterLast('/') +
+            ".${downloadUrl.substringAfterLast('.')}"
+
+    override fun doInBackground(vararg params: String?): String {
+        try {
+            val dir = File(path)
+            if (!dir.exists()) dir.mkdir()
+            val file = File(dir, fileName)
+
+            val urlcon = URL(downloadUrl).openConnection()
+            urlcon.readTimeout = 60000
+            urlcon.connectTimeout = 60000
+            urlcon.connect()
+            val inputStream = BufferedInputStream(urlcon.getInputStream(), 4096)
+
+            val outputStream = FileOutputStream(file)
+            val data = ByteArray(1024)
+            var total: Long = 0
+            var count = inputStream.read(data)
+
+            while (count != -1) {
+                total += count.toLong()
+                outputStream.write(data, 0, count)
+                count = inputStream.read(data)
+            }
+            Log.d("DownloadAsync", downloadUrl)
+            Log.d("DownloadAsync", "File size: $total")
+
+
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
+
+        } catch (e: Exception) {
+            Log.w(e.message, e)
+        }
+
+
+
+        return ""
+    }
+
+    override fun onPostExecute(result: String?) {
+        super.onPostExecute(result)
+        if (File(path + fileName).exists()) Log.d("DownloadAsync", "Downloaded and saved to $path")
+        else Log.d("DownloadAsync", "Downloaded but not saved")
+    }
+}

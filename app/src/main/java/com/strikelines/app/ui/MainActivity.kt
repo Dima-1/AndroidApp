@@ -1,8 +1,10 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     private lateinit var bottomNav: BottomNavigationView
     var regionList: MutableSet<String> = mutableSetOf()
     var regionToFilter: String = ""
+    var snackView: View? = null
 
     companion object {
 
@@ -52,7 +55,10 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        snackView = findViewById(android.R.id.content)
         initChartsList()
+
+
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
             swipeLocked = true
             offscreenPageLimit = 2
@@ -82,8 +88,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
             osmandHelper.connectOsmand()
         }
-
-
     }
 
     override fun onDestroy() {
@@ -228,6 +232,15 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
     }
 
+    fun showSnackBar(msg: String, parentLayout: View, lengths: Int = Snackbar.LENGTH_LONG, action: Int) {
+        val snackbar = Snackbar.make(parentLayout, msg, lengths)
+        when (action) {
+            1 -> snackbar.setAction("UPDATE") { app.loadCharts() }
+            2 -> snackbar.setAction("OK") { snackbar.dismiss() }
+        }
+        snackbar.show()
+    }
+
     fun initChartsList() {
         if (StrikeLinesApplication.isDataReadyFlag) {
             chartsDataIsReady = true
@@ -243,14 +256,15 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         fragmentNotifier.forEach { (k, v) -> v?.onDataReady(true) }
     }
 
-    var appListener = object : StrikeLinesApplication.AppListener {
+    private var appListener = object : StrikeLinesApplication.AppListener {
         override fun isDataReady(status: Boolean) {
             Log.i("MainActivity", "Data is ready - $status")
-            if (status) initChartsList()
-            else showToastMessage(resources.getString(R.string.error_loading_res))
+            if (status) {
+                initChartsList()
+                snackView?.let { showSnackBar(getString(R.string.snack_msg_update_successful), snackView!!, action = 2) }
+            } else snackView?.let { showSnackBar(getString(R.string.snack_msg_update_failed), snackView!!, action = 1) }
         }
     }
-
 
     interface FragmentDataNotifier {
         fun onDataReady(status: Boolean)

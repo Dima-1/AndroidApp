@@ -35,7 +35,7 @@ class StrikeLinesApplication : Application() {
         loadCharts()
 	}
 
-    private fun loadCharts() {
+    fun loadCharts() {
         if(sp.contains(chartsDataKey) && sp.getString(chartsDataKey, "")!!.isNotEmpty()) {
             chartsList.clear()
             chartsList.addAll(parseJson(sp.getString(chartsDataKey, "{}")))
@@ -117,6 +117,7 @@ class StrikeLinesApplication : Application() {
         private const val chartsDataKey = "storedCharts"
         private const val chartsTimeKey = "updateTimestamp"
         private const val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
+        const val DOWNLOAD_REQUEST_CODE = 12321
 
         var isDataReadyFlag = false
         var listener: AppListener? = null

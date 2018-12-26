@@ -1,8 +1,12 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -15,6 +19,7 @@ import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.ui.adapters.ShopAdapter
 import com.strikelines.app.ui.adapters.ShopListener
 import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.DownloadFileAsync
 
 abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
@@ -28,6 +33,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
     lateinit var recycleView: RecyclerView
     var adapter: ShopAdapter? = null
+    private var downloadUrl: String? = null
 
 
     override fun onCreateView(
@@ -53,7 +59,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
     private val listener: ShopListener? = object : ShopListener {
         override fun onDetailsClicked(item: Chart) = openDetailsScreen(item.name)
 
-        override fun onDownloadClicked(url: String) = openBrowser(url)
+        override fun onDownloadClicked(item: Chart) = openUrl(item)
     }
 
     fun openDetailsScreen(chartsName: String) {
@@ -62,12 +68,16 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         })
     }
 
-    fun openBrowser(url: String) {
-        startActivity(AndroidUtils.getIntentForBrowser(url))
+    fun openUrl(item: Chart) {
+        if (item.downloadurl.isEmpty()) startActivity(AndroidUtils.getIntentForBrowser(item.weburl))
+        else {
+            downloadUrl = item.downloadurl
+            downloadFreeChart(downloadUrl!!)
+        }
     }
 
     fun getData() {
-        if(MainActivity.chartsDataIsReady) {
+        if (MainActivity.chartsDataIsReady) {
             onRequestResult(StrikeLinesApplication.chartsList)
         } else {
             onRequestResult(emptyList())
@@ -80,8 +90,29 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
         adapter?.setData(chartsList)
     }
 
-    abstract fun sortResults(results:List<Chart>):List<Chart>
+    abstract fun sortResults(results: List<Chart>): List<Chart>
 
+    private fun downloadFreeChart(downloadUrl: String) {
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(activity!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED
+            ) {
+                DownloadFileAsync(downloadUrl).execute()
+            } else {
+                requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
+                )
+            }
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            downloadUrl.let { DownloadFileAsync(downloadUrl!!).execute() }
+        }
+    }
 
 }
