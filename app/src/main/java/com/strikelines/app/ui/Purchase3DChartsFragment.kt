@@ -37,9 +37,12 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 
     override fun sortResults(results: List<Chart>): List<Chart> {
         val filteredResults = results.filter { it.name.contains("3D ") }
-        return if ((activity!! as MainActivity).regionToFilter != "")
-            filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }
-        else filteredResults
+        activity?.let {
+            if ((activity as MainActivity).regionToFilter != "")
+                return filteredResults.filter { it.region == (activity!! as MainActivity).regionToFilter }
+        }
+
+        return filteredResults
     }
 
 

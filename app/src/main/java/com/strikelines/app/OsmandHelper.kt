@@ -10,14 +10,18 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
+import android.util.Log
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
+import net.osmand.aidl.navdrawer.NavDrawerItem
+import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
+import java.util.ArrayList
 
 class OsmandHelper(private val app: Application) {
 
@@ -110,6 +114,38 @@ class OsmandHelper(private val app: Application) {
 			}
 		}
 	}
+
+
+    /**
+     * Method for adding up to 3 items to the OsmAnd navigation drawer.
+     *
+     * @param appPackage - current application package.
+     * @param names - list of names for items.
+     * @param uris - list of uris for intents.
+     * @param iconNames - list of icon names for items.
+     * @param flags - list of flags for intents. Use -1 if no flags needed.
+     */
+    fun setNavDrawerItems(
+        appPackage: String,
+        names: List<String>,
+        uris: List<String>,
+        iconNames: List<String>,
+        flags: List<Int>
+    ): Boolean {
+        if (mIOsmAndAidlInterface != null) {
+            try {
+                val items = ArrayList<NavDrawerItem>()
+                for (i in names.indices) {
+                    items.add(NavDrawerItem(names[i], uris[i], iconNames[i], flags[i]))
+                }
+                return mIOsmAndAidlInterface!!.setNavDrawerItems(SetNavDrawerItemsParams(appPackage, items))
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            }
+
+        }
+        return false
+    }
 
 	fun setEnabledIds(ids: List<String>) {
 		if (mIOsmAndAidlInterface != null) {

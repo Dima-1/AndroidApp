@@ -21,6 +21,7 @@ object OsmandCustomizationConstants {
 	const val DRAWER_HELP_ID = DRAWER_ITEM_ID_SCHEME + "help"
 	const val DRAWER_BUILDS_ID = DRAWER_ITEM_ID_SCHEME + "builds"
 	const val DRAWER_DIVIDER_ID = DRAWER_ITEM_ID_SCHEME + "divider"
+	const val DRAWER_TEST_ID = DRAWER_ITEM_ID_SCHEME + "Test 1"
 
 	// Configure Map:
 
