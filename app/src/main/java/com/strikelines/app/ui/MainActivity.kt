@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     var regionList: MutableSet<String> = mutableSetOf()
     var regionToFilter: String = ""
     var snackView: View? = null
+    val strikeLinesIntent = "strike_lines_app://main_activity"
+
 
     companion object {
 
@@ -88,6 +90,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
             osmandHelper.connectOsmand()
         }
+
     }
 
     override fun onDestroy() {
@@ -158,12 +161,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 
         osmandHelper.apply {
-            setNavDrawerLogo(logoUri)
+            //setNavDrawerLogo(logoUri)
+            setNavDrawerLogoWithIntent(logoUri, packageName, strikeLinesIntent)
 
             setNavDrawerItems(
                 packageName,
                 listOf("Download charts"),
-                listOf("strike_lines_app://main_activity"),
+                listOf(strikeLinesIntent),
                 listOf("ic_type_archive"),
                 listOf(-1)
             )
