@@ -13,8 +13,11 @@
 	<color name="active_tab_tag">#ffc100</color>
 	<color name="inactive_tab_tag">#8ab5e6</color>
 	<color name="inactive_bottom_nav">#aaadb3</color>
+	<color name="active_tab_bg">#34505b</color>
 	<color name="detail_text_color">#18191a</color>
   <color name="transparent_white">#00ffffff</color>
+	<color name="divider_color">#f0f1f2</color>
+
 
 	<color name="osmand_pressed_btn_bg">#003471</color>
 	<color name="osmand_pressed_btn_icon">#ffc100</color>

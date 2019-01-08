@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
@@ -7,16 +7,14 @@
   android:layout_height="match_parent"
   android:background="@color/card_bg">
 
-  <ScrollView
-    android:id="@+id/details_scroll_view"
+  <android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/details_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentTop="true"
-    android:paddingBottom="64dp">
+    android:layout_gravity="top">
 
     <android.support.constraint.ConstraintLayout
       android:layout_width="match_parent"
@@ -72,9 +70,9 @@
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:background="@drawable/yellow_price_bg"
+        android:gravity="center"
         android:textColor="@color/app_bar_bg"
         android:textSize="14sp"
-        android:gravity="center"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toTopOf="@+id/details_title"
         tools:text="$199"/>
@@ -95,71 +93,79 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        android:lineSpacingExtra="4sp"
         android:textColor="@color/detail_text_color"
+        android:textSize="15sp"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/details_yellow_data_tv"
-        tools:text="Description"/>
+        tools:text="Description DescriptionDescription Description Description Description Description Description Description"/>
 
+      <View
+        android:id="@+id/bottom"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="0dp"
+        android:textColor="@color/detail_text_color"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/details_description"/>
 
       <android.support.design.widget.FloatingActionButton
         android:id="@+id/details_back_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="32dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="13dp"
+        android:layout_marginLeft="13dp"
+        android:focusable="true"
         android:clickable="true"
         android:scaleType="fitXY"
         android:tint="@color/accent_color"
         app:backgroundTint="@color/app_bar_bg"
-        app:backgroundTintMode="src_over"
         app:fabSize="mini"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:rippleColor="@color/transparent_bg"
+        app:rippleColor="@color/transparent_white"
         app:srcCompat="@drawable/ic_action_back"
         app:useCompatPadding="false"/>
 
     </android.support.constraint.ConstraintLayout>
-  </ScrollView>
+  </android.support.v4.widget.NestedScrollView>
 
   <FrameLayout
     android:id="@+id/footer_btn_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:layout_centerHorizontal="true"
-    android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_gravity="bottom|center_horizontal"
+    android:layout_marginBottom="@dimen/padding_10dp"
+    android:paddingLeft="@dimen/padding_10dp"
+    android:paddingRight="@dimen/padding_10dp"
     android:background="@color/transparent_white"
     >
 
     <Button
       android:id="@+id/get_chart_btn"
       android:layout_width="match_parent"
-      android:layout_height="@dimen/padding_48dp"
-
+      android:layout_height="64dp"
       android:background="@drawable/blue_button_bg"
+      android:textAllCaps="false"
       android:textColor="@color/accent_color"
+      android:textSize="@dimen/details_get_chart_btn_text"
       tools:text="Get Chart"/>
 
     <ImageView
       android:id="@+id/button_icon"
       android:layout_width="24dp"
       android:layout_height="24dp"
-      android:layout_marginStart="12dp"
-      android:layout_marginLeft="12dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginLeft="16dp"
       android:layout_gravity="center_vertical"
       android:elevation="@dimen/padding_8dp"
       android:src="@drawable/ic_add_to_cart"
-      app:layout_constraintBottom_toBottomOf="@+id/get_chart_btn"
-      app:layout_constraintStart_toStartOf="@+id/get_chart_btn"
-      app:layout_constraintTop_toTopOf="@+id/get_chart_btn"
       app:srcCompat="@drawable/ic_add_to_cart"/>
 
   </FrameLayout>
 
 
-</RelativeLayout>
+</FrameLayout>

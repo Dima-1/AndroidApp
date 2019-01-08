@@ -21,5 +21,6 @@
 	<dimen name="button_height_36dp">36dp</dimen>
 	<dimen name="padding_48dp">48dp</dimen>
   <dimen name="details_title_20sp">20sp</dimen>
+  <dimen name="details_get_chart_btn_text">17sp</dimen>
 
 </resources>

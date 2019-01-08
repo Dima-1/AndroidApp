@@ -115,11 +115,10 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
-	fun setNavDrawerLogoWithParams(uri: Uri, packageName: String, intent:String) {
+	fun setNavDrawerLogoWithIntent(uri:Uri, packageName:String, intent:String){
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(uri.toString(), packageName, intent)
-				//mIOsmAndAidlInterface!!.setNavDrawerLogo(uri.toString())
+				mIOsmAndAidlInterface!!.setNavDrawerLogoWithIntent(uri.toString(), packageName, intent)
 			} catch (e: RemoteException) {
 				log.error(e)
 			}

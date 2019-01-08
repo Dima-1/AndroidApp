@@ -83,7 +83,7 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
 
     fun bind(item: Chart, listener: ShopListener?) {
-        val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(10))
+        val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(4))
 
         GlideApp.with(itemView)
                 .load(item.imageurl)

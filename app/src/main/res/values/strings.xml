@@ -19,8 +19,8 @@
 	<string name="shared_string_unexpected_error">Unexpected error</string>
     <string name="error_loading_res">Request Failed, Try Later!</string>
     <string name="shop_item_tag_freemap">FREE</string>
-	<string name="shop_details_btn_tag_free_chart">GET CHART - FREE</string>
-	<string name="shop_details_btn_tag_price_of_chart">GET CHART - $</string>
+	<string name="shop_details_btn_tag_free_chart">Get Chart - Free</string>
+	<string name="shop_details_btn_tag_price_of_chart">Get Chart - $</string>
 
 	<!--Shop card-->
 	
