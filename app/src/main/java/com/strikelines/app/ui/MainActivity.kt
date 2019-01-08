@@ -1,7 +1,6 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
@@ -47,6 +46,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
 
         const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
+        var isOsmandWasConnected = false
         var chartsDataIsReady = false
         private const val MAPS_TAB_POS = 0
         private const val DOWNLOADS_TAB_POS = 1
@@ -56,8 +56,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         snackView = findViewById(android.R.id.content)
+        setupOsmand()
         initChartsList()
-
 
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
             swipeLocked = true
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             }
         }
         fab.setOnClickListener { view ->
-            setupOsmand()
+            isOsmandWasConnected = true
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
@@ -120,8 +120,16 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         StrikeLinesApplication.listener = appListener
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        setupOsmand()
+    }
+
     override fun onPause() {
         super.onPause()
+        if(!isOsmandWasConnected) {
+            osmandHelper.restoreOsmand()}
+
         osmandHelper.listener = null
         StrikeLinesApplication.listener = null
     }
@@ -134,11 +142,20 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
     private fun setupOsmand() {
         val logoUri = AndroidUtils.resourceToUri(
-                this@MainActivity, R.drawable.img_strikelines_nav_drawer_logo
+            this@MainActivity, R.drawable.img_strikelines_nav_drawer_logo
         )
 
-        val exceptDefault = listOf(APP_MODE_CAR, APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
-        val exceptPedestrianAndDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
+        val exceptDefault = listOf(
+            APP_MODE_CAR,
+            APP_MODE_PEDESTRIAN,
+            APP_MODE_BICYCLE,
+            APP_MODE_BOAT,
+            APP_MODE_AIRCRAFT,
+            APP_MODE_BUS,
+            APP_MODE_TRAIN
+        )
+        val exceptPedestrianAndDefault =
+            listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
         val exceptAirBoatDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_PEDESTRIAN)
         val pedestrian = listOf(APP_MODE_PEDESTRIAN)
         val pedestrianBicycle = listOf(APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE)
@@ -148,32 +165,53 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 
         osmandHelper.apply {
-            setNavDrawerLogo(logoUri)
+            //setNavDrawerLogo(logoUri)
+            setNavDrawerLogoWithParams(logoUri, packageName, "strike_lines_app://main_activity")
+
+            setNavDrawerItems(
+                packageName,
+                listOf("Download charts"),
+                listOf("strike_lines_app://main_activity"),
+                listOf("ic_type_archive"),
+                listOf(-1)
+            )
+
             setDisabledPatterns(
-                    listOf(
-                            OsmandCustomizationConstants.DRAWER_ITEM_ID_SCHEME,
-                            OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
-                    )
+                listOf(
+                    OsmandCustomizationConstants.DRAWER_DASHBOARD_ID,
+                    OsmandCustomizationConstants.DRAWER_MY_PLACES_ID,
+                    OsmandCustomizationConstants.DRAWER_SEARCH_ID,
+                    OsmandCustomizationConstants.DRAWER_DIRECTIONS_ID,
+                    OsmandCustomizationConstants.DRAWER_CONFIGURE_SCREEN_ID,
+                    OsmandCustomizationConstants.DRAWER_OSMAND_LIVE_ID,
+                    OsmandCustomizationConstants.DRAWER_TRAVEL_GUIDES_ID,
+                    OsmandCustomizationConstants.DRAWER_PLUGINS_ID,
+                    OsmandCustomizationConstants.DRAWER_SETTINGS_ID,
+                    OsmandCustomizationConstants.DRAWER_HELP_ID,
+                    OsmandCustomizationConstants.DRAWER_BUILDS_ID,
+                    OsmandCustomizationConstants.DRAWER_DIVIDER_ID,
+                    OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
+                    OsmandCustomizationConstants.POINTS_ACTION_MENU,
+                    OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
+                )
             )
+
             setEnabledIds(
-                    listOf(
-                            OsmandCustomizationConstants.DRAWER_MAP_MARKERS_ID,
-                            OsmandCustomizationConstants.DRAWER_MEASURE_DISTANCE_ID,
-                            OsmandCustomizationConstants.DRAWER_CONFIGURE_MAP_ID,
-                            OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
-                            //OsmandCustomizationConstants.SHOW_CATEGORY_ID,
-                            OsmandCustomizationConstants.GPX_FILES_ID,
-                            OsmandCustomizationConstants.MAP_SOURCE_ID,
-                            OsmandCustomizationConstants.OVERLAY_MAP,
-                            OsmandCustomizationConstants.UNDERLAY_MAP,
-                            OsmandCustomizationConstants.CONTOUR_LINES
-                    )
+                listOf(
+                    OsmandCustomizationConstants.POINT_MEASURE_DISTANCE,
+                    OsmandCustomizationConstants.GPX_FILES_ID,
+                    OsmandCustomizationConstants.MAP_SOURCE_ID,
+                    OsmandCustomizationConstants.OVERLAY_MAP,
+                    OsmandCustomizationConstants.UNDERLAY_MAP,
+                    OsmandCustomizationConstants.CONTOUR_LINES
+                )
             )
+
             setDisabledIds(
-                    listOf(
-                            OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID,
-                            OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
-                    )
+                listOf(
+                    OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID,
+                    OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
+                )
             )
             // left
             regWidgetVisibility("next_turn", exceptPedestrianAndDefault)
@@ -218,8 +256,11 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                 putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
                 putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
             }
+
             customizeOsmandSettings("strikelines", bundle)
         }
+
+
     }
 
     inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
@@ -235,8 +276,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     fun showSnackBar(msg: String, parentLayout: View, lengths: Int = Snackbar.LENGTH_LONG, action: Int) {
         val snackbar = Snackbar.make(parentLayout, msg, lengths)
         when (action) {
-            1 -> snackbar.setAction("UPDATE") { app.loadCharts() }
-            2 -> snackbar.setAction("OK") { snackbar.dismiss() }
+            1 -> snackbar.setAction(getString(R.string.snack_update_btn)) { app.loadCharts() }
+            2 -> snackbar.setAction(getString(R.string.snack_ok_btn)) { snackbar.dismiss() }
         }
         snackbar.show()
     }
@@ -261,7 +302,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             Log.i("MainActivity", "Data is ready - $status")
             if (status) {
                 initChartsList()
-                snackView?.let { showSnackBar(getString(R.string.snack_msg_update_successful), snackView!!, action = 2) }
+                snackView?.let {
+                    showSnackBar(
+                        getString(R.string.snack_msg_update_successful),
+                        snackView!!,
+                        action = 2
+                    )
+                }
             } else snackView?.let { showSnackBar(getString(R.string.snack_msg_update_failed), snackView!!, action = 1) }
         }
     }

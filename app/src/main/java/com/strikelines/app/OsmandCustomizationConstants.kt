@@ -70,4 +70,23 @@ object OsmandCustomizationConstants {
 	const val ROUTE_PLANNING_HUD_ID = HUD_BTN_ID_SCHEME + "route_planning"
 	const val ZOOM_IN_HUD_ID = HUD_BTN_ID_SCHEME + "zoom_id"
 	const val ZOOM_OUT_HUD_ID = HUD_BTN_ID_SCHEME + "zoom_out"
+
+
+	//Point's Context Action Menu:
+	const val POINTS_ACTION_MENU = "point.actions."
+	const val POINT_DIRECTIONS_FROM_ID = POINTS_ACTION_MENU + "directions_from"
+	const val POINT_SEARCH_NEARBY = POINTS_ACTION_MENU + "search_nearby"
+	const val POINT_CHANGE_MARKER_POSITION = POINTS_ACTION_MENU + "change_m_position"
+	const val POINT_MARK_AS_PARKING_LOC = POINTS_ACTION_MENU + "mark_as_parking"
+	const val POINT_MEASURE_DISTANCE = POINTS_ACTION_MENU + "measure_distance"
+	const val POINT_EDIT_GPX_WP = POINTS_ACTION_MENU + "edit_gpx_waypoint"
+	const val POINT_ADD_GPX_WAYPOINT = POINTS_ACTION_MENU + "add_gpx_waypoint"
+	const val POINT_UPDATE_MAP = POINTS_ACTION_MENU + "update_map"
+	const val POINT_DOWNLOAD_MAP = POINTS_ACTION_MENU + "download_map"
+	const val POINT_MODIFY_POI = POINTS_ACTION_MENU + "modify_poi"
+	const val POINT_MODIFY_OSM_CHANGE = POINTS_ACTION_MENU + "modify_osm_change"
+	const val POINT_CREATE_POI = POINTS_ACTION_MENU + "create_poi"
+	const val POINT_MODIFY_OSM_NOTE = POINTS_ACTION_MENU + "modify_osm_note"
+	const val POINT_OPEN_OSM_NOTE = POINTS_ACTION_MENU + "open_osm_note"
+
 }
