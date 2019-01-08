@@ -79,13 +79,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             }
         }
         fab.setOnClickListener { view ->
+            isOsmandWasConnected = true
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
-            isOsmandWasConnected = true
             osmandHelper.connectOsmand()
         }
     }
