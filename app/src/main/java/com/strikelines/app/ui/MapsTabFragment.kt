@@ -107,7 +107,7 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
                     } else {
                         osmandHelper?.hideGpx(gpx.fileName)
                     }
-                    //app?.runInUI(this::fetchListItems, 500)
+                    app?.runInUI(this::fetchListItems, 1000)
                 }
             }
             is Local3DChartItem -> {

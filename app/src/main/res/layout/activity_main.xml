@@ -39,7 +39,8 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:src="@drawable/ic_action_sail_boat_dark"
-          android:tint="@drawable/osmand_btn_colors"/>
+          android:tint="@drawable/osmand_btn_colors"
+          />
 
         <com.strikelines.app.utils.StyledBoldTextView
           android:layout_width="wrap_content"

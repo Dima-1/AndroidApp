@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         snackView = findViewById(android.R.id.content)
+        setupOsmand()
         initChartsList()
 
 
@@ -158,7 +159,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 
         osmandHelper.apply {
-            setNavDrawerLogo(logoUri)
+            //setNavDrawerLogo(logoUri)
+            setNavDrawerLogoWithParams(logoUri, packageName, "strike_lines_app://main_activity")
 
             setNavDrawerItems(
                 packageName,
@@ -167,7 +169,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                 listOf("ic_type_archive"),
                 listOf(-1)
             )
-
 
             setDisabledPatterns(
                 listOf(
@@ -184,14 +185,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                     OsmandCustomizationConstants.DRAWER_BUILDS_ID,
                     OsmandCustomizationConstants.DRAWER_DIVIDER_ID,
                     OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
+                    OsmandCustomizationConstants.POINTS_ACTION_MENU,
                     OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
                 )
             )
 
-
-
             setEnabledIds(
                 listOf(
+                    OsmandCustomizationConstants.POINT_MEASURE_DISTANCE,
                     OsmandCustomizationConstants.GPX_FILES_ID,
                     OsmandCustomizationConstants.MAP_SOURCE_ID,
                     OsmandCustomizationConstants.OVERLAY_MAP,
@@ -199,8 +200,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                     OsmandCustomizationConstants.CONTOUR_LINES
                 )
             )
-
-
 
             setDisabledIds(
                 listOf(

@@ -115,6 +115,16 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
+	fun setNavDrawerLogoWithParams(uri: Uri, packageName: String, intent:String) {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(uri.toString(), packageName, intent)
+				//mIOsmAndAidlInterface!!.setNavDrawerLogo(uri.toString())
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+	}
 
     /**
      * Method for adding up to 3 items to the OsmAnd navigation drawer.
