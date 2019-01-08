@@ -79,13 +79,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             }
         }
         fab.setOnClickListener { view ->
+            isOsmandWasConnected = true
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
-            isOsmandWasConnected = true
             osmandHelper.connectOsmand()
         }
     }
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
             setNavDrawerItems(
                 packageName,
-                listOf("Download charts"),
+                listOf(getString(R.string.aidl_menu_item_download_charts)),
                 listOf("strike_lines_app://main_activity"),
                 listOf("ic_type_archive"),
                 listOf(-1)

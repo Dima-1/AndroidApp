@@ -34,8 +34,9 @@
 	<string name="snack_msg_update_failed">Missing Internet connection.</string>
   <string name="snack_update_btn">UPDATE</string>
 	<string name="snack_ok_btn">OK</string>
+  <string name="aidl_menu_item_download_charts">Download charts</string>
 
-	<string-array name="filter_region">
+  <string-array name="filter_region">
 		<item>All Regions</item>
 	</string-array>
 
