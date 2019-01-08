@@ -1,7 +1,6 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
@@ -47,6 +46,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
 
         const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
+        var isOsmandWasConnected = false
         var chartsDataIsReady = false
         private const val MAPS_TAB_POS = 0
         private const val DOWNLOADS_TAB_POS = 1
@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         snackView = findViewById(android.R.id.content)
         setupOsmand()
         initChartsList()
-
 
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
             swipeLocked = true
@@ -80,13 +79,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             }
         }
         fab.setOnClickListener { view ->
-
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
+            isOsmandWasConnected = true
             osmandHelper.connectOsmand()
         }
     }
@@ -117,13 +116,20 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
     override fun onResume() {
         super.onResume()
-        setupOsmand()
         osmandHelper.listener = this
         StrikeLinesApplication.listener = appListener
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        setupOsmand()
+    }
+
     override fun onPause() {
         super.onPause()
+        if(!isOsmandWasConnected) {
+            osmandHelper.restoreOsmand()}
+
         osmandHelper.listener = null
         StrikeLinesApplication.listener = null
     }
@@ -270,8 +276,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     fun showSnackBar(msg: String, parentLayout: View, lengths: Int = Snackbar.LENGTH_LONG, action: Int) {
         val snackbar = Snackbar.make(parentLayout, msg, lengths)
         when (action) {
-            1 -> snackbar.setAction("UPDATE") { app.loadCharts() }
-            2 -> snackbar.setAction("OK") { snackbar.dismiss() }
+            1 -> snackbar.setAction(getString(R.string.snack_update_btn)) { app.loadCharts() }
+            2 -> snackbar.setAction(getString(R.string.snack_ok_btn)) { snackbar.dismiss() }
         }
         snackbar.show()
     }

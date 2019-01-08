@@ -435,6 +435,17 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
+	fun restoreOsmand():Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.restoreOsmand()
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
+	}
+
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
 			val intent = Intent("net.osmand.aidl.OsmandAidlService")

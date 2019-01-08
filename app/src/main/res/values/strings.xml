@@ -32,6 +32,8 @@
     <string name="get_chart_from_web_btn_tag">Get Chart</string>
     <string name="snack_msg_update_successful">Charts data updated successfully</string>
 	<string name="snack_msg_update_failed">Missing Internet connection.</string>
+  <string name="snack_update_btn">UPDATE</string>
+	<string name="snack_ok_btn">OK</string>
 
 	<string-array name="filter_region">
 		<item>All Regions</item>
