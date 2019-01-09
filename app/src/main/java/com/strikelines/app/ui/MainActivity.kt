@@ -1,14 +1,18 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatImageView
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import com.strikelines.app.OsmandCustomizationConstants
@@ -48,6 +52,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
         const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
         var isOsmandWasConnected = false
+        var isOsmandInitialized = false
         var chartsDataIsReady = false
         private const val MAPS_TAB_POS = 0
         private const val DOWNLOADS_TAB_POS = 1
@@ -59,7 +64,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         snackView = findViewById(android.R.id.content)
         setupOsmand()
         initChartsList()
-
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
             swipeLocked = true
             offscreenPageLimit = 2
@@ -81,11 +85,29 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         }
         fab.setOnClickListener { view ->
             isOsmandWasConnected = true
+
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
+        fab.setOnTouchListener(
+            object :View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                    when(event?.action) {
+                        MotionEvent.ACTION_UP -> big_fab_icon.setColorFilter(
+                            ContextCompat.getColor(this@MainActivity, R.color.osmand_pressed_btn_bg),
+                            android.graphics.PorterDuff.Mode.MULTIPLY )
+                        MotionEvent.ACTION_DOWN -> big_fab_icon.setColorFilter(
+                            ContextCompat.getColor(this@MainActivity, R.color.osmand_pressed_btn_icon),
+                            android.graphics.PorterDuff.Mode.MULTIPLY )
+                    }
+                    return v?.onTouchEvent(event)?:true
+                }
+
+            }
+        )
+
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
             osmandHelper.connectOsmand()
         }
