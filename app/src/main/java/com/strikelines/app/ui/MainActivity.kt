@@ -191,14 +191,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                     OsmandCustomizationConstants.DRAWER_BUILDS_ID,
                     OsmandCustomizationConstants.DRAWER_DIVIDER_ID,
                     OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
-                    OsmandCustomizationConstants.POINTS_ACTION_MENU,
+                    OsmandCustomizationConstants.MAP_CONTEXT_MENU_ACTIONS,
                     OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
                 )
             )
 
             setEnabledIds(
                 listOf(
-                    OsmandCustomizationConstants.POINT_MEASURE_DISTANCE,
+                    OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
                     OsmandCustomizationConstants.GPX_FILES_ID,
                     OsmandCustomizationConstants.MAP_SOURCE_ID,
                     OsmandCustomizationConstants.OVERLAY_MAP,

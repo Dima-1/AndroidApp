@@ -17,6 +17,7 @@ import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
+import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.tiles.ASqliteDbFile
@@ -118,7 +119,7 @@ class OsmandHelper(private val app: Application) {
 	fun setNavDrawerLogoWithParams(uri:Uri, packageName:String, intent:String){
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(uri.toString(), packageName, intent)
+				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(NavDrawerHeaderParams(uri.toString(), packageName, intent))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}
