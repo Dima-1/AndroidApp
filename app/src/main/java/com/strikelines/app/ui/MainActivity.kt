@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.strikelines.app.OsmandCustomizationConstants
+import com.strikelines.app.OsmandCustomizationConstants.PLUGIN_RASTER_MAPS
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BOAT
@@ -154,15 +155,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             APP_MODE_BUS,
             APP_MODE_TRAIN
         )
-        val exceptPedestrianAndDefault =
-            listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
+        val exceptPedestrianAndDefault =listOf(
+            APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
         val exceptAirBoatDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_PEDESTRIAN)
         val pedestrian = listOf(APP_MODE_PEDESTRIAN)
         val pedestrianBicycle = listOf(APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE)
-
         val all = null
         val none = emptyList<String>()
-
 
         osmandHelper.apply {
             //setNavDrawerLogo(logoUri)
@@ -213,6 +212,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                     OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
                 )
             )
+
+            changePluginState(PLUGIN_RASTER_MAPS, 1)
+
             // left
             regWidgetVisibility("next_turn", exceptPedestrianAndDefault)
             regWidgetVisibility("next_turn_small", pedestrian)
@@ -299,7 +301,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
     private var appListener = object : StrikeLinesApplication.AppListener {
         override fun isDataReady(status: Boolean) {
-            Log.i("MainActivity", "Data is ready - $status")
             if (status) {
                 initChartsList()
                 snackView?.let {

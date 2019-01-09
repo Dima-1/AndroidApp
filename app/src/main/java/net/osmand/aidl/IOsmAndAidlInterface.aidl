@@ -76,6 +76,7 @@ import net.osmand.aidl.gpx.AGpxFile;
 import net.osmand.aidl.gpx.AGpxFileDetails;
 import net.osmand.aidl.tiles.ASqliteDbFile;
 
+import net.osmand.aidl.plugins.PluginParams;
 
 // NOTE: Add new methods at the end of file!!!
 
@@ -167,4 +168,6 @@ interface IOsmAndAidlInterface {
     boolean setNavDrawerFooterWithParams(in NavDrawerFooterParams params);
 
     boolean restoreOsmand();
+
+    boolean changePluginState(in PluginParams params);
 }

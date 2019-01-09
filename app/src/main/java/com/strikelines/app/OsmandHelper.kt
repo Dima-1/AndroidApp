@@ -20,6 +20,7 @@ import net.osmand.aidl.gpx.*
 import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
+import net.osmand.aidl.plugins.PluginParams
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
 import java.util.ArrayList
@@ -85,6 +86,11 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
+    fun reconnectOsmand() {
+        cleanupResources()
+        connectOsmand()
+    }
+
 	fun cleanupResources() {
 		try {
 			if (mIOsmAndAidlInterface != null) {
@@ -119,7 +125,8 @@ class OsmandHelper(private val app: Application) {
 	fun setNavDrawerLogoWithParams(uri:Uri, packageName:String, intent:String){
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(NavDrawerHeaderParams(uri.toString(), packageName, intent))
+				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(
+                    NavDrawerHeaderParams(uri.toString(), packageName, intent))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}
@@ -446,6 +453,19 @@ class OsmandHelper(private val app: Application) {
 		}
 		return false
 	}
+
+	fun changePluginState(pluginId:String, newStatus:Int):Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.changePluginState(PluginParams(pluginId, newStatus))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
+	}
+
+
 
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {

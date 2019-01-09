@@ -89,4 +89,16 @@ object OsmandCustomizationConstants {
 	val MAP_CONTEXT_MENU_CREATE_POI = MAP_CONTEXT_MENU_ACTIONS + "create_poi"
 	val MAP_CONTEXT_MENU_MODIFY_OSM_NOTE = MAP_CONTEXT_MENU_ACTIONS + "modify_osm_note"
 	val MAP_CONTEXT_MENU_OPEN_OSM_NOTE = MAP_CONTEXT_MENU_ACTIONS + "open_osm_note"
+
+	//Plug-in's IDs:
+	val PLUGIN_OSMAND_MONITOR = "osmand.monitoring"
+	val PLUGIN_MAPILLARY = "osmand.mapillary"
+	val PLUGIN_OSMAND_DEV = "osmand.development"
+	val PLUGIN_AUDIO_VIDEO_NOTES = "osmand.audionotes"
+	val PLUGIN_NAUTICAL = "nauticalPlugin.plugin"
+	val PLUGIN_OSMAND_EDITING = "osm.editing"
+	val PLUGIN_PARKING_POSITION = "osmand.parking.position"
+	val PLUGIN_RASTER_MAPS = "osmand.rastermaps"
+	val PLUGIN_SKI_MAPS = "skimaps.plugin"
+	val PLUGIN_SRTM = "osmand.srtm"
 }

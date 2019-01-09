@@ -30,9 +30,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         private const val CHART_BUNDLE_KEY = "chart_details"
     }
 
-
     var chart: Chart? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,11 +38,6 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             changeSystemBarVisibility(true)
-//            val w = window
-//            w.setFlags(
-//                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-//                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-//            )
         }
 
 
