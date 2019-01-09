@@ -36,19 +36,21 @@
         android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatImageView
+          android:id="@+id/big_fab_icon"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:src="@drawable/ic_action_sail_boat_dark"
-          android:tint="@drawable/osmand_btn_colors"
+          android:tint="@color/osmand_pressed_btn_bg"
           />
 
         <com.strikelines.app.utils.StyledBoldTextView
+          android:id="@+id/big_fab_label"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:gravity="center"
           android:paddingLeft="8dp"
           android:text="@string/navigate"
-          android:textColor="@drawable/osmand_btn_colors"/>
+          android:textColor="@color/fab_inverse"/>
 
       </LinearLayout>
 

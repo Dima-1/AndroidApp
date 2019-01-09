@@ -1,5 +1,6 @@
 package com.strikelines.app.ui.adapters
 
+import android.graphics.Bitmap
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.text.method.ScrollingMovementMethod
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
@@ -20,6 +22,7 @@ import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.utils.UiUtils
 import com.strikelines.app.utils.clearTitleForWrecks
 import com.strikelines.app.utils.descriptionFilter
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
 
 class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemViewHolder>() {
@@ -84,11 +87,13 @@ class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(item: Chart, listener: ShopListener?) {
         val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(4))
+        val imageTransformations = MultiTransformation<Bitmap>(
+            CenterCrop(), RoundedCornersTransformation(4, 0, RoundedCornersTransformation.CornerType.LEFT))
 
         GlideApp.with(itemView)
                 .load(item.imageurl)
                 .placeholder(R.drawable.img_placeholder)
-                .apply(requestOptions)
+                .apply(RequestOptions.bitmapTransform(imageTransformations))
                 .into(imageView)
 
         title.text = clearTitleForWrecks(item.name)

@@ -73,6 +73,7 @@
         android:gravity="center"
         android:textColor="@color/app_bar_bg"
         android:textSize="14sp"
+
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toTopOf="@+id/details_title"
         tools:text="$199"/>
@@ -152,6 +153,7 @@
       android:textAllCaps="false"
       android:textColor="@color/accent_color"
       android:textSize="@dimen/details_get_chart_btn_text"
+      android:foreground="?attr/selectableItemBackground"
       tools:text="Get Chart"/>
 
     <ImageView

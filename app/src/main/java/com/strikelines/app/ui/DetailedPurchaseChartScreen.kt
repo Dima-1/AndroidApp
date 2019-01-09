@@ -36,9 +36,9 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.detailed_chart_screen)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            changeSystemBarVisibility(true)
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            changeSystemBarVisibility(true)
+//        }
 
 
         if (intent.extras != null) {
@@ -74,27 +74,27 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
             get_chart_btn.text = getString(R.string.shop_details_btn_tag_free_chart)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            details_scroll_view.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-                Log.d("Scroll Change", "sY: $scrollY, olY: $oldScrollY")
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-
-                    val bounds = Rect()
-                    details_image.getHitRect(bounds)
-
-                    val scrollBounds = Rect(scrollX, scrollY,
-                            scrollX + details_scroll_view.width,
-                            scrollY + details_scroll_view.height)
-
-                    if (!Rect.intersects(scrollBounds, bounds)) {
-                        changeSystemBarVisibility(false)
-                    } else {
-                        changeSystemBarVisibility(true)
-                    }
-                }
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            details_scroll_view.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+//                Log.d("Scroll Change", "sY: $scrollY, olY: $oldScrollY")
+//
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//
+//                    val bounds = Rect()
+//                    details_image.getHitRect(bounds)
+//
+//                    val scrollBounds = Rect(scrollX, scrollY,
+//                            scrollX + details_scroll_view.width,
+//                            scrollY + details_scroll_view.height)
+//
+//                    if (!Rect.intersects(scrollBounds, bounds)) {
+//                        changeSystemBarVisibility(false)
+//                    } else {
+//                        changeSystemBarVisibility(true)
+//                    }
+//                }
+//            }
+//        }
     }
 
     private fun downloadFreeChart(downloadUrl: String) {
@@ -126,24 +126,24 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun changeSystemBarVisibility(isVisible: Boolean) {
-        val w = window
-        when (isVisible) {
-            true -> {
-                w.setFlags(
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                )
-            }
-            false -> {
-                w.clearFlags(
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-            }
-        }
-
-
-    }
+//    @RequiresApi(Build.VERSION_CODES.KITKAT)
+//    fun changeSystemBarVisibility(isVisible: Boolean) {
+//        val w = window
+//        when (isVisible) {
+//            true -> {
+//                w.setFlags(
+//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+//                )
+//            }
+//            false -> {
+//                w.clearFlags(
+//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+//            }
+//        }
+//
+//
+//    }
 
 }
 
