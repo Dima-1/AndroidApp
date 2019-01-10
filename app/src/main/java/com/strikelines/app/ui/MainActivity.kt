@@ -1,7 +1,6 @@
 package com.strikelines.app.ui
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
@@ -10,13 +9,13 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatImageView
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import com.strikelines.app.OsmandCustomizationConstants
 import com.strikelines.app.OsmandCustomizationConstants.PLUGIN_RASTER_MAPS
+import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BOAT
@@ -41,18 +40,23 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
     private var mapsTabFragment: MapsTabFragment? = null
     private var purchasesTabFragment: PurchasesTabFragment? = null
+
     private lateinit var bottomNav: BottomNavigationView
     var regionList: MutableSet<String> = mutableSetOf()
     var regionToFilter: String = ""
     var snackView: View? = null
 
+    val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
+        override fun onOsmandInitialized() {
+            setupOsmand()
+        }
+    }
+
     companion object {
-
         val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
-
         const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
-        var isOsmandWasConnected = false
-        var isOsmandInitialized = false
+        var isOsmandFABWasClicked = false
+        var isOsmandConnected = false
         var chartsDataIsReady = false
         private const val MAPS_TAB_POS = 0
         private const val DOWNLOADS_TAB_POS = 1
@@ -61,14 +65,16 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        snackView = findViewById(android.R.id.content)
-        setupOsmand()
+        osmandHelper.onOsmandInitCallback = osmandHelperInitListener
         initChartsList()
+
+        snackView = findViewById(android.R.id.content)
         val viewPager = findViewById<LockableViewPager>(R.id.view_pager).apply {
             swipeLocked = true
             offscreenPageLimit = 2
             adapter = ViewPagerAdapter(supportFragmentManager)
         }
+
         bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
             setOnNavigationItemSelectedListener {
                 var pos = -1
@@ -84,33 +90,70 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             }
         }
         fab.setOnClickListener { view ->
-            isOsmandWasConnected = true
-
+            isOsmandFABWasClicked = true
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
         fab.setOnTouchListener(
-            object :View.OnTouchListener {
+            object : View.OnTouchListener {
                 override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                    when(event?.action) {
-                        MotionEvent.ACTION_UP -> big_fab_icon.setColorFilter(
-                            ContextCompat.getColor(this@MainActivity, R.color.osmand_pressed_btn_bg),
-                            android.graphics.PorterDuff.Mode.MULTIPLY )
-                        MotionEvent.ACTION_DOWN -> big_fab_icon.setColorFilter(
-                            ContextCompat.getColor(this@MainActivity, R.color.osmand_pressed_btn_icon),
-                            android.graphics.PorterDuff.Mode.MULTIPLY )
-                    }
-                    return v?.onTouchEvent(event)?:true
-                }
+                    when (event?.action) {
+                        MotionEvent.ACTION_UP -> {
+                            big_fab_icon.setColorFilter(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.osmand_pressed_btn_bg
+                                ),
+                                android.graphics.PorterDuff.Mode.MULTIPLY
+                            )
+                            big_fab_label.setTextColor(
+                                resources.getColor(R.color.osmand_pressed_btn_bg))
+                        }
+                        MotionEvent.ACTION_DOWN -> {
+                            big_fab_icon.setColorFilter(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.osmand_pressed_btn_icon
+                                ),
+                                android.graphics.PorterDuff.Mode.MULTIPLY
+                            )
+                            big_fab_label.setTextColor(
+                                resources.getColor(R.color.osmand_pressed_btn_text))
+                        }
 
+                    }
+                    return v?.onTouchEvent(event) ?: true
+                }
             }
         )
 
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
             osmandHelper.connectOsmand()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        osmandHelper.listener = this
+        StrikeLinesApplication.listener = appListener
+        osmandHelper.onOsmandInitCallback = osmandHelperInitListener
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        setupOsmand()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!isOsmandFABWasClicked) {
+            osmandHelper.restoreOsmand()
+        }
+        osmandHelper.onOsmandInitCallback = null
+        osmandHelper.listener = null
+        StrikeLinesApplication.listener = null
     }
 
     override fun onDestroy() {
@@ -137,27 +180,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        osmandHelper.listener = this
-        StrikeLinesApplication.listener = appListener
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        setupOsmand()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if(!isOsmandWasConnected) {
-            osmandHelper.restoreOsmand()}
-
-        osmandHelper.listener = null
-        StrikeLinesApplication.listener = null
-    }
-
     override fun onOsmandConnectionStateChanged(connected: Boolean) {
+        if (connected) {
+            osmandHelper.registerForOsmandInitialization()
+            isOsmandConnected = true
+            if (isOsmandConnected && chartsDataIsReady) loading_indicator.visibility = View.GONE
+        }
         listeners.forEach {
             it.get()?.onOsmandConnectionStateChanged(connected)
         }
@@ -177,8 +205,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             APP_MODE_BUS,
             APP_MODE_TRAIN
         )
-        val exceptPedestrianAndDefault =listOf(
-            APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_BOAT, APP_MODE_AIRCRAFT, APP_MODE_BUS, APP_MODE_TRAIN)
+        val exceptPedestrianAndDefault = listOf(
+            APP_MODE_CAR,
+            APP_MODE_BICYCLE,
+            APP_MODE_BOAT,
+            APP_MODE_AIRCRAFT,
+            APP_MODE_BUS,
+            APP_MODE_TRAIN
+        )
         val exceptAirBoatDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_PEDESTRIAN)
         val pedestrian = listOf(APP_MODE_PEDESTRIAN)
         val pedestrianBicycle = listOf(APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE)
@@ -186,7 +220,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         val none = emptyList<String>()
 
         osmandHelper.apply {
-            //setNavDrawerLogo(logoUri)
+
             setNavDrawerLogoWithParams(logoUri, packageName, "strike_lines_app://main_activity")
 
             setNavDrawerItems(
@@ -283,8 +317,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
             customizeOsmandSettings("strikelines", bundle)
         }
-
-
     }
 
     inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
@@ -297,7 +329,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         Toast.makeText(this@MainActivity, msg, Toast.LENGTH_LONG).show()
     }
 
-    fun showSnackBar(msg: String, parentLayout: View, lengths: Int = Snackbar.LENGTH_LONG, action: Int) {
+    fun showSnackBar(
+        msg: String,
+        parentLayout: View,
+        lengths: Int = Snackbar.LENGTH_LONG,
+        action: Int
+    ) {
         val snackbar = Snackbar.make(parentLayout, msg, lengths)
         when (action) {
             1 -> snackbar.setAction(getString(R.string.snack_update_btn)) { app.loadCharts() }
@@ -309,7 +346,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
     fun initChartsList() {
         if (StrikeLinesApplication.isDataReadyFlag) {
             chartsDataIsReady = true
-            loading_indicator.visibility = View.GONE
+            if (chartsDataIsReady && isOsmandConnected) loading_indicator.visibility = View.GONE
             regionList.clear()
             regionList.add(resources.getString(R.string.all_regions))
             StrikeLinesApplication.chartsList.forEach { regionList.add(it.region) }
@@ -332,7 +369,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                         action = 2
                     )
                 }
-            } else snackView?.let { showSnackBar(getString(R.string.snack_msg_update_failed), snackView!!, action = 1) }
+            } else snackView?.let {
+                showSnackBar(
+                    getString(R.string.snack_msg_update_failed),
+                    snackView!!,
+                    action = 1
+                )
+            }
         }
     }
 

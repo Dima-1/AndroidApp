@@ -170,4 +170,6 @@ interface IOsmAndAidlInterface {
     boolean restoreOsmand();
 
     boolean changePluginState(in PluginParams params);
+
+    boolean registerForOsmandInitListener(in IOsmAndAidlCallback callback);
 }

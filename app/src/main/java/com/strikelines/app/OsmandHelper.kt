@@ -13,6 +13,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
+import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
@@ -21,6 +22,7 @@ import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
+import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
 import java.util.ArrayList
@@ -32,16 +34,35 @@ class OsmandHelper(private val app: Application) {
 	private val osmandPackages = listOf("net.osmand.plus", "net.osmand", "net.osmand.dev")
 
 	private var mIOsmAndAidlInterface: IOsmAndAidlInterface? = null
-
+	private var osmandCallbackId: Long = 0
 	private var initialized = false
 	private var bound = false
 
 	private var selectedOsmandPackage = ""
 
 	var listener: OsmandHelperListener? = null
+	var onOsmandInitCallback: OsmandAppInitCallback? = null
 
 	interface OsmandHelperListener {
 		fun onOsmandConnectionStateChanged(connected: Boolean)
+	}
+
+	interface OsmandAppInitCallback {
+		fun onOsmandInitialized()
+	}
+
+
+	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
+		@Throws(RemoteException::class)
+		override fun onSearchComplete(resultSet: List<SearchResult>) {}
+
+		@Throws(RemoteException::class)
+		override fun onUpdate() {}
+
+		@Throws(RemoteException::class)
+		override fun onAppInitialized() {
+			onOsmandInitCallback?.onOsmandInitialized()
+		}
 	}
 
 	/**
@@ -86,11 +107,6 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
-    fun reconnectOsmand() {
-        cleanupResources()
-        connectOsmand()
-    }
-
 	fun cleanupResources() {
 		try {
 			if (mIOsmAndAidlInterface != null) {
@@ -112,6 +128,17 @@ class OsmandHelper(private val app: Application) {
 		} else {
 			onOsmandMissingAction?.invoke()
 		}
+	}
+
+	fun registerForOsmandInitialization():Boolean {
+		if(mIOsmAndAidlInterface !=null) {
+			try {
+				return mIOsmAndAidlInterface!!.registerForOsmandInitListener(iOsmAndAidlCallback)
+			} catch (e:RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return false
 	}
 
 	fun setNavDrawerLogo(uri: Uri) {
@@ -466,8 +493,6 @@ class OsmandHelper(private val app: Application) {
 		}
 		return false
 	}
-
-
 
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
