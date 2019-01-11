@@ -18,6 +18,7 @@ import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
+import net.osmand.aidl.navdrawer.NavDrawerFooterParams
 import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
@@ -156,6 +157,17 @@ class OsmandHelper(private val app: Application) {
 			try {
 				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(
                     NavDrawerHeaderParams(uri.toString(), packageName, intent))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+	}
+
+	fun setNavDrawerFooterParams(packageName:String, intent:String, appName:String){
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setNavDrawerFooterWithParams(
+					NavDrawerFooterParams(packageName, intent, appName))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}

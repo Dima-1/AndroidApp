@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         osmandHelper.apply {
 
             setNavDrawerLogoWithParams(logoUri, packageName, "strike_lines_app://main_activity")
-
+            setNavDrawerFooterParams(packageName, "strike_lines_app://main_activity", resources.getString(R.string.app_name))
             setNavDrawerItems(
                 packageName,
                 listOf(getString(R.string.aidl_menu_item_download_charts)),

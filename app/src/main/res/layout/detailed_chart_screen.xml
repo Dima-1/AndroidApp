@@ -112,24 +112,7 @@
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/details_description"/>
 
-      <android.support.design.widget.FloatingActionButton
-        android:id="@+id/details_back_btn"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginLeft="13dp"
-        android:focusable="true"
-        android:clickable="true"
-        android:scaleType="fitXY"
-        android:tint="@color/accent_color"
-        app:backgroundTint="@color/app_bar_bg"
-        app:fabSize="mini"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:rippleColor="@color/transparent_white"
-        app:srcCompat="@drawable/ic_action_back"
-        app:useCompatPadding="false"/>
+
 
     </android.support.constraint.ConstraintLayout>
   </android.support.v4.widget.NestedScrollView>
@@ -165,9 +148,27 @@
       android:layout_gravity="center_vertical"
       android:elevation="@dimen/padding_8dp"
       android:src="@drawable/ic_add_to_cart"
-      app:srcCompat="@drawable/ic_add_to_cart"/>
+      />
 
   </FrameLayout>
 
+  <android.support.design.widget.FloatingActionButton
+    android:id="@+id/details_back_btn"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_marginTop="13dp"
+    android:layout_marginStart="13dp"
+    android:layout_marginLeft="13dp"
+    android:focusable="true"
+    android:clickable="true"
+    android:scaleType="fitXY"
+    android:tint="@color/accent_color"
+    app:backgroundTint="@color/app_bar_bg"
+    app:fabSize="mini"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:rippleColor="@color/transparent_white"
+    app:srcCompat="@drawable/ic_action_back"
+    app:useCompatPadding="false"/>
 
 </FrameLayout>

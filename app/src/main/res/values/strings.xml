@@ -21,10 +21,8 @@
     <string name="shop_item_tag_freemap">FREE</string>
 	<string name="shop_details_btn_tag_free_chart">Get Chart - Free</string>
 	<string name="shop_details_btn_tag_price_of_chart">Get Chart - $</string>
-
 	<!--Shop card-->
-	
-	
+
 	<!--spinners-->
 	<string name="all_regions">"All regions"</string>
 	<string name="details_btn">Details</string>
