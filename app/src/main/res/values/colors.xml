@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
 	<color name="app_bar_bg">#003471</color>
 	<color name="card_bg">#ffffff</color>
 	<color name="screen_bg">#f0f0f0</color>

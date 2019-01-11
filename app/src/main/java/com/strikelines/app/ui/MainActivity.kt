@@ -1,6 +1,8 @@
 package com.strikelines.app.ui
 
+import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
@@ -8,6 +10,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
@@ -32,6 +35,11 @@ import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
+import android.view.LayoutInflater
+import kotlinx.android.synthetic.main.recycler_list_fragment.*
+import java.util.*
+import kotlin.concurrent.schedule
+
 
 class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
@@ -60,6 +68,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         var chartsDataIsReady = false
         private const val MAPS_TAB_POS = 0
         private const val DOWNLOADS_TAB_POS = 1
+        private val INTERVAL: Long = 5000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +102,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             isOsmandFABWasClicked = true
             osmandHelper.openOsmand {
                 // TODO: open OsmAnd on Google Play Store
+                installOsmadnDialog()
                 Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
             }
         }
@@ -132,6 +142,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
             osmandHelper.connectOsmand()
         }
+
+        Timer("disableLoader", false).schedule(INTERVAL) {runOnUiThread{dismissLoader()}}
     }
 
     override fun onResume() {
@@ -180,6 +192,10 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
         }
     }
 
+    fun dismissLoader(){ loading_indicator.visibility = View.GONE }
+
+
+
     override fun onOsmandConnectionStateChanged(connected: Boolean) {
         if (connected) {
             osmandHelper.registerForOsmandInitialization()
@@ -190,6 +206,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
             it.get()?.onOsmandConnectionStateChanged(connected)
         }
     }
+
 
     private fun setupOsmand() {
         val logoUri = AndroidUtils.resourceToUri(
@@ -381,5 +398,33 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
     interface FragmentDataNotifier {
         fun onDataReady(status: Boolean)
+    }
+
+    private fun installOsmadnDialog() {
+        val appPackageName = "net.osmand"
+        val builder = AlertDialog.Builder(this)
+        val dialogLayout = layoutInflater.inflate(R.layout.dialog_download_osmand, null)
+        builder.setPositiveButton("OK", null)
+        builder.setView(dialogLayout)
+        builder.setPositiveButton("INSTALL") { dialog, _ ->
+            try {
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=$appPackageName")
+                    )
+                )
+            } catch (anfe: android.content.ActivityNotFoundException) {
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+                    )
+                )
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("CANCEL") { dialog, _ -> dialog.dismiss()}
+        builder.show()
     }
 }

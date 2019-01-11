@@ -32,7 +32,7 @@ class OsmandHelper(private val app: Application) {
 
 	private val log = PlatformUtil.getLog(OsmandHelper::class.java)
 
-	private val osmandPackages = listOf("net.osmand.plus", "net.osmand", "net.osmand.dev")
+	private val osmandPackages = listOf("net.osmand.plus", "net.osmand") //, "net.osmand.dev"
 
 	private var mIOsmAndAidlInterface: IOsmAndAidlInterface? = null
 	private var osmandCallbackId: Long = 0

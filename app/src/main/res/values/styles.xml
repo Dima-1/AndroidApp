@@ -5,7 +5,7 @@
 		<!-- Customize your theme here. -->
 		<item name="colorPrimary">@color/fab_text</item>
 		<item name="colorPrimaryDark">@color/app_bar_bg</item>
-		<item name="colorAccent">@color/card_bg</item>
+		<item name="colorAccent">@color/osmand_pressed_btn_bg</item>
 		<item name="android:windowBackground">@color/screen_bg</item>
 		<item name="android:colorBackground">@color/screen_bg</item>
 		<item name="colorControlActivated">@color/fab_text</item>

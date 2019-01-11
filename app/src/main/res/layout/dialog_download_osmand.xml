@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:gravity="center_horizontal">
+
+  <ImageView
+    android:layout_width="240dp"
+    android:layout_height="240dp"
+    android:src="@drawable/osmand_logo"
+    android:scaleType="fitCenter"
+    android:layout_marginBottom="@dimen/padding_16dp"
+    />
+
+  <com.strikelines.app.utils.StyledTextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/load_osmand_dialog_title"
+    android:textSize="@dimen/default_list_text_size_large"
+    android:paddingRight="@dimen/padding_16dp"
+    android:paddingLeft="@dimen/padding_16dp"
+    android:textColor="@color/detail_text_color"
+    />
+
+  <com.strikelines.app.utils.StyledTextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingRight="@dimen/padding_16dp"
+    android:paddingLeft="@dimen/padding_16dp"
+    android:paddingBottom="@dimen/padding_10dp"
+    android:text="@string/load_osmand_msg"
+    android:textSize="@dimen/default_list_text_size"
+    android:textColor="@color/detail_text_color"/>
+
+</LinearLayout>

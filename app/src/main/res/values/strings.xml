@@ -33,8 +33,10 @@
   <string name="snack_update_btn">UPDATE</string>
 	<string name="snack_ok_btn">OK</string>
   <string name="aidl_menu_item_download_charts">Download charts</string>
+	<string name="load_osmand_msg"><![CDATA[To use StrikeLines maps with navigation, you need to install OsmAnd Maps & Navigation from the Google Play store.]]></string>
+	<string name="load_osmand_dialog_title">Navigate</string>
 
-  <string-array name="filter_region">
+	<string-array name="filter_region">
 		<item>All Regions</item>
 	</string-array>
 
