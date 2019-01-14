@@ -72,7 +72,6 @@ object OsmandCustomizationConstants {
 	const val ZOOM_OUT_HUD_ID = HUD_BTN_ID_SCHEME + "zoom_out"
 
 
-	//Point's Context Action Menu:
 	//Map Context Menu Actions:
 	val MAP_CONTEXT_MENU_ACTIONS = "point.actions."
 	val MAP_CONTEXT_MENU_DIRECTIONS_FROM_ID = MAP_CONTEXT_MENU_ACTIONS + "directions_from"
