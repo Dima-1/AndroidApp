@@ -149,24 +149,5 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
         }
     }
 
-//    @RequiresApi(Build.VERSION_CODES.KITKAT)
-//    fun changeSystemBarVisibility(isVisible: Boolean) {
-//        val w = window
-//        when (isVisible) {
-//            true -> {
-//                w.setFlags(
-//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-//                )
-//            }
-//            false -> {
-//                w.clearFlags(
-//                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-//            }
-//        }
-//
-//
-//    }
-
 }
 

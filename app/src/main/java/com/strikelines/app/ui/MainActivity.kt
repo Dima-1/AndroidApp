@@ -1,6 +1,5 @@
 package com.strikelines.app.ui
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +11,6 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
@@ -35,8 +33,6 @@ import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
-import android.view.LayoutInflater
-import kotlinx.android.synthetic.main.recycler_list_fragment.*
 import java.util.*
 import kotlin.concurrent.schedule
 

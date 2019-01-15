@@ -5,6 +5,7 @@ import android.support.annotation.NonNull
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,9 +28,9 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
     private val viewAdapter = LocalItemsViewAdapter()
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.maps_tab_fragment, container, false)
 
@@ -53,20 +54,23 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 
         val gpxFiles = osmandHelper?.importedGpxFiles
         if (gpxFiles != null && gpxFiles.isNotEmpty()) {
+
             val gpxHeaderItem = HeaderItem()
             gpxHeaderItem.title = getString(R.string.gpx_charts)
             gpxHeaderItem.description = getString(R.string.select_multiple)
             listItems.add(gpxHeaderItem)
             for (gpx in gpxFiles) {
-                val gpxItem = LocalGpxItem()
-                gpxItem.imageId = R.drawable.img_gpx_chart
-                gpxItem.title = OsmandHelper.getGpxFileHumanReadableName(gpx.fileName)
-                gpxItem.description =
-                        "${AndroidUtils.formatSize(gpx.fileSize)} • ${gpx.details?.wptPoints.toString()} waypoints"
-                gpxItem.selected = gpx.isActive
-                gpxItem.multiselection = true
-                gpxItem.data = gpx
-                listItems.add(gpxItem)
+                if (!gpx.fileName.contains("rec")) {
+                    val gpxItem = LocalGpxItem()
+                    gpxItem.imageId = R.drawable.img_gpx_chart
+                    gpxItem.title = OsmandHelper.getGpxFileHumanReadableName(gpx.fileName)
+                    gpxItem.description =
+                            "${AndroidUtils.formatSize(gpx.fileSize)} • ${gpx.details?.wptPoints.toString()} waypoints"
+                    gpxItem.selected = gpx.isActive
+                    gpxItem.multiselection = true
+                    gpxItem.data = gpx
+                    listItems.add(gpxItem)
+                }
             }
         }
 
@@ -79,7 +83,8 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
             for (sqliteDbFile in sqliteDbFiles) {
                 val chartItem = Local3DChartItem()
                 chartItem.imageId = R.drawable.img_3d_chart
-                chartItem.title = OsmandHelper.getSqliteDbFileHumanReadableName(sqliteDbFile.fileName)
+                chartItem.title =
+                        OsmandHelper.getSqliteDbFileHumanReadableName(sqliteDbFile.fileName)
                 chartItem.description = AndroidUtils.formatSize(sqliteDbFile.fileSize)
                 chartItem.selected = sqliteDbFile.isActive
                 chartItem.multiselection = false
