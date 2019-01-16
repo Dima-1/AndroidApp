@@ -13,12 +13,17 @@ import android.text.TextUtils
 import android.util.Log
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
+import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
+import net.osmand.aidl.navdrawer.NavDrawerFooterParams
+import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
+import net.osmand.aidl.plugins.PluginParams
+import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
 import java.util.ArrayList
@@ -27,19 +32,38 @@ class OsmandHelper(private val app: Application) {
 
 	private val log = PlatformUtil.getLog(OsmandHelper::class.java)
 
-	private val osmandPackages = listOf("net.osmand.plus", "net.osmand", "net.osmand.dev")
+	private val osmandPackages = listOf("net.osmand.plus", "net.osmand") //, "net.osmand.dev"
 
 	private var mIOsmAndAidlInterface: IOsmAndAidlInterface? = null
-
+	private var osmandCallbackId: Long = 0
 	private var initialized = false
 	private var bound = false
 
 	private var selectedOsmandPackage = ""
 
 	var listener: OsmandHelperListener? = null
+	var onOsmandInitCallback: OsmandAppInitCallback? = null
 
 	interface OsmandHelperListener {
 		fun onOsmandConnectionStateChanged(connected: Boolean)
+	}
+
+	interface OsmandAppInitCallback {
+		fun onOsmandInitialized()
+	}
+
+
+	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
+		@Throws(RemoteException::class)
+		override fun onSearchComplete(resultSet: List<SearchResult>) {}
+
+		@Throws(RemoteException::class)
+		override fun onUpdate() {}
+
+		@Throws(RemoteException::class)
+		override fun onAppInitialized() {
+			onOsmandInitCallback?.onOsmandInitialized()
+		}
 	}
 
 	/**
@@ -96,6 +120,8 @@ class OsmandHelper(private val app: Application) {
 	}
 
 	fun openOsmand(onOsmandMissingAction: (() -> Unit)?) {
+
+
 		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
 		if (intent != null) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -103,6 +129,17 @@ class OsmandHelper(private val app: Application) {
 		} else {
 			onOsmandMissingAction?.invoke()
 		}
+	}
+
+	fun registerForOsmandInitialization():Boolean {
+		if(mIOsmAndAidlInterface !=null) {
+			try {
+				return mIOsmAndAidlInterface!!.registerForOsmandInitListener(iOsmAndAidlCallback)
+			} catch (e:RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return false
 	}
 
 	fun setNavDrawerLogo(uri: Uri) {
@@ -118,7 +155,19 @@ class OsmandHelper(private val app: Application) {
 	fun setNavDrawerLogoWithParams(uri:Uri, packageName:String, intent:String){
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(uri.toString(), packageName, intent)
+				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(
+					NavDrawerHeaderParams(uri.toString(), packageName, intent))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+	}
+
+	fun setNavDrawerFooterParams(packageName:String, intent:String, appName:String){
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				mIOsmAndAidlInterface!!.setNavDrawerFooterWithParams(
+					NavDrawerFooterParams(packageName, intent, appName))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}
@@ -439,6 +488,17 @@ class OsmandHelper(private val app: Application) {
 		if (mIOsmAndAidlInterface != null) {
 			try {
 				return mIOsmAndAidlInterface!!.restoreOsmand()
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
+	}
+
+	fun changePluginState(pluginId:String, newStatus:Int):Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.changePluginState(PluginParams(pluginId, newStatus))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}

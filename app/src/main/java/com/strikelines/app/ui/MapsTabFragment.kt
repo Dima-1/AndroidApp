@@ -5,6 +5,7 @@ import android.support.annotation.NonNull
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,107 +21,111 @@ import net.osmand.aidl.tiles.ASqliteDbFile
 
 class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 
-    private val app get() = activity?.application as? StrikeLinesApplication
-    private val osmandHelper get() = app?.osmandHelper
+	private val app get() = activity?.application as? StrikeLinesApplication
+	private val osmandHelper get() = app?.osmandHelper
 
-    private lateinit var listView: RecyclerView
-    private val viewAdapter = LocalItemsViewAdapter()
+	private lateinit var listView: RecyclerView
+	private val viewAdapter = LocalItemsViewAdapter()
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.maps_tab_fragment, container, false)
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		val view = inflater.inflate(R.layout.maps_tab_fragment, container, false)
 
-        viewAdapter.listener = this
-        listView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        listView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = this@MapsTabFragment.viewAdapter
-        }
+		viewAdapter.listener = this
+		listView = view.findViewById<RecyclerView>(R.id.recycler_view)
+		listView.apply {
+			layoutManager = LinearLayoutManager(context)
+			adapter = this@MapsTabFragment.viewAdapter
+		}
 
-        val osmandHelper = osmandHelper
-        if (osmandHelper != null && osmandHelper.isOsmandBound()) {
-            fetchListItems()
-        }
+		val osmandHelper = osmandHelper
+		if (osmandHelper != null && osmandHelper.isOsmandBound()) {
+			fetchListItems()
+		}
 
-        return view
-    }
+		return view
+	}
 
-    private fun fetchListItems() {
-        val listItems = mutableListOf<ListItem>()
+	private fun fetchListItems() {
+		val listItems = mutableListOf<ListItem>()
 
-        val gpxFiles = osmandHelper?.importedGpxFiles
-        if (gpxFiles != null && gpxFiles.isNotEmpty()) {
-            val gpxHeaderItem = HeaderItem()
-            gpxHeaderItem.title = getString(R.string.gpx_charts)
-            gpxHeaderItem.description = getString(R.string.select_multiple)
-            listItems.add(gpxHeaderItem)
-            for (gpx in gpxFiles) {
-                val gpxItem = LocalGpxItem()
-                gpxItem.imageId = R.drawable.img_gpx_chart
-                gpxItem.title = OsmandHelper.getGpxFileHumanReadableName(gpx.fileName)
-                gpxItem.description =
-                        "${AndroidUtils.formatSize(gpx.fileSize)} • ${gpx.details?.wptPoints.toString()} waypoints"
-                gpxItem.selected = gpx.isActive
-                gpxItem.multiselection = true
-                gpxItem.data = gpx
-                listItems.add(gpxItem)
-            }
-        }
+		val gpxFiles = osmandHelper?.importedGpxFiles
+		if (gpxFiles != null && gpxFiles.isNotEmpty()) {
 
-        val sqliteDbFiles = osmandHelper?.sqliteDbFiles
-        if (sqliteDbFiles != null && sqliteDbFiles.isNotEmpty()) {
-            val charts3dHeader = HeaderItem()
-            charts3dHeader.title = getString(R.string.charts_3d)
-            charts3dHeader.description = getString(R.string.select_single)
-            listItems.add(charts3dHeader)
-            for (sqliteDbFile in sqliteDbFiles) {
-                val chartItem = Local3DChartItem()
-                chartItem.imageId = R.drawable.img_3d_chart
-                chartItem.title = OsmandHelper.getSqliteDbFileHumanReadableName(sqliteDbFile.fileName)
-                chartItem.description = AndroidUtils.formatSize(sqliteDbFile.fileSize)
-                chartItem.selected = sqliteDbFile.isActive
-                chartItem.multiselection = false
-                chartItem.data = sqliteDbFile
-                listItems.add(chartItem)
-            }
-        }
+			val gpxHeaderItem = HeaderItem()
+			gpxHeaderItem.title = getString(R.string.gpx_charts)
+			gpxHeaderItem.description = getString(R.string.select_multiple)
+			listItems.add(gpxHeaderItem)
+			for (gpx in gpxFiles) {
+				if (!gpx.fileName.contains("rec")) {
+					val gpxItem = LocalGpxItem()
+					gpxItem.imageId = R.drawable.img_gpx_chart
+					gpxItem.title = OsmandHelper.getGpxFileHumanReadableName(gpx.fileName)
+					gpxItem.description =
+							"${AndroidUtils.formatSize(gpx.fileSize)} • ${gpx.details?.wptPoints.toString()} waypoints"
+					gpxItem.selected = gpx.isActive
+					gpxItem.multiselection = true
+					gpxItem.data = gpx
+					listItems.add(gpxItem)
+				}
+			}
+		}
 
-        listView.post {
-            viewAdapter.items = listItems
-        }
-    }
+		val sqliteDbFiles = osmandHelper?.sqliteDbFiles
+		if (sqliteDbFiles != null && sqliteDbFiles.isNotEmpty()) {
+			val charts3dHeader = HeaderItem()
+			charts3dHeader.title = getString(R.string.charts_3d)
+			charts3dHeader.description = getString(R.string.select_single)
+			listItems.add(charts3dHeader)
+			for (sqliteDbFile in sqliteDbFiles) {
+				val chartItem = Local3DChartItem()
+				chartItem.imageId = R.drawable.img_3d_chart
+				chartItem.title =
+						OsmandHelper.getSqliteDbFileHumanReadableName(sqliteDbFile.fileName)
+				chartItem.description = AndroidUtils.formatSize(sqliteDbFile.fileSize)
+				chartItem.selected = sqliteDbFile.isActive
+				chartItem.multiselection = false
+				chartItem.data = sqliteDbFile
+				listItems.add(chartItem)
+			}
+		}
 
-    override fun onOsmandConnectionStateChanged(connected: Boolean) {
-        fetchListItems()
-    }
+		listView.post {
+			viewAdapter.items = listItems
+		}
+	}
 
-    override fun onCheckedChanged(@NonNull listItem: ListItem, isChecked: Boolean) {
-        when (listItem) {
-            is LocalGpxItem -> {
-                val gpx = listItem.data as? AGpxFile
-                if (gpx != null) {
-                    if (isChecked) {
-                        osmandHelper?.showGpx(gpx.fileName)
-                    } else {
-                        osmandHelper?.hideGpx(gpx.fileName)
-                    }
-                    app?.runInUI(this::fetchListItems, 1000)
-                }
-            }
-            is Local3DChartItem -> {
-                val sqliteDbFile = listItem.data as? ASqliteDbFile
-                if (sqliteDbFile != null) {
-                    if (isChecked) {
-                        osmandHelper?.showSqliteDbFile(sqliteDbFile.fileName)
-                    } else {
-                        osmandHelper?.hideSqliteDbFile(sqliteDbFile.fileName)
-                    }
-                    app?.runInUI(this::fetchListItems, 500)
-                }
-            }
-        }
-    }
+	override fun onOsmandConnectionStateChanged(connected: Boolean) {
+		fetchListItems()
+	}
+
+	override fun onCheckedChanged(@NonNull listItem: ListItem, isChecked: Boolean) {
+		when (listItem) {
+			is LocalGpxItem -> {
+				val gpx = listItem.data as? AGpxFile
+				if (gpx != null) {
+					if (isChecked) {
+						osmandHelper?.showGpx(gpx.fileName)
+					} else {
+						osmandHelper?.hideGpx(gpx.fileName)
+					}
+					app?.runInUI(this::fetchListItems, 1000)
+				}
+			}
+			is Local3DChartItem -> {
+				val sqliteDbFile = listItem.data as? ASqliteDbFile
+				if (sqliteDbFile != null) {
+					if (isChecked) {
+						osmandHelper?.showSqliteDbFile(sqliteDbFile.fileName)
+					} else {
+						osmandHelper?.hideSqliteDbFile(sqliteDbFile.fileName)
+					}
+					app?.runInUI(this::fetchListItems, 500)
+				}
+			}
+		}
+	}
 }

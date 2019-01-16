@@ -27,13 +27,13 @@ class StrikeLinesApplication : Application() {
 
     private var isUpdatedInThisSession = false
 
-
 	override fun onCreate() {
 		super.onCreate()
 		osmandHelper = OsmandHelper(this)
         sp  = this.getSharedPreferences(spName, 0)
         loadCharts()
 	}
+
 
     fun loadCharts() {
         if(sp.contains(chartsDataKey) && sp.getString(chartsDataKey, "")!!.isNotEmpty()) {
@@ -45,7 +45,6 @@ class StrikeLinesApplication : Application() {
         } else {
             GetRequestAsync(url, onRequestResultListener).execute()
         }
-
     }
 
     @SuppressLint("ApplySharedPref")
@@ -77,23 +76,6 @@ class StrikeLinesApplication : Application() {
     private fun parseJson(response: String?): List<Chart> {
         val charts: Charts = gson.fromJson(response, Charts::class.java)
         return charts.charts
-    }
-
-    //mock, delete later
-    private fun loadJSONFromAsset(): String? {
-        var json: String? = null
-        try {
-            val inputStream = this.assets.open("json/strike.json")
-            val size = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            inputStream.close()
-            json = String(buffer)
-        } catch (ex: IOException) {
-            Log.w(ex.message,ex)
-            return null
-        }
-        return json
     }
 
     private val onRequestResultListener = object : OnRequestResultListener {

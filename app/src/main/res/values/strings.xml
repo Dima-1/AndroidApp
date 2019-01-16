@@ -21,10 +21,8 @@
     <string name="shop_item_tag_freemap">FREE</string>
 	<string name="shop_details_btn_tag_free_chart">Get Chart - Free</string>
 	<string name="shop_details_btn_tag_price_of_chart">Get Chart - $</string>
-
 	<!--Shop card-->
-	
-	
+
 	<!--spinners-->
 	<string name="all_regions">"All regions"</string>
 	<string name="details_btn">Details</string>
@@ -34,6 +32,9 @@
 	<string name="snack_msg_update_failed">Missing Internet connection.</string>
   <string name="snack_update_btn">UPDATE</string>
 	<string name="snack_ok_btn">OK</string>
+  <string name="aidl_menu_item_download_charts">Download charts</string>
+	<string name="load_osmand_msg"><![CDATA[To use StrikeLines maps with navigation, you need to install OsmAnd Maps & Navigation from the Google Play store.]]></string>
+	<string name="load_osmand_dialog_title">Navigate</string>
 
 	<string-array name="filter_region">
 		<item>All Regions</item>
