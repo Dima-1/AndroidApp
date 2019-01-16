@@ -36,12 +36,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 	private var downloadUrl: String? = null
 
 
-	override fun onCreateView(
-		inflater: LayoutInflater,
-		container: ViewGroup?,
-		savedInstanceState: Bundle?
-	): View? {
-
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 		retainInstance = true
 		val view = inflater.inflate(R.layout.recycler_list_fragment, container, false)
 		recycleView = view.findViewById(R.id.recycler_view)
@@ -50,7 +45,6 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 		recycleView.adapter = this.adapter
 		return view
 	}
-
 
 	override fun onResume() {
 		super.onResume()
@@ -111,11 +105,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
 	}
 
-	override fun onRequestPermissionsResult(
-		requestCode: Int,
-		permissions: Array<out String>,
-		grantResults: IntArray
-	) {
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 			downloadUrl.let { DownloadFileAsync(downloadUrl!!).execute() }
 		}

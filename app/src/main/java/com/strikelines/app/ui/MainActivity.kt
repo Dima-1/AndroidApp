@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
 			isOsmandConnected = true
-			if (isActivityVisible && chartsDataIsReady) runOnUiThread{
+			if (isActivityVisible && chartsDataIsReady) {
 				loading_indicator.visibility = View.GONE
 			}
 		}
@@ -351,7 +351,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	fun initChartsList() {
 		if (StrikeLinesApplication.isDataReadyFlag) {
 			chartsDataIsReady = true
-			if (isActivityVisible && chartsDataIsReady && isOsmandConnected) runOnUiThread {
+			if (isActivityVisible && chartsDataIsReady && isOsmandConnected) {
 				loading_indicator.visibility = View.GONE
 			}
 			regionList.clear()

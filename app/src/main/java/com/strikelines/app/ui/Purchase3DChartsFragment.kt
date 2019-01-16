@@ -19,9 +19,7 @@ class Purchase3DChartsFragment : PurchaseSqliteDbFilesFragment() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		fragmentNotifier = object : MainActivity.FragmentDataNotifier {
-			override fun onDataReady(status: Boolean) {
-				getData()
-			}
+			override fun onDataReady(status: Boolean) = getData()
 		}
 	}
 
