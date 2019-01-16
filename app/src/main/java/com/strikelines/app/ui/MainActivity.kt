@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	var regionList: MutableSet<String> = mutableSetOf()
 	var regionToFilter: String = ""
 	var snackView: View? = null
+	var isActivityVisible = false
 
 	val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
 		override fun onOsmandInitialized() {
@@ -127,6 +128,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	override fun onResume() {
 		super.onResume()
+		isActivityVisible = true
 		osmandHelper.listener = this
 		StrikeLinesApplication.listener = appListener
 		osmandHelper.onOsmandInitCallback = osmandHelperInitListener
@@ -139,6 +141,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	override fun onPause() {
 		super.onPause()
+		isActivityVisible = false
 		if (!isOsmandFABWasClicked) {
 			osmandHelper.restoreOsmand()
 		}
@@ -180,7 +183,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
 			isOsmandConnected = true
-			if (isOsmandConnected && chartsDataIsReady) loading_indicator.visibility = View.GONE
+			if (isActivityVisible && chartsDataIsReady) runOnUiThread{
+				loading_indicator.visibility = View.GONE
+			}
 		}
 		listeners.forEach {
 			it.get()?.onOsmandConnectionStateChanged(connected)
@@ -346,7 +351,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	fun initChartsList() {
 		if (StrikeLinesApplication.isDataReadyFlag) {
 			chartsDataIsReady = true
-			if (chartsDataIsReady && isOsmandConnected) loading_indicator.visibility = View.GONE
+			if (isActivityVisible && chartsDataIsReady && isOsmandConnected) runOnUiThread {
+				loading_indicator.visibility = View.GONE
+			}
 			regionList.clear()
 			regionList.add(resources.getString(R.string.all_regions))
 			StrikeLinesApplication.chartsList.forEach { regionList.add(it.region) }
