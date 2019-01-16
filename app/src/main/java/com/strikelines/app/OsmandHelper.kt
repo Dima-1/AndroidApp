@@ -156,7 +156,7 @@ class OsmandHelper(private val app: Application) {
 		if (mIOsmAndAidlInterface != null) {
 			try {
 				mIOsmAndAidlInterface!!.setNavDrawerLogoWithParams(
-                    NavDrawerHeaderParams(uri.toString(), packageName, intent))
+					NavDrawerHeaderParams(uri.toString(), packageName, intent))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}

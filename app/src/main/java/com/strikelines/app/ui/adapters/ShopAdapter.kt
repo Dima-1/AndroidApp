@@ -27,94 +27,92 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
 class ShopAdapter(val listener: ShopListener?) : RecyclerView.Adapter<ShopItemViewHolder>() {
 
-    private val dataList = mutableListOf<Chart>()
+	private val dataList = mutableListOf<Chart>()
 
-    fun setData(list: List<Chart>) {
-        if(list.isNotEmpty()) {
-            val diffUtil= DiffUtil.calculateDiff(ChartDiff(dataList, list.toMutableList()))
-            dataList.clear()
-            dataList.addAll(list)
-            diffUtil.dispatchUpdatesTo(this)
-        } else {
-            dataList.clear()
-            notifyDataSetChanged()
-        }
+	fun setData(list: List<Chart>) {
+		if (list.isNotEmpty()) {
+			val diffUtil = DiffUtil.calculateDiff(ChartDiff(dataList, list.toMutableList()))
+			dataList.clear()
+			dataList.addAll(list)
+			diffUtil.dispatchUpdatesTo(this)
+		} else {
+			dataList.clear()
+			notifyDataSetChanged()
+		}
+		notifyDataSetChanged()
+	}
 
-        notifyDataSetChanged()
-    }
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ShopItemViewHolder(
+		LayoutInflater
+			.from(parent.context)
+			.inflate(R.layout.item_shopchart, parent, false)
+	)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ShopItemViewHolder(
-            LayoutInflater
-                    .from(parent.context)
-                    .inflate(R.layout.item_shopchart, parent, false)
-    )
+	override fun getItemCount(): Int = dataList.size
 
-    override fun getItemCount(): Int = dataList.size
+	override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
+		holder.bind(dataList[position], listener)
+	}
 
-    override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
-        holder.bind(dataList[position], listener)
+	inner class ChartDiff(
+		private val oldList: MutableList<Chart>,
+		private val newList: MutableList<Chart>
+	) : DiffUtil.Callback() {
 
-    }
+		override fun getOldListSize() = oldList.size
 
-    inner class ChartDiff(
-            private val oldList: MutableList<Chart>,
-            private val newList: MutableList<Chart>
-    ) : DiffUtil.Callback() {
+		override fun getNewListSize() = newList.size
 
-        override fun getOldListSize() = oldList.size
+		override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+			oldList[oldItemPosition].name == newList[newItemPosition].name
 
-        override fun getNewListSize() = newList.size
-
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                oldList[oldItemPosition].name == newList[newItemPosition].name
-
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                oldList[oldItemPosition] == newList[newItemPosition]
-    }
+		override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+			oldList[oldItemPosition] == newList[newItemPosition]
+	}
 }
 
 class ShopItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val bg:View = itemView.findViewById(R.id.shop_card_back)
-    private val imageView: ImageView = itemView.findViewById(R.id.shop_card_image)
-    private val title: TextView = itemView.findViewById(R.id.shop_card_title)
-    private val description: TextView = itemView.findViewById(R.id.shop_card_description)
-    private val contentParams: TextView = itemView.findViewById(R.id.shop_card_content_params)
-    private val detailsButton: TextView = itemView.findViewById(R.id.detailsBtn)
-    private val downloadButton: View = itemView.findViewById(R.id.downloadBtn)
-    private val downloadTextView: TextView = itemView.findViewById(R.id.downloadTV)
-    private val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
+	private val bg: View = itemView.findViewById(R.id.shop_card_back)
+	private val imageView: ImageView = itemView.findViewById(R.id.shop_card_image)
+	private val title: TextView = itemView.findViewById(R.id.shop_card_title)
+	private val description: TextView = itemView.findViewById(R.id.shop_card_description)
+	private val contentParams: TextView = itemView.findViewById(R.id.shop_card_content_params)
+	private val detailsButton: TextView = itemView.findViewById(R.id.detailsBtn)
+	private val downloadButton: View = itemView.findViewById(R.id.downloadBtn)
+	private val downloadTextView: TextView = itemView.findViewById(R.id.downloadTV)
+	private val downloadIcon: ImageView = itemView.findViewById(R.id.downloadIcon)
 
-    fun bind(item: Chart, listener: ShopListener?) {
-        val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(4))
-        val imageTransformations = MultiTransformation<Bitmap>(
-            CenterCrop(), RoundedCornersTransformation(4, 0, RoundedCornersTransformation.CornerType.LEFT))
+	fun bind(item: Chart, listener: ShopListener?) {
+		val requestOptions = RequestOptions().transforms(CenterCrop(), RoundedCorners(4))
+		val imageTransformations = MultiTransformation<Bitmap>(
+			CenterCrop(),
+			RoundedCornersTransformation(4, 0, RoundedCornersTransformation.CornerType.LEFT)
+		)
 
-        GlideApp.with(itemView)
-                .load(item.imageurl)
-                .placeholder(R.drawable.img_placeholder)
-                .apply(RequestOptions.bitmapTransform(imageTransformations))
-                .into(imageView)
+		GlideApp.with(itemView)
+			.load(item.imageurl)
+			.placeholder(R.drawable.img_placeholder)
+			.apply(RequestOptions.bitmapTransform(imageTransformations))
+			.into(imageView)
 
-        title.text = clearTitleForWrecks(item.name)
-        description.text = descriptionFilter(item)
-        description.movementMethod = ScrollingMovementMethod()
-        downloadIcon.setImageDrawable(
-                UiUtils(StrikeLinesApplication.applicationContext())
-                        .getIcon(R.drawable.ic_download_chart, R.color.fab_text))
-        val contentText = "${item.region} • ${if (item.price.toInt() != 0) "$${item.price}"
-        else itemView.context.getString(R.string.shop_item_tag_freemap)}"
-        contentParams.text = contentText
-        bg.setOnClickListener {listener?.onDetailsClicked(item)}
-        detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
-        downloadButton.setOnClickListener { listener?.onDownloadClicked(item) }
-        if(item.downloadurl.isEmpty()) downloadTextView.text =
-                StrikeLinesApplication.applicationContext().getString(R.string.get_chart_from_web_btn_tag)
-    }
+		title.text = clearTitleForWrecks(item.name)
+		description.text = descriptionFilter(item)
+		description.movementMethod = ScrollingMovementMethod()
+		downloadIcon.setImageDrawable(
+			UiUtils(StrikeLinesApplication.applicationContext()).getIcon(R.drawable.ic_download_chart, R.color.fab_text)
+		)
+		val contentText =
+			"${item.region} • ${if (item.price.toInt() != 0) "$${item.price}" else itemView.context.getString(R.string.shop_item_tag_freemap)}"
+		contentParams.text = contentText
+		bg.setOnClickListener { listener?.onDetailsClicked(item) }
+		detailsButton.setOnClickListener { listener?.onDetailsClicked(item) }
+		downloadButton.setOnClickListener { listener?.onDownloadClicked(item) }
+		if (item.downloadurl.isEmpty()) downloadTextView.text = StrikeLinesApplication.applicationContext()
+					.getString(R.string.get_chart_from_web_btn_tag)
+	}
 }
 
-
 interface ShopListener {
-    fun onDetailsClicked(item: Chart)
-    fun onDownloadClicked(item: Chart)
+	fun onDetailsClicked(item: Chart)
+	fun onDownloadClicked(item: Chart)
 }
