@@ -90,15 +90,7 @@ class DownloadFileAsync(private val downloadUrl: String, private val downloadCal
             downloadCallback.onDownloadComplete(fileName, path, false)
             Log.w(e.message, e)
         }
-
         return ""
-    }
-
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-//        if (File(path + fileName).exists()) Log.d("DownloadAsync", "Downloaded and saved to $path")
-//        else Log.d("DownloadAsync", "Downloaded but not saved")
-
     }
 }
 
