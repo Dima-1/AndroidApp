@@ -12,6 +12,7 @@ import com.google.gson.JsonObject
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
 import com.strikelines.app.ui.MainActivity
+import com.strikelines.app.utils.DownloadCallback
 import com.strikelines.app.utils.GetRequestAsync
 import com.strikelines.app.utils.OnRequestResultListener
 import org.json.JSONObject
@@ -88,6 +89,18 @@ class StrikeLinesApplication : Application() {
             }
         }
     }
+
+	val downloadCallback = object: DownloadCallback {
+		override fun onDownloadComplete(fileName: String, filePath: String, isSuccess: Boolean) {
+			var message = ""
+			if (isSuccess) {
+				message = resources.getString(R.string.download_success_msg).format(fileName, filePath)
+			} else {
+				message = resources.getString(R.string.download_failed_msg)
+			}
+			showToastMessage(message)
+		}
+	}
 
     interface AppListener{
         fun isDataReady(status:Boolean)
