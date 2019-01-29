@@ -5,18 +5,18 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
-import android.util.Log
 import android.widget.Toast
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
-import com.strikelines.app.ui.MainActivity
 import com.strikelines.app.utils.DownloadCallback
 import com.strikelines.app.utils.GetRequestAsync
 import com.strikelines.app.utils.OnRequestResultListener
-import org.json.JSONObject
-import java.io.IOException
+import android.content.Intent
+import android.net.Uri
+import android.support.v4.content.FileProvider
+import java.io.File
+
 
 class StrikeLinesApplication : Application() {
 
@@ -90,16 +90,15 @@ class StrikeLinesApplication : Application() {
         }
     }
 
-	val downloadCallback = object: DownloadCallback {
-		override fun onDownloadComplete(fileName: String, filePath: String, isSuccess: Boolean) {
-			var message = ""
-			if (isSuccess) {
-				message = resources.getString(R.string.download_success_msg).format(fileName, filePath)
-			} else {
-				message = resources.getString(R.string.download_failed_msg)
-			}
-			showToastMessage(message)
-		}
+	fun openFile(path:String) {
+		val file = File(path)
+		val intentOpenFile = Intent(Intent.ACTION_VIEW)
+		intentOpenFile.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		val uri = FileProvider.getUriForFile(this,
+			this.applicationContext.packageName+".provider", file)
+		intentOpenFile.setDataAndType(uri, "*/*")
+		intentOpenFile.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+		startActivity(intentOpenFile)
 	}
 
     interface AppListener{
@@ -119,6 +118,7 @@ class StrikeLinesApplication : Application() {
         val chartsList = mutableListOf<Chart>()
 
         private var instance: StrikeLinesApplication? = null
+		fun getApp() = instance
         fun applicationContext(): Context = instance!!.applicationContext
     }
 
