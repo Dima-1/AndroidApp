@@ -53,9 +53,7 @@ interface OnRequestResultListener {
     fun onResult(result: String)
 }
 
-class DownloadFileAsync(
-    private val downloadUrl: String
-) : AsyncTask<String, String, String>() {
+class DownloadFileAsync(private val downloadUrl: String, private val downloadCallback: DownloadCallback) : AsyncTask<String, String, String>() {
 
     private val path = "${Environment.getExternalStorageDirectory().absolutePath}/strikelines/"
     private val fileName = downloadUrl.substringBeforeLast('/').substringAfterLast('/') +
@@ -83,26 +81,19 @@ class DownloadFileAsync(
                 outputStream.write(data, 0, count)
                 count = inputStream.read(data)
             }
-            Log.d("DownloadAsync", downloadUrl)
-            Log.d("DownloadAsync", "File size: $total")
-
 
             outputStream.flush()
             outputStream.close()
             inputStream.close()
-
+            downloadCallback.onDownloadComplete(fileName, path, true)
         } catch (e: Exception) {
+            downloadCallback.onDownloadComplete(fileName, path, false)
             Log.w(e.message, e)
         }
-
-
-
         return ""
     }
+}
 
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-        if (File(path + fileName).exists()) Log.d("DownloadAsync", "Downloaded and saved to $path")
-        else Log.d("DownloadAsync", "Downloaded but not saved")
-    }
+interface DownloadCallback{
+    fun onDownloadComplete(fileName:String, filePath:String, isSuccess:Boolean)
 }

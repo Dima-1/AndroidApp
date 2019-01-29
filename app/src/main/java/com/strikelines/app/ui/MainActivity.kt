@@ -31,6 +31,7 @@ import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.DownloadCallback
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 import java.util.*
@@ -39,7 +40,7 @@ import kotlin.concurrent.schedule
 
 class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
-	private val app get() = application as StrikeLinesApplication
+	val app get() = application as StrikeLinesApplication
 	private val osmandHelper get() = app.osmandHelper
 	private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
 	private var mapsTabFragment: MapsTabFragment? = null
@@ -396,4 +397,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		builder.setNegativeButton("CANCEL") { dialog, _ -> dialog.dismiss() }
 		builder.show()
 	}
+
+
 }

@@ -94,7 +94,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 					this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 				== PackageManager.PERMISSION_GRANTED)
 			{
-				DownloadFileAsync(downloadUrl).execute()
+				DownloadFileAsync(downloadUrl, (application as StrikeLinesApplication).downloadCallback).execute()
 			} else {
 				requestPermissions(
 					arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
@@ -109,7 +109,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 		grantResults: IntArray
 	) {
 		if (requestCode == DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			chart?.let { DownloadFileAsync(chart!!.downloadurl).execute() }
+			chart?.let { DownloadFileAsync(chart!!.downloadurl, (application as StrikeLinesApplication).downloadCallback).execute() }
 		}
 	}
 
