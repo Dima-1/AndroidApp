@@ -36,8 +36,9 @@
 	<string name="load_osmand_msg"><![CDATA[To use StrikeLines maps with navigation, you need to install OsmAnd Maps & Navigation from the Google Play store.]]></string>
 	<string name="load_osmand_dialog_title">Navigate</string>
 
-	<string name="download_success_msg">File %1\$s successfully downloaded and saved in %2\$s location</string>
-	<string name="download_failed_msg">Download failed. Please try later!</string>
+	<string name="download_success_msg">%1s downloaded</string>
+	<string name="download_failed_msg">Download failed</string>
+	<string name="open_action">OPEN</string>
 
 	<string-array name="filter_region">
 		<item>All Regions</item>

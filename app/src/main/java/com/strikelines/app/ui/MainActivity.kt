@@ -32,6 +32,7 @@ import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.DownloadCallback
+import com.strikelines.app.utils.clearTitleForWrecks
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 import java.util.*
@@ -179,6 +180,19 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		loading_indicator.visibility = View.GONE
 	}
 
+	val downloadCallback = object: DownloadCallback {
+		override fun onDownloadComplete(title: String, path:String, isSuccess: Boolean) {
+			if (isSuccess && isActivityVisible) {
+				showSnackBar(resources.getString(R.string.download_success_msg)
+					.format(clearTitleForWrecks(title)),
+					findViewById(android.R.id.content), action = 3, path = path)
+			} else if (isActivityVisible) {
+				showSnackBar(resources.getString(R.string.download_failed_msg)
+					.format(clearTitleForWrecks(title)),
+					findViewById(android.R.id.content), action = 2, path = path)
+			}
+		}
+	}
 
 	override fun onOsmandConnectionStateChanged(connected: Boolean) {
 		if (connected) {
@@ -339,12 +353,16 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		msg: String,
 		parentLayout: View,
 		lengths: Int = Snackbar.LENGTH_LONG,
-		action: Int
+		action: Int,
+		path: String = ""
 	) {
 		val snackbar = Snackbar.make(parentLayout, msg, lengths)
 		when (action) {
 			1 -> snackbar.setAction(getString(R.string.snack_update_btn)) { app.loadCharts() }
 			2 -> snackbar.setAction(getString(R.string.snack_ok_btn)) { snackbar.dismiss() }
+			3 -> snackbar.setAction(getString(R.string.open_action)) {
+				if (path.isNotEmpty()) app.openFile(path)
+			}
 		}
 		snackbar.show()
 	}

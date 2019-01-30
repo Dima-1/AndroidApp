@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 	lateinit var recycleView: RecyclerView
 	var adapter: ShopAdapter? = null
 	private var downloadUrl: String? = null
-
+	var downloadTitle:String = ""
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 		retainInstance = true
@@ -63,8 +64,9 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 	fun openUrl(item: Chart) {
 		if (item.downloadurl.isEmpty()) startActivity(AndroidUtils.getIntentForBrowser(item.weburl))
 		else {
-
+			Log.d("ListFragment:", "Download clicked")
 			downloadUrl = item.downloadurl
+			downloadTitle = item.name
 			downloadFreeChart(downloadUrl!!)
 		}
 	}
@@ -91,19 +93,21 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 			if (checkSelfPermission(activity!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 				== PackageManager.PERMISSION_GRANTED
 			) {
-				DownloadFileAsync(downloadUrl, (activity as MainActivity).app.downloadCallback).execute()
+				DownloadFileAsync(downloadUrl, (activity as MainActivity).downloadCallback, downloadTitle).execute()
 			} else {
 				requestPermissions(
 					arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
 					StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
 				)
 			}
+		} else {
+			DownloadFileAsync(downloadUrl, (activity as MainActivity).downloadCallback, downloadTitle).execute()
 		}
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			downloadUrl.let { DownloadFileAsync(downloadUrl!!, (activity as MainActivity).app.downloadCallback).execute() }
+			downloadUrl.let { DownloadFileAsync(downloadUrl!!, (activity as MainActivity).downloadCallback, downloadTitle).execute() }
 		}
 	}
 

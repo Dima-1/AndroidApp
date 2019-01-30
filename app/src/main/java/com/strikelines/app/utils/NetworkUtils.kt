@@ -1,6 +1,5 @@
 package com.strikelines.app.utils
 
-import android.content.Context
 import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
@@ -53,7 +52,10 @@ interface OnRequestResultListener {
     fun onResult(result: String)
 }
 
-class DownloadFileAsync(private val downloadUrl: String, private val downloadCallback: DownloadCallback) : AsyncTask<String, String, String>() {
+class DownloadFileAsync(
+    private val downloadUrl: String,
+    private val downloadCallback: DownloadCallback,
+    private val title:String = "") : AsyncTask<String, String, String>() {
 
     private val path = "${Environment.getExternalStorageDirectory().absolutePath}/strikelines/"
     private val fileName = downloadUrl.substringBeforeLast('/').substringAfterLast('/') +
@@ -85,9 +87,9 @@ class DownloadFileAsync(private val downloadUrl: String, private val downloadCal
             outputStream.flush()
             outputStream.close()
             inputStream.close()
-            downloadCallback.onDownloadComplete(fileName, path, true)
+            downloadCallback.onDownloadComplete(title, path+fileName,  true)
         } catch (e: Exception) {
-            downloadCallback.onDownloadComplete(fileName, path, false)
+            downloadCallback.onDownloadComplete(title, "", false)
             Log.w(e.message, e)
         }
         return ""
@@ -95,5 +97,5 @@ class DownloadFileAsync(private val downloadUrl: String, private val downloadCal
 }
 
 interface DownloadCallback{
-    fun onDownloadComplete(fileName:String, filePath:String, isSuccess:Boolean)
+    fun onDownloadComplete(title: String, path: String, isSuccess: Boolean)
 }

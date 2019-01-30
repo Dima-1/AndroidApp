@@ -21,3 +21,4 @@ fun descriptionFilter(chart: Chart):String {
 fun clearTitleForWrecks(title:String):String = title.replace("&#8211;", "-").replace("&#8217;","\'")
 
 fun String.clearGarbadge():String = this.replace("\\**.*?\\*".toRegex(), "")
+
