@@ -23,6 +23,7 @@ import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
+import net.osmand.aidl.tiles.FilePartParams
 import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
 import java.io.File
@@ -504,10 +505,10 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
-	fun appendDataToFile(chunk: ByteArray, fileName: String):Boolean {
+	fun appendDataToFile(filePart: FilePartParams):Boolean {
 		if(mIOsmAndAidlInterface !=null) {
 			try {
-				return mIOsmAndAidlInterface!!.appendDataToFile(fileName, chunk)
+				return mIOsmAndAidlInterface!!.copyFileOverApi(filePart)
 			} catch (e:RemoteException) {
 				log.error(e)
 			}

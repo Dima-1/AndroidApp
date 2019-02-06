@@ -36,8 +36,6 @@ import com.strikelines.app.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.lang.ref.WeakReference
-import java.util.*
-import kotlin.concurrent.schedule
 
 
 class MainActivity : AppCompatActivity(), OsmandHelperListener {
@@ -57,7 +55,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	var snackView: View? = null
 	var isActivityVisible = false
 	var isOsmandConnected = false
-	var isCopingFile = false
+	var isCopyingFile = false
 	private var importHelper:ImportHelper? = null
 
 	val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
@@ -166,7 +164,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 					== PackageManager.PERMISSION_GRANTED
 				) {
-					isCopingFile = true
+					isCopyingFile = true
 					importHelper?.execute()
 				} else {
 					requestPermissions(
@@ -175,7 +173,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 					)
 				}
 			} else {
-				isCopingFile = true
+				isCopyingFile = true
 				importHelper?.execute()
 			}
 		} else {
@@ -185,7 +183,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			isCopingFile = true
+			isCopyingFile = true
 			importHelper?.execute()
 		}
 	}
@@ -265,7 +263,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
 			isOsmandConnected = true
-			if (isActivityVisible && chartsDataIsReady && !isCopingFile) {
+			if (isActivityVisible && chartsDataIsReady && !isCopyingFile) {
 				dismissLoader()
 			}
 		}
@@ -437,7 +435,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	fun initChartsList() {
 		if (StrikeLinesApplication.isDataReadyFlag) {
 			chartsDataIsReady = true
-			if (isActivityVisible && chartsDataIsReady && isOsmandConnected&&!isCopingFile) {
+			if (isActivityVisible && chartsDataIsReady && isOsmandConnected&&!isCopyingFile) {
 				dismissLoader()
 			}
 			regionList.clear()

@@ -1,11 +1,9 @@
 package com.strikelines.app
 
-import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.AsyncTask
-import android.support.v7.app.AppCompatActivity
 import com.strikelines.app.ui.MainActivity
 import com.strikelines.app.utils.PlatformUtil
+import net.osmand.aidl.tiles.FilePartParams
 import java.io.*
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -30,7 +28,7 @@ class ImportHelper (
 
     override fun onPreExecute() {
         super.onPreExecute()
-        var mainActivity: MainActivity? = mainActivityRef.get()
+        val mainActivity: MainActivity? = mainActivityRef.get()
         mainActivity?.showLoader()
     }
 
@@ -41,13 +39,13 @@ class ImportHelper (
 
     override fun onPostExecute(result: Boolean?) {
         super.onPostExecute(result)
-        var mainActivity: MainActivity? = mainActivityRef.get()
+        val mainActivity: MainActivity? = mainActivityRef.get()
         if(result!=null && result) {
             mainActivity?.showSnackBar("Import of ${fileName} into OsmAnd SUCCESSFUL!", action = 2)
         } else {
             mainActivity?.showSnackBar("Error! Import of ${fileName} into OsmAnd FAILED!", action = 2)
         }
-        mainActivity?.isCopingFile = false
+        mainActivity?.isCopyingFile = false
         mainActivity?.dismissLoader()
         if(mainActivity?.isActivityVisible!!) {
             mainActivity.updateOsmandItemList()
@@ -71,6 +69,7 @@ class ImportHelper (
 
         try {
             var sentData = 0L
+            var receivedData = 0L
             var data = ByteArray(chunkSize)
             val fileToCopy = File(path)
             val fileSize = fileToCopy.length()
@@ -83,16 +82,15 @@ class ImportHelper (
                     data = ByteArray((fileSize - sentData).toInt()+1)
                 }
                 if (response) {
+                    receivedData += read
                     read = bis.read(data, 0, data.size)
                     sentData += read
                     counter++
                 }
-
-                response = app.osmandHelper.appendDataToFile(data, fileName)
-                //log.debug("data chunks count: $counter, response: $response, chunk size ${data.size}")
-
+                response = app.osmandHelper.appendDataToFile(FilePartParams(fileName, fileSize, receivedData, data))
+                log.debug("data chunks count: $counter, response: $response, chunk size ${data.size}")
             }
-            app.osmandHelper.appendDataToFile(ByteArray(0), fileName)
+            app.osmandHelper.appendDataToFile(FilePartParams(fileName, fileSize, sentData, byteArrayOf(0)) )
             bis.close()
             return true
         } catch (ioe: IOException) {
