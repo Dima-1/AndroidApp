@@ -1,7 +1,10 @@
 package com.strikelines.app.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
@@ -14,9 +17,8 @@ import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
-import com.strikelines.app.OsmandCustomizationConstants
+import com.strikelines.app.*
 import com.strikelines.app.OsmandCustomizationConstants.PLUGIN_RASTER_MAPS
-import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BOAT
@@ -30,16 +32,16 @@ import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LockableViewPager
-import com.strikelines.app.utils.AndroidUtils
-import com.strikelines.app.utils.DownloadCallback
-import com.strikelines.app.utils.clearTitleForWrecks
+import com.strikelines.app.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.concurrent.schedule
 
 
 class MainActivity : AppCompatActivity(), OsmandHelperListener {
+	private val log = PlatformUtil.getLog(MainActivity::class.java)
 
 	val app get() = application as StrikeLinesApplication
 	private val osmandHelper get() = app.osmandHelper
@@ -47,14 +49,20 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	private var mapsTabFragment: MapsTabFragment? = null
 	private var purchasesTabFragment: PurchasesTabFragment? = null
 
+
 	private lateinit var bottomNav: BottomNavigationView
+	var mapListFragmentId:Int = -1
 	var regionList: MutableSet<String> = mutableSetOf()
 	var regionToFilter: String = ""
 	var snackView: View? = null
 	var isActivityVisible = false
+	var isOsmandConnected = false
+	var isCopingFile = false
+	private var importHelper:ImportHelper? = null
 
 	val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
 		override fun onOsmandInitialized() {
+			log.debug("Osmand Initialized!")
 			setupOsmand()
 		}
 	}
@@ -67,13 +75,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		var chartsDataIsReady = false
 		private const val MAPS_TAB_POS = 0
 		private const val DOWNLOADS_TAB_POS = 1
-		private val INTERVAL: Long = 5000
+		private val INTERVAL: Long = 2000
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
-		osmandHelper.onOsmandInitCallback = osmandHelperInitListener
+		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
 		initChartsList()
 
 		snackView = findViewById(android.R.id.content)
@@ -100,7 +108,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		fab.setOnClickListener { view ->
 			isOsmandFABWasClicked = true
 			osmandHelper.openOsmand {
-				installOsmadnDialog()
+				installOsmandDialog()
 				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
 			}
 		}
@@ -125,7 +133,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 			osmandHelper.connectOsmand()
 		}
 
-		Timer("disableLoader", false).schedule(INTERVAL) { runOnUiThread { dismissLoader() } }
+		//Timer("disableLoader", false).schedule(INTERVAL) { runOnUiThread { dismissLoader() } }
 	}
 
 	override fun onResume() {
@@ -133,7 +141,53 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		isActivityVisible = true
 		osmandHelper.listener = this
 		StrikeLinesApplication.listener = appListener
-		osmandHelper.onOsmandInitCallback = osmandHelperInitListener
+		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
+		val intent:Intent? = intent
+			if (Intent.ACTION_VIEW == intent?.action) {
+				if (intent.data != null) {
+					val data = intent.data
+					val scheme = data!!.scheme
+					intent.action = null
+					if (scheme == "content") {
+						var uri = "file:///storage/emulated/0/" + data.toString().substringAfter("external_files/")
+						processFileImport(uri, File(data.path).name)
+ 					} else if  ("file" == scheme) {
+						processFileImport(data.toString(), File(data.path).name)
+					}
+					setIntent(null)
+				}
+			}
+	}
+
+	private fun processFileImport(absolutePath: String, filename:String) {
+		if (osmandHelper.isOsmandAvailiable()){
+			importHelper = ImportHelper(app, this@MainActivity, absolutePath, filename)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+					== PackageManager.PERMISSION_GRANTED
+				) {
+					isCopingFile = true
+					importHelper?.execute()
+				} else {
+					requestPermissions(
+						arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+						StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
+					)
+				}
+			} else {
+				isCopingFile = true
+				importHelper?.execute()
+			}
+		} else {
+			installOsmandDialog()
+		}
+	}
+
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			isCopingFile = true
+			importHelper?.execute()
+		}
 	}
 
 	override fun onRestart() {
@@ -147,7 +201,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (!isOsmandFABWasClicked) {
 			osmandHelper.restoreOsmand()
 		}
-		osmandHelper.onOsmandInitCallback = null
+		osmandHelper.onOsmandInitCallbacks.clear()
 		osmandHelper.listener = null
 		StrikeLinesApplication.listener = null
 	}
@@ -176,8 +230,21 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-	private fun dismissLoader() {
+	fun dismissLoader() {
 		loading_indicator.visibility = View.GONE
+	}
+
+	fun showLoader() {
+		loading_indicator.visibility = View.VISIBLE
+	}
+
+	fun updateOsmandItemList() {
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment is MapsTabFragment) {
+                fragment.fetchListItems()
+            }
+        }
+
 	}
 
 	val downloadCallback = object: DownloadCallback {
@@ -198,8 +265,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
 			isOsmandConnected = true
-			if (isActivityVisible && chartsDataIsReady) {
-				loading_indicator.visibility = View.GONE
+			if (isActivityVisible && chartsDataIsReady && !isCopingFile) {
+				dismissLoader()
 			}
 		}
 		listeners.forEach {
@@ -351,12 +418,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	fun showSnackBar(
 		msg: String,
-		parentLayout: View,
+		parentLayout: View? = snackView,
 		lengths: Int = Snackbar.LENGTH_LONG,
 		action: Int,
 		path: String = ""
 	) {
-		val snackbar = Snackbar.make(parentLayout, msg, lengths)
+		val snackbar = Snackbar.make(parentLayout!!, msg, lengths)
 		when (action) {
 			1 -> snackbar.setAction(getString(R.string.snack_update_btn)) { app.loadCharts() }
 			2 -> snackbar.setAction(getString(R.string.snack_ok_btn)) { snackbar.dismiss() }
@@ -370,8 +437,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	fun initChartsList() {
 		if (StrikeLinesApplication.isDataReadyFlag) {
 			chartsDataIsReady = true
-			if (isActivityVisible && chartsDataIsReady && isOsmandConnected) {
-				loading_indicator.visibility = View.GONE
+			if (isActivityVisible && chartsDataIsReady && isOsmandConnected&&!isCopingFile) {
+				dismissLoader()
 			}
 			regionList.clear()
 			regionList.add(resources.getString(R.string.all_regions))
@@ -398,7 +465,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		fun onDataReady(status: Boolean)
 	}
 
-	private fun installOsmadnDialog() {
+	private fun installOsmandDialog() {
 		val appPackageName = "net.osmand"
 		val builder = AlertDialog.Builder(this)
 		val dialogLayout = layoutInflater.inflate(R.layout.dialog_download_osmand, null)

@@ -34,7 +34,6 @@
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
-
       </intent-filter>
 
       <intent-filter>
@@ -43,6 +42,25 @@
 
         <data android:host="main_activity"/>
         <data android:scheme="strike_lines_app"/>
+      </intent-filter>
+
+      <intent-filter
+              android:label="@string/app_name"
+              android:priority="51">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="file"/>
+        <data android:scheme="content"/>
+        <data android:scheme="data"/>
+        <data android:host="*"/>
+        <data android:mimeType="*/*"/>
+        <data android:pathPattern="*.sqlitedb" />
+        <data android:pathPattern=".*\\.sqlitedb" />
+        <data android:pathPattern=".*\\..*\\.sqlitedb" />
+        <data android:pathPattern=".*\\..*\\..*\\.sqlitedb" />
+        <data android:pathPattern=".*\\..*\\..*\\..*\\.sqlitedb" />
+        <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.sqlitedb" />
       </intent-filter>
 
     </activity>

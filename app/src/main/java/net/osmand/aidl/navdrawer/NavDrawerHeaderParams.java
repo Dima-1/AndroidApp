@@ -30,7 +30,7 @@ public class NavDrawerHeaderParams implements Parcelable {
 	}
 
 	public NavDrawerHeaderParams(@NonNull String imageUri, @NonNull String packageName,
-		@Nullable String intent) {
+                                 @Nullable String intent) {
 		this.imageUri = imageUri;
 		this.packageName = packageName;
 		this.intent = intent;

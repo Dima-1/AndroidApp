@@ -2,7 +2,6 @@ package net.osmand.aidl.maplayer;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import net.osmand.aidl.maplayer.point.AMapPoint;
 
 import java.util.ArrayList;
