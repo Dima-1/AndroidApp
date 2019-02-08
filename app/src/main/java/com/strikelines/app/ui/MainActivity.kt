@@ -142,23 +142,19 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		val intent:Intent? = intent
 			if (Intent.ACTION_VIEW == intent?.action) {
 				if (intent.data != null) {
-					val data = intent.data
-					val scheme = data!!.scheme
+					val uri = intent.data
 					intent.action = null
-					if (scheme == "content") {
-						var uri = "file:///storage/emulated/0/" + data.toString().substringAfter("external_files/")
-						processFileImport(uri, File(data.path).name)
- 					} else if  ("file" == scheme) {
-						processFileImport(data.toString(), File(data.path).name)
+					if (uri!=null) {
+						processFileImport(uri, File(uri.path).name)
 					}
 					setIntent(null)
 				}
 			}
 	}
 
-	private fun processFileImport(absolutePath: String, filename:String) {
+	private fun processFileImport(uri: Uri, filename:String) {
 		if (osmandHelper.isOsmandAvailiable()){
-			importHelper = ImportHelper(app, this@MainActivity, absolutePath, filename)
+			importHelper = ImportHelper(app, this@MainActivity, uri, filename)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 					== PackageManager.PERMISSION_GRANTED

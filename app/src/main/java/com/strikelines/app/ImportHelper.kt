@@ -1,5 +1,8 @@
 package com.strikelines.app
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
 import android.os.AsyncTask
 import com.strikelines.app.ui.MainActivity
 import com.strikelines.app.utils.PlatformUtil
@@ -11,7 +14,7 @@ import java.net.URI
 class ImportHelper (
     val app: StrikeLinesApplication,
     activity: MainActivity,
-    val uri: String,
+    val uri: Uri,
     val fileName: String): AsyncTask<Void, Void, Boolean>( ){
 
     private val log = PlatformUtil.getLog(ImportHelper::class.java)
@@ -22,7 +25,7 @@ class ImportHelper (
 
     companion object {
         const val SQLITE_EXT = ".sqlitedb"
-        const val CHARTS_EXT = ".charts" //$NON-NLS-1$
+        const val CHARTS_EXT = ".charts"
     }
 
     override fun onPreExecute() {
@@ -33,7 +36,6 @@ class ImportHelper (
 
     override fun doInBackground(vararg params: Void): Boolean? {
         return handleFileImport(uri, fileName)
-
     }
 
     override fun onPostExecute(result: Boolean?) {
@@ -53,7 +55,7 @@ class ImportHelper (
         }
     }
 
-    private fun handleFileImport(uri: String, fileName:String):Boolean {
+    private fun handleFileImport(uri: Uri, fileName:String):Boolean {
         if (fileName.endsWith(SQLITE_EXT)) {
             return fileImportImpl(uri, fileName)
         } else if (fileName.endsWith(CHARTS_EXT)) {
@@ -63,35 +65,45 @@ class ImportHelper (
         return false
     }
 
-    private fun fileImportImpl(uri: String, fileName: String):Boolean {
-        val path = File(URI.create(uri)).absolutePath
+    private fun fileImportImpl(uri: Uri, fileName: String):Boolean {
         var counter = 0
-        val copyStartTime = System.currentTimeMillis();
+        var receivedDataSize = 0L
+        var isError = false
+        var isReceived = true
+        var data = ByteArray(chunkSize)
+        val copyStartTime = System.currentTimeMillis()
         try {
-            var sentData = 0L
-            var receivedData = 0L
-            var data = ByteArray(chunkSize)
-            val fileToCopy = File(path)
-            val fileSize = fileToCopy.length()
-            val bis: InputStream = DataInputStream(FileInputStream(fileToCopy))
+            val bis:DataInputStream
+            if (uri.scheme == "content") {
+                bis = DataInputStream(app.contentResolver.openInputStream(uri))
+            } else {
+                bis = DataInputStream(FileInputStream(File(File(URI.create(uri.toString())).absolutePath)))
+            }
+
             var read = 0
-
-            var response = true
-            do {
-                if (fileSize - sentData <= chunkSize) {
-                    data = ByteArray((fileSize - sentData).toInt())
+            while (read !=-1 ){
+                var errorCount = 0
+                if (isReceived) {
+                    counter ++
+                    receivedDataSize += read
+                    read = bis.read (data)
+                } else {
+                    errorCount++
+                    log.debug("errors: $errorCount")
+                    if (errorCount > 100) {
+                        isError = true
+                        break
+                    }
                 }
-                if (response) {
-                    receivedData += read
-                    read = bis.read(data, 0, data.size)
-                    sentData += read
-                    counter++
-                }
-
-                response = app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, receivedData, data, copyStartTime))
-
-            } while (read != 0)
+                isReceived = app.osmandHelper.copyFile(CopyFileParams(fileName, receivedDataSize, data, copyStartTime, false))
+            }
             bis.close()
+
+            if (!isError) {
+                app.osmandHelper.copyFile(CopyFileParams(fileName, 0, ByteArray(0), copyStartTime, true))
+            } else {
+                return false
+            }
             return true
         } catch (ioe: IOException) {
             log.error(ioe.message, ioe)
