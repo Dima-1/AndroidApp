@@ -66,8 +66,7 @@ class ImportHelper (
     private fun fileImportImpl(uri: String, fileName: String):Boolean {
         val path = File(URI.create(uri)).absolutePath
         var counter = 0
-
-
+        val copyStartTime = System.currentTimeMillis();
         try {
             var sentData = 0L
             var receivedData = 0L
@@ -78,9 +77,9 @@ class ImportHelper (
             var read = 0
 
             var response = true
-            while (read != -1) {
+            do {
                 if (fileSize - sentData <= chunkSize) {
-                    data = ByteArray((fileSize - sentData).toInt()+1)
+                    data = ByteArray((fileSize - sentData).toInt())
                 }
                 if (response) {
                     receivedData += read
@@ -88,9 +87,10 @@ class ImportHelper (
                     sentData += read
                     counter++
                 }
-                response = app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, receivedData, data))
-            }
-            app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, sentData, byteArrayOf(0)) )
+
+                response = app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, receivedData, data, copyStartTime))
+
+            } while (read != 0)
             bis.close()
             return true
         } catch (ioe: IOException) {
