@@ -3,7 +3,7 @@ package com.strikelines.app
 import android.os.AsyncTask
 import com.strikelines.app.ui.MainActivity
 import com.strikelines.app.utils.PlatformUtil
-import net.osmand.aidl.tiles.FilePartParams
+import net.osmand.aidl.tiles.CopyFileParams
 import java.io.*
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -16,10 +16,9 @@ class ImportHelper (
 
     private val log = PlatformUtil.getLog(ImportHelper::class.java)
     private val chunkSize = 1024*256
-    val mainActivityRef by lazy {
+    private val mainActivityRef by lazy {
         WeakReference<MainActivity>(activity)
     }
-
 
     companion object {
         const val SQLITE_EXT = ".sqlitedb"
@@ -41,9 +40,11 @@ class ImportHelper (
         super.onPostExecute(result)
         val mainActivity: MainActivity? = mainActivityRef.get()
         if(result!=null && result) {
-            mainActivity?.showSnackBar("Import of ${fileName} into OsmAnd SUCCESSFUL!", action = 2)
+            mainActivity?.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
+                .getString(R.string.importFileSuccess).format(fileName), action = 2)
         } else {
-            mainActivity?.showSnackBar("Error! Import of ${fileName} into OsmAnd FAILED!", action = 2)
+            mainActivity?.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
+                .getString(R.string.importFileError).format(fileName), action = 2)
         }
         mainActivity?.isCopyingFile = false
         mainActivity?.dismissLoader()
@@ -52,17 +53,17 @@ class ImportHelper (
         }
     }
 
-    fun handleFileImport(uri: String, fileName:String):Boolean {
+    private fun handleFileImport(uri: String, fileName:String):Boolean {
         if (fileName.endsWith(SQLITE_EXT)) {
-            return handleSqliteCopy(uri, fileName)
+            return fileImportImpl(uri, fileName)
         } else if (fileName.endsWith(CHARTS_EXT)) {
             val newFilename = fileName.removePrefix(CHARTS_EXT)+ SQLITE_EXT
-            return handleSqliteCopy(uri, newFilename)
+            return fileImportImpl(uri, newFilename)
         }
         return false
     }
 
-    private fun handleSqliteCopy(uri: String, fileName: String):Boolean {
+    private fun fileImportImpl(uri: String, fileName: String):Boolean {
         val path = File(URI.create(uri)).absolutePath
         var counter = 0
 
@@ -87,10 +88,9 @@ class ImportHelper (
                     sentData += read
                     counter++
                 }
-                response = app.osmandHelper.appendDataToFile(FilePartParams(fileName, fileSize, receivedData, data))
-                log.debug("data chunks count: $counter, response: $response, chunk size ${data.size}")
+                response = app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, receivedData, data))
             }
-            app.osmandHelper.appendDataToFile(FilePartParams(fileName, fileSize, sentData, byteArrayOf(0)) )
+            app.osmandHelper.copyFile(CopyFileParams(fileName, fileSize, sentData, byteArrayOf(0)) )
             bis.close()
             return true
         } catch (ioe: IOException) {

@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
-import android.util.Log
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlCallback
@@ -23,9 +22,9 @@ import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidl.navdrawer.NavDrawerItem
 import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
-import net.osmand.aidl.tiles.FilePartParams
 import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
+import net.osmand.aidl.tiles.CopyFileParams
 import java.io.File
 import java.util.ArrayList
 
@@ -505,10 +504,10 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
-	fun appendDataToFile(filePart: FilePartParams):Boolean {
+	fun copyFile(filePart: CopyFileParams):Boolean {
 		if(mIOsmAndAidlInterface !=null) {
 			try {
-				return mIOsmAndAidlInterface!!.copyFileOverApi(filePart)
+				return mIOsmAndAidlInterface!!.copyFile(filePart)
 			} catch (e:RemoteException) {
 				log.error(e)
 			}

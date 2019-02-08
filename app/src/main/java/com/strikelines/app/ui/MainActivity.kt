@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 			isOsmandFABWasClicked = true
 			osmandHelper.openOsmand {
 				installOsmandDialog()
-				Toast.makeText(view.context, "OsmAnd Missing", Toast.LENGTH_SHORT).show()
+				Toast.makeText(view.context, getString(R.string.osmandIsMissing), Toast.LENGTH_SHORT).show()
 			}
 		}
 		fab.setOnTouchListener { v, event ->
@@ -131,7 +131,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 			osmandHelper.connectOsmand()
 		}
 
-		//Timer("disableLoader", false).schedule(INTERVAL) { runOnUiThread { dismissLoader() } }
 	}
 
 	override fun onResume() {
@@ -242,7 +241,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
                 fragment.fetchListItems()
             }
         }
-
 	}
 
 	val downloadCallback = object: DownloadCallback {
@@ -271,7 +269,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 			it.get()?.onOsmandConnectionStateChanged(connected)
 		}
 	}
-
 
 	private fun setupOsmand() {
 		val logoUri = AndroidUtils.resourceToUri(

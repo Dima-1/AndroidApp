@@ -39,6 +39,9 @@
 	<string name="download_success_msg">%1s downloaded</string>
 	<string name="download_failed_msg">Download failed</string>
 	<string name="open_action">OPEN</string>
+    <string name="importFileSuccess">Import of %s into OsmAnd SUCCESSFUL!</string>
+	<string name="importFileError">Error! Import of %s into OsmAnd FAILED!</string>
+	<string name="osmandIsMissing">OsmAnd is Missing</string>
 
 	<string-array name="filter_region">
 		<item>All Regions</item>
