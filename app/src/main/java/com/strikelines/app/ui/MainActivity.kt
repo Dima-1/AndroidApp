@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	var snackView: View? = null
 	var isActivityVisible = false
 	var isOsmandConnected = false
-	var isCopyingFile = false
 	private var importHelper:ImportHelper? = null
 
 	val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
@@ -144,34 +143,37 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				setIntent(null)
 				if (uri != null) {
 					importListener = object: ImportHelperListener {
-						override fun updateMapList() = updateMapsList()
-
-						override fun showSnackBar(message: String, action: Int) {
+						override fun copyFinished(fileName: String, result: Int) {
 							if (isActivityVisible) {
-								this@MainActivity.showSnackBar(message, action = action)
+								when(result){
+									1 -> {
+										updateMapsList()
+										showSnackBar(getString(R.string.importFileSuccess).format(fileName), action = 2)
+									}
+									2 -> showSnackBar(getString(R.string.importFileError).format(fileName), action = 2)
+								}
 							}
 						}
 
-						override fun showProgressBar(visibility: Boolean) {
-							this@MainActivity.showProgressBar(visibility)
+						override fun fileCopying(isCopying: Boolean) {
+							this@MainActivity.showProgressBar(isCopying)
 						}
 
 					}
-					processFileImport(uri, File(uri.path).name)
+					processFileImport(uri)
 				}
 
 			}
 		}
 	}
 
-	private fun processFileImport(uri: Uri, filename:String) {
+	private fun processFileImport(uri: Uri) {
 		if (osmandHelper.isOsmandAvailiable() && importListener!= null){
-			importHelper = ImportHelper(app, importListener!!, uri, filename)
+			importHelper = ImportHelper(app, importListener!!, uri)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 					== PackageManager.PERMISSION_GRANTED
 				) {
-					isCopyingFile = true
 					importHelper?.execute()
 				} else {
 					requestPermissions(
@@ -180,7 +182,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 					)
 				}
 			} else {
-				isCopyingFile = true
 				importHelper?.execute()
 			}
 		} else {
@@ -190,7 +191,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			isCopyingFile = true
 			importHelper?.execute()
 		}
 	}

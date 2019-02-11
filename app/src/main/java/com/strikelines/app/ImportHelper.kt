@@ -2,22 +2,23 @@ package com.strikelines.app
 
 import android.net.Uri
 import android.os.AsyncTask
-import com.strikelines.app.ui.MainActivity
+import android.provider.OpenableColumns
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.tiles.CopyFileParams
 import java.io.*
-import java.lang.ref.WeakReference
-import java.net.URI
 
 class ImportHelper(
 	val app: StrikeLinesApplication,
 	val listener: ImportHelperListener,
-	val uri: Uri,
-	val fileName: String
+	val uri: Uri
 ) : AsyncTask<Void, Void, Boolean>() {
 
 	private val log = PlatformUtil.getLog(ImportHelper::class.java)
 	private val chunkSize = 1024 * 256
+	private val fileName by lazy {
+		getNameFromContentUri(uri)!!
+	}
+
 
 
 	companion object {
@@ -27,29 +28,27 @@ class ImportHelper(
 
 	override fun onPreExecute() {
 		super.onPreExecute()
-		listener.showProgressBar(true)
+		listener.fileCopying(true)
 	}
 
 	override fun doInBackground(vararg params: Void): Boolean? {
-		return handleFileImport(uri, fileName)
+		return handleFileImport(uri)
 	}
 
 	override fun onPostExecute(result: Boolean?) {
 		super.onPostExecute(result)
 
 		if (result != null && result) {
-			listener.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
-					.getString(R.string.importFileSuccess).format(fileName), 2)
+			listener.copyFinished(fileName, 1)
 		} else {
-			listener.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
-					.getString(R.string.importFileError).format(fileName), 2)
+			listener.copyFinished(fileName, -1)
 		}
 
-		listener.showProgressBar(false)
-		listener.updateMapList()
+		listener.fileCopying(false)
+
 	}
 
-	private fun handleFileImport(uri: Uri, fileName: String): Boolean {
+	private fun handleFileImport(uri: Uri): Boolean {
 		if (fileName.endsWith(SQLITE_EXT)) {
 			return fileImportImpl(uri, fileName)
 		} else if (fileName.endsWith(CHARTS_EXT)) {
@@ -60,17 +59,15 @@ class ImportHelper(
 	}
 
 	private fun fileImportImpl(uri: Uri, fileName: String): Boolean {
-		var receivedDataSize = 0L
 		var isError = false
 		var isReceived = true
-		var data = ByteArray(chunkSize)
+		val data = ByteArray(chunkSize)
 		val copyStartTime = System.currentTimeMillis()
 		try {
-			val bis: DataInputStream
-			if (uri.scheme == "content") {
-				bis = DataInputStream(app.contentResolver.openInputStream(uri))
+			val bis: DataInputStream = if (uri.scheme == "content") {
+				DataInputStream(app.contentResolver.openInputStream(uri))
 			} else {
-				bis = DataInputStream(FileInputStream(
+				DataInputStream(FileInputStream(
 					app.applicationContext.contentResolver.openFileDescriptor(uri, "r")?.fileDescriptor))
 			}
 
@@ -79,9 +76,10 @@ class ImportHelper(
 				var errorCount = 0
 				var isCopyComplete = false
 				if (isReceived) {
-					receivedDataSize += read
 					read = bis.read(data)
-					if (read == -1) isCopyComplete = true
+					if (read == -1) {
+						isCopyComplete = true
+					}
 				} else {
 					errorCount++
 					if (errorCount > 10) {
@@ -89,8 +87,7 @@ class ImportHelper(
 						break
 					}
 				}
-				isReceived =
-					app.osmandHelper.copyFile(CopyFileParams(fileName, data, copyStartTime, isCopyComplete))
+				isReceived = app.osmandHelper.copyFile(CopyFileParams(fileName, data, copyStartTime, isCopyComplete))
 			}
 			bis.close()
 
@@ -104,10 +101,29 @@ class ImportHelper(
 			return false
 		}
 	}
+
+
+	private fun getNameFromContentUri(contentUri: Uri): String? {
+		val name: String?
+		val returnCursor = app.contentResolver.query(contentUri, null, null, null, null)
+		if (returnCursor != null && returnCursor.moveToFirst()) {
+			val columnIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+			if (columnIndex != -1) {
+				name = returnCursor.getString(columnIndex)
+			} else {
+				name = contentUri.lastPathSegment
+			}
+		} else {
+			name = null
+		}
+		if (returnCursor != null && !returnCursor.isClosed) {
+			returnCursor.close()
+		}
+		return name
+	}
 }
 
 interface ImportHelperListener {
-	fun showProgressBar(visibility: Boolean)
-	fun updateMapList()
-	fun showSnackBar(message: String, action: Int)
+	fun fileCopying(isCopying: Boolean)
+	fun copyFinished( fileName: String, result: Int)
 }
