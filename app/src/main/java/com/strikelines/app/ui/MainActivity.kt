@@ -69,11 +69,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
 		const val OPEN_DOWNLOADS_TAB_KEY = "open_downloads_tab_key"
 		var isOsmandFABWasClicked = false
-		var isOsmandConnected = false
 		var chartsDataIsReady = false
 		private const val MAPS_TAB_POS = 0
 		private const val DOWNLOADS_TAB_POS = 1
-		private val INTERVAL: Long = 2000
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -144,10 +142,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				if (intent.data != null) {
 					val uri = intent.data
 					intent.action = null
+					setIntent(null)
 					if (uri!=null) {
+						showProgressBar()
 						processFileImport(uri, File(uri.path).name)
 					}
-					setIntent(null)
+
 				}
 			}
 	}
@@ -223,20 +223,20 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-	fun dismissLoader() {
+	fun dismissProgressBar() {
 		loading_indicator.visibility = View.GONE
 	}
 
-	fun showLoader() {
+	fun showProgressBar() {
 		loading_indicator.visibility = View.VISIBLE
 	}
 
 	fun updateOsmandItemList() {
-        for (fragment in supportFragmentManager.fragments) {
-            if (fragment is MapsTabFragment) {
-                fragment.fetchListItems()
-            }
-        }
+		for (fragment in supportFragmentManager.fragments) {
+			if (fragment is MapsTabFragment) {
+				fragment.fetchListItems()
+			}
+		}
 	}
 
 	val downloadCallback = object: DownloadCallback {
@@ -257,9 +257,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
 			isOsmandConnected = true
-			if (isActivityVisible && chartsDataIsReady && !isCopyingFile) {
-				dismissLoader()
-			}
 		}
 		listeners.forEach {
 			it.get()?.onOsmandConnectionStateChanged(connected)
@@ -428,9 +425,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	fun initChartsList() {
 		if (StrikeLinesApplication.isDataReadyFlag) {
 			chartsDataIsReady = true
-			if (isActivityVisible && chartsDataIsReady && isOsmandConnected&&!isCopyingFile) {
-				dismissLoader()
-			}
 			regionList.clear()
 			regionList.add(resources.getString(R.string.all_regions))
 			StrikeLinesApplication.chartsList.forEach { regionList.add(it.region) }
