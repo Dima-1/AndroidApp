@@ -34,6 +34,7 @@ import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LockableViewPager
 import com.strikelines.app.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.recycler_list_fragment.*
 import java.io.File
 import java.lang.ref.WeakReference
 
@@ -135,6 +136,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		osmandHelper.listener = this
 		StrikeLinesApplication.listener = appListener
 		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
+		importHelper?.let{
+			importListener?.let { importHelper?.listener = importListener }
+			if(it.isCopyInProgress) {
+				showProgressBar(true)
+			}
+		}
 		val intent:Intent? = intent
 		if (Intent.ACTION_VIEW == intent?.action) {
 			if (intent.data != null) {
@@ -142,34 +149,42 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				intent.action = null
 				setIntent(null)
 				if (uri != null) {
-					importListener = object: ImportHelperListener {
-						override fun copyFinished(fileName: String, result: Int) {
-							if (isActivityVisible) {
-								when(result){
-									1 -> {
-										updateMapsList()
-										showSnackBar(getString(R.string.importFileSuccess).format(fileName), action = 2)
+					if (importHelper!=null && importHelper!!.isCopyInProgress) {
+						showToastMessage("File copying already in progress, wait until it's done!")
+					} else {
+						importListener = object: ImportHelperListener {
+							override fun fileCopyFinished(fileName: String?, result: Int) {
+								if (isActivityVisible) {
+									this@MainActivity.showProgressBar(false)
+									when(result){
+										1 -> {
+											updateMapsList()
+											showSnackBar(getString(R.string.importFileSuccess).format(fileName), action = 2)
+										}
+										-1 -> showSnackBar(getString(R.string.importFileError).format(fileName), action = 2)
 									}
-									2 -> showSnackBar(getString(R.string.importFileError).format(fileName), action = 2)
 								}
 							}
-						}
 
-						override fun fileCopying(isCopying: Boolean) {
-							this@MainActivity.showProgressBar(isCopying)
-						}
+							override fun fileCopyError(msg: String, fileName: String?) {
+								showToastMessage(msg)
+							}
 
+							override fun fileCopyStarted(fileName: String?) {
+								this@MainActivity.showProgressBar(true)
+							}
+						}
+						processFileImport(uri)
 					}
-					processFileImport(uri)
 				}
-
 			}
 		}
 	}
 
 	private fun processFileImport(uri: Uri) {
 		if (osmandHelper.isOsmandAvailiable() && importListener!= null){
-			importHelper = ImportHelper(app, importListener!!, uri)
+			importHelper = ImportHelper(app, uri)
+			importHelper?.listener = importListener
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 					== PackageManager.PERMISSION_GRANTED
@@ -208,7 +223,11 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 		osmandHelper.onOsmandInitCallbacks.clear()
 		osmandHelper.listener = null
+		showProgressBar(false)
 		StrikeLinesApplication.listener = null
+		if (importHelper!=null && importListener!=null) {
+			importHelper?.listener = null
+		}
 	}
 
 	override fun onDestroy() {

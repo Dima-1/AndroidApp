@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
+import com.strikelines.app.ImportHelper.Companion.IO_ERROR
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlCallback
@@ -504,7 +505,7 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
-	fun copyFile(filePart: CopyFileParams):Boolean {
+	fun copyFile(filePart: CopyFileParams):Int {
 		if(mIOsmAndAidlInterface !=null) {
 			try {
 				return mIOsmAndAidlInterface!!.copyFile(filePart)
@@ -512,7 +513,7 @@ class OsmandHelper(private val app: Application) {
 				log.error(e)
 			}
 		}
-		return false
+		return IO_ERROR
 	}
 
 	fun changePluginState(pluginId:String, newStatus:Int):Boolean {
