@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
 	private var mapsTabFragment: MapsTabFragment? = null
 	private var purchasesTabFragment: PurchasesTabFragment? = null
-
+	private var importListener: ImportHelperListener? = null
 
 	private lateinit var bottomNav: BottomNavigationView
 	var mapListFragmentId:Int = -1
@@ -128,7 +128,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
 			osmandHelper.connectOsmand()
 		}
-
 	}
 
 	override fun onResume() {
@@ -138,23 +137,36 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		StrikeLinesApplication.listener = appListener
 		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
 		val intent:Intent? = intent
-			if (Intent.ACTION_VIEW == intent?.action) {
-				if (intent.data != null) {
-					val uri = intent.data
-					intent.action = null
-					setIntent(null)
-					if (uri!=null) {
-						showProgressBar()
-						processFileImport(uri, File(uri.path).name)
-					}
+		if (Intent.ACTION_VIEW == intent?.action) {
+			if (intent.data != null) {
+				val uri = intent.data
+				intent.action = null
+				setIntent(null)
+				if (uri != null) {
+					importListener = object: ImportHelperListener {
+						override fun updateMapList() = updateMapsList()
 
+						override fun showSnackBar(message: String, action: Int) {
+							if (isActivityVisible) {
+								this@MainActivity.showSnackBar(message, action = action)
+							}
+						}
+
+						override fun showProgressBar(visibility: Boolean) {
+							this@MainActivity.showProgressBar(visibility)
+						}
+
+					}
+					processFileImport(uri, File(uri.path).name)
 				}
+
 			}
+		}
 	}
 
 	private fun processFileImport(uri: Uri, filename:String) {
-		if (osmandHelper.isOsmandAvailiable()){
-			importHelper = ImportHelper(app, this@MainActivity, uri, filename)
+		if (osmandHelper.isOsmandAvailiable() && importListener!= null){
+			importHelper = ImportHelper(app, importListener!!, uri, filename)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 					== PackageManager.PERMISSION_GRANTED
@@ -223,15 +235,15 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-	fun dismissProgressBar() {
-		loading_indicator.visibility = View.GONE
+	fun showProgressBar(isVisible : Boolean) {
+		if (isVisible)
+			loading_indicator.visibility = View.VISIBLE
+		else {
+			loading_indicator.visibility = View.GONE
+		}
 	}
 
-	fun showProgressBar() {
-		loading_indicator.visibility = View.VISIBLE
-	}
-
-	fun updateOsmandItemList() {
+	fun updateMapsList() {
 		for (fragment in supportFragmentManager.fragments) {
 			if (fragment is MapsTabFragment) {
 				fragment.fetchListItems()

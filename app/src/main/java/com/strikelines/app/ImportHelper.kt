@@ -11,16 +11,14 @@ import java.net.URI
 
 class ImportHelper(
 	val app: StrikeLinesApplication,
-	activity: MainActivity,
+	val listener: ImportHelperListener,
 	val uri: Uri,
 	val fileName: String
 ) : AsyncTask<Void, Void, Boolean>() {
 
 	private val log = PlatformUtil.getLog(ImportHelper::class.java)
 	private val chunkSize = 1024 * 256
-	private val mainActivityRef by lazy {
-		WeakReference<MainActivity>(activity)
-	}
+
 
 	companion object {
 		const val SQLITE_EXT = ".sqlitedb"
@@ -29,8 +27,7 @@ class ImportHelper(
 
 	override fun onPreExecute() {
 		super.onPreExecute()
-		val mainActivity: MainActivity? = mainActivityRef.get()
-		mainActivity?.showProgressBar()
+		listener.showProgressBar(true)
 	}
 
 	override fun doInBackground(vararg params: Void): Boolean? {
@@ -39,23 +36,17 @@ class ImportHelper(
 
 	override fun onPostExecute(result: Boolean?) {
 		super.onPostExecute(result)
-		val mainActivity: MainActivity? = mainActivityRef.get()
+
 		if (result != null && result) {
-			mainActivity?.showSnackBar(
-				StrikeLinesApplication.getApp()!!.applicationContext
-					.getString(R.string.importFileSuccess).format(fileName), action = 2
-			)
+			listener.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
+					.getString(R.string.importFileSuccess).format(fileName), 2)
 		} else {
-			mainActivity?.showSnackBar(
-				StrikeLinesApplication.getApp()!!.applicationContext
-					.getString(R.string.importFileError).format(fileName), action = 2
-			)
+			listener.showSnackBar(StrikeLinesApplication.getApp()!!.applicationContext
+					.getString(R.string.importFileError).format(fileName), 2)
 		}
-		mainActivity?.isCopyingFile = false
-		mainActivity?.dismissProgressBar()
-		if (mainActivity?.isActivityVisible!!) {
-			mainActivity.updateOsmandItemList()
-		}
+
+		listener.showProgressBar(false)
+		listener.updateMapList()
 	}
 
 	private fun handleFileImport(uri: Uri, fileName: String): Boolean {
@@ -69,7 +60,6 @@ class ImportHelper(
 	}
 
 	private fun fileImportImpl(uri: Uri, fileName: String): Boolean {
-		var counter = 0
 		var receivedDataSize = 0L
 		var isError = false
 		var isReceived = true
@@ -80,7 +70,8 @@ class ImportHelper(
 			if (uri.scheme == "content") {
 				bis = DataInputStream(app.contentResolver.openInputStream(uri))
 			} else {
-				bis = DataInputStream(FileInputStream(File(File(URI.create(uri.toString())).absolutePath)))
+				bis = DataInputStream(FileInputStream(
+					app.applicationContext.contentResolver.openFileDescriptor(uri, "r")?.fileDescriptor))
 			}
 
 			var read = 0
@@ -88,19 +79,18 @@ class ImportHelper(
 				var errorCount = 0
 				var isCopyComplete = false
 				if (isReceived) {
-					counter++
 					receivedDataSize += read
 					read = bis.read(data)
 					if (read == -1) isCopyComplete = true
 				} else {
 					errorCount++
-					if (errorCount > 100) {
+					if (errorCount > 10) {
 						isError = true
 						break
 					}
 				}
 				isReceived =
-					app.osmandHelper.copyFile(CopyFileParams(fileName, receivedDataSize, data, copyStartTime, isCopyComplete))
+					app.osmandHelper.copyFile(CopyFileParams(fileName, data, copyStartTime, isCopyComplete))
 			}
 			bis.close()
 
@@ -114,4 +104,10 @@ class ImportHelper(
 			return false
 		}
 	}
+}
+
+interface ImportHelperListener {
+	fun showProgressBar(visibility: Boolean)
+	fun updateMapList()
+	fun showSnackBar(message: String, action: Int)
 }
