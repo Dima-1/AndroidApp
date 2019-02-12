@@ -79,15 +79,15 @@ class ImportHelper(
 			}
 
 			var tryCount = 0
-			var responseId = 1
+			var responseId = COPY_FILE_START_FLAG
 			var actionStatus = COPY_FILE_START_FLAG
 			var read = 0
 
 			while (read != -1 && !isError) {
 				log.debug("Response id = $responseId")
 				when(responseId) {
-					1 -> read = bis.read()
-					0 -> {
+					COPY_FILE_START_FLAG -> read = bis.read()
+					COPY_FILE_OK_RESPONSE -> {
 						read = bis.read(data)
 						actionStatus = if (read == -1) {
 							COPY_FILE_FINISH_FLAG

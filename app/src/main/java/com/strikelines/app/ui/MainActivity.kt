@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 								}
 							}
 							override fun fileCopyError(msg: String, fileName: String?) {
-								showToastMessage(String.format(msg, fileName));
+								showToastMessage(String.format(msg, fileName))
 							}
 
 							override fun fileCopyStarted(fileName: String?) {
