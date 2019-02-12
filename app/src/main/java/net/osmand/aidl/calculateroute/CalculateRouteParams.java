@@ -2,7 +2,6 @@ package net.osmand.aidl.calculateroute;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import net.osmand.aidl.map.ALatLon;
 
 import java.util.ArrayList;

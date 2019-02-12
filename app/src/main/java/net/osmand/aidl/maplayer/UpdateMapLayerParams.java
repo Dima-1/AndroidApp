@@ -2,7 +2,6 @@ package net.osmand.aidl.maplayer;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class UpdateMapLayerParams implements Parcelable {
 	private AMapLayer layer;

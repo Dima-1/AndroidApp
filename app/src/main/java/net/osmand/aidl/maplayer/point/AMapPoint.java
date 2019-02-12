@@ -2,7 +2,6 @@ package net.osmand.aidl.maplayer.point;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import net.osmand.aidl.map.ALatLon;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class AMapPoint implements Parcelable {
 	private Map<String, String> params = new HashMap<>();
 
 	public AMapPoint(String id, String shortName, String fullName, String typeName, int color,
-					 ALatLon location, List<String> details, Map<String, String> params) {
+                     ALatLon location, List<String> details, Map<String, String> params) {
 		this.id = id;
 		this.shortName = shortName;
 		this.fullName = fullName;

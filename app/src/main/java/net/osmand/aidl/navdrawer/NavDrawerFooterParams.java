@@ -30,7 +30,7 @@ public class NavDrawerFooterParams implements Parcelable {
 	}
 
 	public NavDrawerFooterParams(@NonNull String packageName, @Nullable String intent,
-		@Nullable String appName) {
+                                 @Nullable String appName) {
 		this.packageName = packageName;
 		this.intent = intent;
 		this.appName = appName;

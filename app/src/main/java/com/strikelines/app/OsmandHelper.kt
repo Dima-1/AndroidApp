@@ -10,11 +10,11 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
-import android.util.Log
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
+import net.osmand.aidl.OsmandAidlConstants.COPY_FILE_IO_ERROR
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
@@ -25,6 +25,7 @@ import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
 import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
+import net.osmand.aidl.tiles.CopyFileParams
 import java.io.File
 import java.util.ArrayList
 
@@ -32,7 +33,7 @@ class OsmandHelper(private val app: Application) {
 
 	private val log = PlatformUtil.getLog(OsmandHelper::class.java)
 
-	private val osmandPackages = listOf("net.osmand.plus", "net.osmand") //, "net.osmand.dev"
+	private val osmandPackages = listOf("net.osmand.plus", "net.osmand", "net.osmand.dev") //,
 
 	private var mIOsmAndAidlInterface: IOsmAndAidlInterface? = null
 	private var osmandCallbackId: Long = 0
@@ -42,7 +43,7 @@ class OsmandHelper(private val app: Application) {
 	private var selectedOsmandPackage = ""
 
 	var listener: OsmandHelperListener? = null
-	var onOsmandInitCallback: OsmandAppInitCallback? = null
+	var onOsmandInitCallbacks: MutableList<OsmandAppInitCallback> = mutableListOf()
 
 	interface OsmandHelperListener {
 		fun onOsmandConnectionStateChanged(connected: Boolean)
@@ -55,6 +56,9 @@ class OsmandHelper(private val app: Application) {
 
 	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
 		@Throws(RemoteException::class)
+		override fun onGpxBitmapCreated(bitmap: AGpxBitmap?) {}
+
+		@Throws(RemoteException::class)
 		override fun onSearchComplete(resultSet: List<SearchResult>) {}
 
 		@Throws(RemoteException::class)
@@ -62,7 +66,11 @@ class OsmandHelper(private val app: Application) {
 
 		@Throws(RemoteException::class)
 		override fun onAppInitialized() {
-			onOsmandInitCallback?.onOsmandInitialized()
+			for(callback in onOsmandInitCallbacks){
+				log.debug("osmand initialized")
+				callback.onOsmandInitialized()
+			}
+
 		}
 	}
 
@@ -120,8 +128,6 @@ class OsmandHelper(private val app: Application) {
 	}
 
 	fun openOsmand(onOsmandMissingAction: (() -> Unit)?) {
-
-
 		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
 		if (intent != null) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -130,6 +136,10 @@ class OsmandHelper(private val app: Application) {
 			onOsmandMissingAction?.invoke()
 		}
 	}
+
+	fun isOsmandAvailiable():Boolean =
+		app.packageManager.getLaunchIntentForPackage(getOsmandPackage()) != null
+
 
 	fun registerForOsmandInitialization():Boolean {
 		if(mIOsmAndAidlInterface !=null) {
@@ -493,6 +503,17 @@ class OsmandHelper(private val app: Application) {
 			}
 		}
 		return false
+	}
+
+	fun copyFile(filePart: CopyFileParams):Int {
+		if(mIOsmAndAidlInterface !=null) {
+			try {
+				return mIOsmAndAidlInterface!!.copyFile(filePart)
+			} catch (e:RemoteException) {
+				log.error(e)
+			}
+		}
+		return COPY_FILE_IO_ERROR
 	}
 
 	fun changePluginState(pluginId:String, newStatus:Int):Boolean {
