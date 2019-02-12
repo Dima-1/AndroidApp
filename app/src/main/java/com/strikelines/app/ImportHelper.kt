@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.provider.OpenableColumns
 import com.strikelines.app.utils.PlatformUtil
+import net.osmand.aidl.OsmandAidlConstants.*
 import net.osmand.aidl.tiles.CopyFileParams
 import java.io.*
 
@@ -25,12 +26,8 @@ class ImportHelper(
 	companion object {
 		const val SQLITE_EXT = ".sqlitedb"
 		const val CHARTS_EXT = ".charts"
-
-		const val FILE_PARAMS_ERROR = -1001
-		const val TOO_BIG_PARTS = -1002
-		const val DOUBLE_COPY = -1003
-		const val IO_ERROR = -1004
-		const val UNKNOWN_FILE_TYPE = -1005
+		const val COPY_SUCCESSFUL = 1
+		const val COPY_FAILED = -1
 	}
 
 	override fun onPreExecute() {
@@ -42,9 +39,8 @@ class ImportHelper(
 		return if (fileName!=null) {
 			isCopyInProgress = true
 			handleFileImport(uri)
-
 		} else {
-			listener?.fileCopyFinished(fileName, -1)
+			listener?.fileCopyFinished(fileName, COPY_FAILED)
 			false
 		}
 	}
@@ -53,9 +49,9 @@ class ImportHelper(
 		super.onPostExecute(result)
 		isCopyInProgress = false
 		if (result != null && result) {
-			listener?.fileCopyFinished(fileName, 1)
+			listener?.fileCopyFinished(fileName, COPY_SUCCESSFUL)
 		} else {
-			listener?.fileCopyFinished(fileName, -1)
+			listener?.fileCopyFinished(fileName, COPY_FAILED)
 		}
 	}
 
@@ -71,9 +67,9 @@ class ImportHelper(
 
 	private fun fileImportImpl(uri: Uri, fileName: String): Boolean {
 		var isError = false
-		var responseId = 0
 		val data = ByteArray(chunkSize)
-		var id = 0
+		val startTime = System.currentTimeMillis()
+
 		try {
 			val bis: DataInputStream = if (uri.scheme == "content") {
 				DataInputStream(app.contentResolver.openInputStream(uri))
@@ -82,32 +78,50 @@ class ImportHelper(
 					app.applicationContext.contentResolver.openFileDescriptor(uri, "r")?.fileDescriptor))
 			}
 
+			var tryCount = 0
+			var responseId = 1
+			var actionStatus = COPY_FILE_START_FLAG
 			var read = 0
-			while (read != -1) {
-				var isCopyComplete = false
 
-
-				if (responseId >= 0) {
-					read = bis.read(data)
-					if (read == -1) {
-						isCopyComplete = true
+			while (read != -1 && !isError) {
+				log.debug("Response id = $responseId")
+				when(responseId) {
+					1 -> read = bis.read()
+					0 -> {
+						read = bis.read(data)
+						actionStatus = if (read == -1) {
+							COPY_FILE_FINISH_FLAG
+						} else {
+							COPY_FILE_IN_PROGRESS_FLAG
+						}
 					}
-				} else if (responseId < 0) {
-					when(responseId) {
-						FILE_PARAMS_ERROR -> listener?.fileCopyError("Check file parameters", fileName)
-						TOO_BIG_PARTS -> {log.error("Array should not be large")}
-						DOUBLE_COPY -> {listener?.fileCopyError("Wait until copying of file with same name complete", fileName)}
-						IO_ERROR -> {listener?.fileCopyError("I/O error", fileName)}
-						UNKNOWN_FILE_TYPE -> {listener?.fileCopyError("Unknown/Unsupported File Type", fileName)}
+					COPY_FILE_WRITE_LOCK_ERROR -> {
+						if(tryCount < 3) {
+							listener?.fileCopyError(app.applicationContext.getString(R.string.copy_file_write_lock_error_msg), fileName)
+							tryCount++
+							Thread.sleep(COPY_FILE_VALID_PAUSE)
+						} else {
+							isError = true
+						}
+					}
+					COPY_FILE_PARAMS_ERROR -> {
+						log.error (app.applicationContext.getString(R.string.file_params_error))
+						isError = true
+					}
+					COPY_FILE_PART_SIZE_LIMIT_ERROR -> {
+						log.error (app.applicationContext.getString(R.string.part_size_limit_error))
+						isError = true
+					}
+					COPY_FILE_IO_ERROR -> {
+						log.error (app.applicationContext.getString(R.string.io_error))
+						isError = true
+					}
+					COPY_FILE_UNSUPPORTED_FILE_TYPE_ERROR -> {
+						log.error(app.applicationContext.getString(R.string.unsupported_type_error))
+						isError = true
 					}
 				}
-
-				if(responseId==0) {
-					id = responseId
-				}
-
-
-				responseId = app.osmandHelper.copyFile(CopyFileParams(fileName, data, id, isCopyComplete))
+				responseId = app.osmandHelper.copyFile(CopyFileParams(fileName, data, startTime, actionStatus))
 			}
 			bis.close()
 
@@ -127,10 +141,10 @@ class ImportHelper(
 		val returnCursor = app.contentResolver.query(contentUri, null, null, null, null)
 		if (returnCursor != null && returnCursor.moveToFirst()) {
 			val columnIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-			if (columnIndex != -1) {
-				name = returnCursor.getString(columnIndex)
+			name = if (columnIndex != -1) {
+				returnCursor.getString(columnIndex)
 			} else {
-				name = contentUri.lastPathSegment
+				contentUri.lastPathSegment
 			}
 		} else {
 			name = null
