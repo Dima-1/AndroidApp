@@ -18,6 +18,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import com.strikelines.app.*
+import com.strikelines.app.ImportHelper.Companion.COPY_FAILED
+import com.strikelines.app.ImportHelper.Companion.COPY_SUCCESSFUL
 import com.strikelines.app.OsmandCustomizationConstants.PLUGIN_RASTER_MAPS
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
 import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
@@ -149,25 +151,24 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				intent.action = null
 				setIntent(null)
 				if (uri != null) {
-					if (importHelper!=null && importHelper!!.isCopyInProgress) {
-						showToastMessage("File copying already in progress, wait until it's done!")
+					if(importHelper != null && (importHelper as ImportHelper).isCopyInProgress) {
+						showToastMessage(getString(R.string.copy_file_in_progress_alert))
 					} else {
 						importListener = object: ImportHelperListener {
 							override fun fileCopyFinished(fileName: String?, result: Int) {
 								if (isActivityVisible) {
 									this@MainActivity.showProgressBar(false)
 									when(result){
-										1 -> {
+										COPY_SUCCESSFUL -> {
 											updateMapsList()
 											showSnackBar(getString(R.string.importFileSuccess).format(fileName), action = 2)
 										}
-										-1 -> showSnackBar(getString(R.string.importFileError).format(fileName), action = 2)
+										COPY_FAILED -> showSnackBar(getString(R.string.importFileError).format(fileName), action = 2)
 									}
 								}
 							}
-
 							override fun fileCopyError(msg: String, fileName: String?) {
-								showToastMessage(msg)
+								showToastMessage(String.format(msg, fileName));
 							}
 
 							override fun fileCopyStarted(fileName: String?) {
@@ -176,6 +177,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 						}
 						processFileImport(uri)
 					}
+
+
+
 				}
 			}
 		}

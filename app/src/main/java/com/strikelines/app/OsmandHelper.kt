@@ -10,11 +10,11 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.text.TextUtils
-import com.strikelines.app.ImportHelper.Companion.IO_ERROR
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
+import net.osmand.aidl.OsmandAidlConstants.COPY_FILE_IO_ERROR
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
@@ -513,7 +513,7 @@ class OsmandHelper(private val app: Application) {
 				log.error(e)
 			}
 		}
-		return IO_ERROR
+		return COPY_FILE_IO_ERROR
 	}
 
 	fun changePluginState(pluginId:String, newStatus:Int):Boolean {
