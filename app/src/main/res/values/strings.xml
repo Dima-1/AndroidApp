@@ -42,7 +42,7 @@
     <string name="importFileSuccess">Import of %s into OsmAnd SUCCESSFUL!</string>
 	<string name="importFileError">Error! Import of %s into OsmAnd FAILED!</string>
 	<string name="osmandIsMissing">OsmAnd is Missing</string>
-    <string name="copy_file_write_lock_error_msg">File %s already being copying, will retry in 10 second</string>
+    <string name="copy_file_write_lock_error_msg">File already being copying, will retry in 10 second</string>
 	<string name="file_params_error">Check file params!</string>
 	<string name="part_size_limit_error">Sent file\'s parts (byte arrays) should not exceed 256k!</string>
 	<string name="io_error">IO error</string>

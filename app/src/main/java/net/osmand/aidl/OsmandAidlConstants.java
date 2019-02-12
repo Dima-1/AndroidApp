@@ -12,4 +12,5 @@ public interface OsmandAidlConstants {
 	int COPY_FILE_IN_PROGRESS_FLAG = 1000;
 	long COPY_FILE_VALID_PAUSE = 10000;
 	int COPY_FILE_OK_RESPONSE = 0;
+	int COPY_FILE_START = 1;
 }

@@ -151,7 +151,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				intent.action = null
 				setIntent(null)
 				if (uri != null) {
-					if(importHelper != null && (importHelper as ImportHelper).isCopyInProgress) {
+					val tempHelper = importHelper
+					if(tempHelper != null && tempHelper.isCopyInProgress) {
 						showToastMessage(getString(R.string.copy_file_in_progress_alert))
 					} else {
 						importListener = object: ImportHelperListener {
@@ -167,9 +168,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 									}
 								}
 							}
-							override fun fileCopyError(msg: String, fileName: String?) {
-								showToastMessage(String.format(msg, fileName))
-							}
 
 							override fun fileCopyStarted(fileName: String?) {
 								this@MainActivity.showProgressBar(true)
@@ -177,9 +175,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 						}
 						processFileImport(uri)
 					}
-
-
-
 				}
 			}
 		}

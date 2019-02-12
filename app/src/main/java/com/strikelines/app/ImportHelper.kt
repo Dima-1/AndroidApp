@@ -79,14 +79,15 @@ class ImportHelper(
 			}
 
 			var tryCount = 0
-			var responseId = COPY_FILE_START_FLAG
-			var actionStatus = COPY_FILE_START_FLAG
+			var response = COPY_FILE_START_FLAG
+			var actionStatus = COPY_FILE_START
 			var read = 0
 
 			while (read != -1 && !isError) {
-				log.debug("Response id = $responseId")
-				when(responseId) {
-					COPY_FILE_START_FLAG -> read = bis.read()
+				when(response) {
+					COPY_FILE_START -> {
+						read = bis.read()
+					}
 					COPY_FILE_OK_RESPONSE -> {
 						read = bis.read(data)
 						actionStatus = if (read == -1) {
@@ -97,7 +98,7 @@ class ImportHelper(
 					}
 					COPY_FILE_WRITE_LOCK_ERROR -> {
 						if(tryCount < 3) {
-							listener?.fileCopyError(app.applicationContext.getString(R.string.copy_file_write_lock_error_msg), fileName)
+							log.error(app.applicationContext.getString(R.string.copy_file_write_lock_error_msg))
 							tryCount++
 							Thread.sleep(COPY_FILE_VALID_PAUSE)
 						} else {
@@ -121,14 +122,12 @@ class ImportHelper(
 						isError = true
 					}
 				}
-				responseId = app.osmandHelper.copyFile(CopyFileParams(fileName, data, startTime, actionStatus))
+				response = app.osmandHelper.copyFile(CopyFileParams(fileName, data, startTime, actionStatus))
+
 			}
 			bis.close()
 
-			if (isError) {
-				return false
-			}
-			return true
+			return !isError
 
 		} catch (ioe: IOException) {
 			log.error(ioe.message, ioe)
@@ -158,6 +157,5 @@ class ImportHelper(
 
 interface ImportHelperListener {
 	fun fileCopyStarted(fileName: String?)
-	fun fileCopyError(msg: String, fileName: String?)
 	fun fileCopyFinished (fileName: String?, result: Int)
 }
