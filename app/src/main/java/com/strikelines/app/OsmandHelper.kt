@@ -25,7 +25,7 @@ import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
 import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
-import net.osmand.aidl.tiles.CopyFileParams
+import net.osmand.aidl.copyfile.CopyFileParams
 import java.io.File
 import java.util.ArrayList
 

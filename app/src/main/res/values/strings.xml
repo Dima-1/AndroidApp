@@ -33,7 +33,7 @@
   <string name="snack_update_btn">UPDATE</string>
 	<string name="snack_ok_btn">OK</string>
   <string name="aidl_menu_item_download_charts">Download charts</string>
-	<string name="load_osmand_msg"><![CDATA[To use StrikeLines maps with navigation, you need to install OsmAnd Maps & Navigation from the Google Play store.]]></string>
+	<string name="load_osmand_msg">To use StrikeLines maps with navigation, you need to install OsmAnd Maps &amp; Navigation from the Google Play store.</string>
 	<string name="load_osmand_dialog_title">Navigate</string>
 
 	<string name="download_success_msg">%1s downloaded</string>
@@ -41,13 +41,8 @@
 	<string name="open_action">OPEN</string>
     <string name="importFileSuccess">Import of %s into OsmAnd SUCCESSFUL!</string>
 	<string name="importFileError">Error! Import of %s into OsmAnd FAILED!</string>
-	<string name="osmandIsMissing">OsmAnd is Missing</string>
-    <string name="copy_file_write_lock_error_msg">File already being copying, will retry in 10 second</string>
-	<string name="file_params_error">Check file params!</string>
-	<string name="part_size_limit_error">Sent file\'s parts (byte arrays) should not exceed 256k!</string>
-	<string name="io_error">IO error</string>
-	<string name="unsupported_type_error">You are trying to copy unsupported file type</string>
-    <string name="copy_file_in_progress_alert">Copying File already is in progress, wait until it\'s finished!</string>
+	<string name="osmandIsMissing">OsmAnd is missing</string>
+	<string name="copy_file_in_progress_alert">Copying file already is in progress, wait until it\'s finished!</string>
 
     <string-array name="filter_region">
 		<item>All Regions</item>
