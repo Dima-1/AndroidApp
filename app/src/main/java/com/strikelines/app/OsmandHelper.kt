@@ -104,6 +104,8 @@ class OsmandHelper(private val app: Application) {
 
 	fun isOsmandBound() = initialized && bound
 
+	fun isSelectedOsmandNotInstalled() = initialized && !bound
+
 	fun isOsmandConnected() = mIOsmAndAidlInterface != null
 
 	fun connectOsmand() {
@@ -128,6 +130,9 @@ class OsmandHelper(private val app: Application) {
 	}
 
 	fun openOsmand(onOsmandMissingAction: (() -> Unit)?) {
+		if (isSelectedOsmandNotInstalled() && !isOsmandConnected()) {
+			connectOsmand()
+		}
 		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
 		if (intent != null) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
