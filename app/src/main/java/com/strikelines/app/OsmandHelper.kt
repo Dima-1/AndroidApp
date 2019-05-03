@@ -15,6 +15,7 @@ import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.OsmandAidlConstants.COPY_FILE_IO_ERROR
+import net.osmand.aidl.copyfile.CopyFileParams
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
@@ -25,9 +26,8 @@ import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
 import net.osmand.aidl.plugins.PluginParams
 import net.osmand.aidl.search.SearchResult
 import net.osmand.aidl.tiles.ASqliteDbFile
-import net.osmand.aidl.copyfile.CopyFileParams
 import java.io.File
-import java.util.ArrayList
+import java.util.*
 
 class OsmandHelper(private val app: Application) {
 
@@ -39,6 +39,7 @@ class OsmandHelper(private val app: Application) {
 	private var osmandCallbackId: Long = 0
 	private var initialized = false
 	private var bound = false
+	private var osmandCustomized = false
 
 	private var selectedOsmandPackage = ""
 
@@ -101,6 +102,8 @@ class OsmandHelper(private val app: Application) {
 	init {
 		connectOsmand()
 	}
+
+	fun isOsmandCustomized() = osmandCustomized
 
 	fun isOsmandBound() = initialized && bound
 
@@ -283,7 +286,7 @@ class OsmandHelper(private val app: Application) {
 	fun customizeOsmandSettings(sharedPreferencesName: String, bundle: Bundle? = null) {
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				mIOsmAndAidlInterface!!.customizeOsmandSettings(OsmandSettingsParams(sharedPreferencesName, bundle))
+				osmandCustomized = mIOsmAndAidlInterface!!.customizeOsmandSettings(OsmandSettingsParams(sharedPreferencesName, bundle))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}
