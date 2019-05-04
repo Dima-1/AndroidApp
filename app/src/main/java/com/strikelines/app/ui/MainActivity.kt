@@ -426,6 +426,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				putBoolean("driving_region_automatic", false)
 				putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
 				putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
+				if (!isOsmandCustomized()) {
+					putBoolean("map_online_data", true)
+				}
 			}
 			customizeOsmandSettings("strikelines", bundle)
 		}

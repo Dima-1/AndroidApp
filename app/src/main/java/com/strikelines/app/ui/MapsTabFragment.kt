@@ -41,12 +41,15 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 			adapter = this@MapsTabFragment.viewAdapter
 		}
 
+		return view
+	}
+
+	override fun onResume() {
+		super.onResume()
 		val osmandHelper = osmandHelper
 		if (osmandHelper != null && osmandHelper.isOsmandBound()) {
 			fetchListItems()
 		}
-
-		return view
 	}
 
 	fun fetchListItems() {
