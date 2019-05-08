@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager
 import android.text.format.DateFormat
 import android.view.View
 import android.view.WindowManager
-import java.io.IOException
 import java.text.MessageFormat
 import java.util.*
 
@@ -92,4 +91,6 @@ object AndroidUtils {
 
 	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
+	fun isIntentSafe(ctx: Context, intent: Intent) =
+		ctx.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
 }

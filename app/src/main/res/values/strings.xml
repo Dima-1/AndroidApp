@@ -1,4 +1,5 @@
 <resources>
+	<string name="shared_string_import">Import</string>
 	<string name="navigate">Navigate</string>
 	<string name="app_name">StrikeLines</string>
 	<string name="shared_string_maps">Maps</string>

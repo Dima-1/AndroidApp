@@ -2,6 +2,7 @@ package com.strikelines.app.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -183,6 +184,49 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		if (requestCode == StrikeLinesApplication.IMPORT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+			if (data != null) {
+				val uri = data.data
+				if (uri != null) {
+					processFileImport(uri)
+				}
+			}
+		} else {
+			super.onActivityResult(requestCode, resultCode, data)
+		}
+	}
+
+	fun selectFileForImport() {
+		if (osmandHelper.isOsmandAvailiable()) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+					importFile()
+				} else {
+					requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), StrikeLinesApplication.IMPORT_REQUEST_CODE)
+				}
+			} else {
+				importFile()
+			}
+		} else {
+			installOsmandDialog()
+		}
+	}
+
+	fun importFile() {
+		val intent = Intent().apply {
+			action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				Intent.ACTION_OPEN_DOCUMENT
+			} else {
+				Intent.ACTION_GET_CONTENT
+			}
+			type = "*/*"
+		}
+		if (AndroidUtils.isIntentSafe(this, intent)) {
+			startActivityForResult(intent, StrikeLinesApplication.IMPORT_REQUEST_CODE)
+		}
+	}
+
 	private fun processFileImport(uri: Uri) {
 		if (osmandHelper.isOsmandAvailiable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -206,10 +250,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			val uri = importUri
-			if (uri != null) {
-				importHelper.importFile(uri)
+		if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE) {
+				val uri = importUri
+				if (uri != null) {
+					importHelper.importFile(uri)
+				}
+			} else if (requestCode == StrikeLinesApplication.IMPORT_REQUEST_CODE) {
+				selectFileForImport()
 			}
 		}
 	}
@@ -424,6 +472,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				putString("application_mode", APP_MODE_BOAT)
 				putString("default_application_mode_string", APP_MODE_BOAT)
 				putBoolean("driving_region_automatic", false)
+				putBoolean("show_osmand_welcome_screen", false)
 				putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
 				putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
 				if (!isOsmandCustomized()) {

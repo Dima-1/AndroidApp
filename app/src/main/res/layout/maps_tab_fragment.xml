@@ -17,19 +17,44 @@
       android:layout_height="wrap_content"
       android:orientation="vertical">
 
-      <com.strikelines.app.utils.StyledBoldTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:paddingLeft="@dimen/content_padding_standard"
-        android:paddingRight="@dimen/content_padding_standard"
-        android:paddingTop="13dp"
-        android:paddingBottom="4dp"
-        android:text="@string/app_name"
-        android:textStyle="bold"
-        android:textColor="@color/app_bar_title"
-        android:textSize="@dimen/app_bar_text"/>
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
+
+        <com.strikelines.app.utils.StyledBoldTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingLeft="@dimen/content_padding_standard"
+            android:paddingTop="13dp"
+            android:paddingRight="@dimen/content_padding_standard"
+            android:paddingBottom="4dp"
+            android:text="@string/app_name"
+            android:textColor="@color/app_bar_title"
+            android:textSize="@dimen/app_bar_text"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/import_button"
+            style="@style/CustomFontTabsStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground"
+            android:drawableEnd="@drawable/ic_action_import"
+            android:drawableRight="@drawable/ic_action_import"
+            android:drawablePadding="@dimen/content_padding_half"
+            android:gravity="center"
+            android:paddingLeft="@dimen/content_padding_standard"
+            android:paddingTop="13dp"
+            android:paddingRight="@dimen/content_padding_standard"
+            android:paddingBottom="4dp"
+            android:text="@string/shared_string_import"
+            android:textColor="@color/accent_color" />
+
+      </LinearLayout>
 
       <com.strikelines.app.utils.StyledTextView
         android:layout_width="match_parent"
