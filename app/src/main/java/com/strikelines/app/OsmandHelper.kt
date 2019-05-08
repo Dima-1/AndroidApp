@@ -107,7 +107,7 @@ class OsmandHelper(private val app: Application) {
 
 	fun isOsmandBound() = initialized && bound
 
-	fun isSelectedOsmandNotInstalled() = initialized && AndroidUtils.isAppInstalled(app, selectedOsmandPackage)
+	fun isSelectedOsmandNotInstalled() = initialized && !AndroidUtils.isAppInstalled(app, selectedOsmandPackage)
 
 	fun isOsmandConnected() = mIOsmAndAidlInterface != null
 
