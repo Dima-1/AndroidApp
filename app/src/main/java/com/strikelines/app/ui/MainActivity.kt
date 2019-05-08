@@ -197,17 +197,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 		}
 	}
 
-	private fun getImportFileIntent(): Intent {
-		return Intent().apply {
-			action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-				Intent.ACTION_OPEN_DOCUMENT
-			} else {
-				Intent.ACTION_GET_CONTENT
-			}
-			type = "*/*"
-		}
-	}
-
 	fun selectFileForImport() {
 		if (osmandHelper.isOsmandAvailiable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -225,7 +214,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	}
 
 	fun importFile() {
-		val intent = getImportFileIntent()
+		val intent = Intent().apply {
+			action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				Intent.ACTION_OPEN_DOCUMENT
+			} else {
+				Intent.ACTION_GET_CONTENT
+			}
+			type = "*/*"
+		}
 		if (AndroidUtils.isIntentSafe(this, intent)) {
 			startActivityForResult(intent, StrikeLinesApplication.IMPORT_REQUEST_CODE)
 		}
@@ -476,6 +472,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 				putString("application_mode", APP_MODE_BOAT)
 				putString("default_application_mode_string", APP_MODE_BOAT)
 				putBoolean("driving_region_automatic", false)
+				putBoolean("show_osmand_welcome_screen", false)
 				putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
 				putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
 				if (!isOsmandCustomized()) {

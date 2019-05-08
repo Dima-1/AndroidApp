@@ -107,7 +107,7 @@ class OsmandHelper(private val app: Application) {
 
 	fun isOsmandBound() = initialized && bound
 
-	fun isSelectedOsmandNotInstalled() = initialized && !bound
+	fun isSelectedOsmandNotInstalled() = initialized && AndroidUtils.isAppInstalled(app, selectedOsmandPackage)
 
 	fun isOsmandConnected() = mIOsmAndAidlInterface != null
 
@@ -139,6 +139,7 @@ class OsmandHelper(private val app: Application) {
 		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
 		if (intent != null) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+			intent.putExtra(SHOW_OSMAND_WELCOME_SCREEN, false)
 			app.startActivity(intent)
 		} else {
 			onOsmandMissingAction?.invoke()
@@ -569,6 +570,8 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_MILES_AND_METERS = "MILES_AND_METERS"
 		const val METRIC_CONST_MILES_AND_YARDS = "MILES_AND_YARDS"
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
+
+		const val SHOW_OSMAND_WELCOME_SCREEN = "show_osmand_welcome_screen"
 
 		fun getSqliteDbFileHumanReadableName(fileName: String): String {
 			return getFileHumanReadableName(fileName)
