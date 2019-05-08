@@ -5,17 +5,18 @@ import android.support.annotation.NonNull
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.strikelines.app.utils.AndroidUtils
+import android.widget.TextView
 import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.ui.adapters.LocalItemsViewAdapter
 import com.strikelines.app.ui.adapters.LocalItemsViewAdapter.*
+import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.UiUtils
 import net.osmand.aidl.gpx.AGpxFile
 import net.osmand.aidl.tiles.ASqliteDbFile
 
@@ -39,6 +40,16 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 		listView.apply {
 			layoutManager = LinearLayoutManager(context)
 			adapter = this@MapsTabFragment.viewAdapter
+		}
+		view.findViewById<TextView>(R.id.import_button).apply {
+			val mainActivity = activity as? MainActivity
+			if (mainActivity != null) {
+				val icon = UiUtils(mainActivity).getIcon(R.drawable.ic_action_import, R.color.accent_color)
+				setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
+				setOnClickListener {
+					mainActivity.selectFileForImport()
+				}
+			}
 		}
 
 		return view

@@ -109,6 +109,7 @@ class StrikeLinesApplication : Application() {
 		private const val chartsTimeKey = "updateTimestamp"
 		private const val url = "https://strikelines.com/api/charts/?key=A3dgmiOM1ul@IG1N=*@q"
 		const val DOWNLOAD_REQUEST_CODE = 12321
+		const val IMPORT_REQUEST_CODE = 12327
 
 		var isDataReadyFlag = false
 		var listener: AppListener? = null
