@@ -2,7 +2,7 @@ package com.strikelines.app
 
 import android.net.Uri
 import android.os.AsyncTask
-import android.provider.OpenableColumns
+import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.OsmandAidlConstants.*
 import net.osmand.aidl.copyfile.CopyFileParams
@@ -16,7 +16,7 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 	private var importTask: ImportTask? = null
 	var listener: ImportHelperListener? = null
 
-	public fun importFile(uri: Uri): Int {
+	fun importFile(uri: Uri): Int {
 		return when {
 			importTask != null -> {
 				RESULT_BUSY
@@ -31,7 +31,7 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 		}
 	}
 
-	public fun isCopying(): Boolean = importTask != null
+	fun isCopying(): Boolean = importTask != null
 
 	override fun fileCopyStarted(fileName: String?) {
 		listener?.fileCopyStarted(fileName)
@@ -59,14 +59,10 @@ private class ImportTask(
 ) : AsyncTask<Void, Void, Boolean>() {
 
 	private val log = PlatformUtil.getLog(ImportTask::class.java)
-	private val fileName: String?
+	private val fileName: String? = AndroidUtils.getNameFromContentUri(app, uri)
 	var copying = false
 		private set
 	var listener: ImportTaskListener? = null
-
-	init {
-		fileName = getNameFromContentUri(uri)
-	}
 
 	companion object {
 		const val SQLITE_EXT = ".sqlitedb"
@@ -179,24 +175,6 @@ private class ImportTask(
 			log.error(e.message, e)
 			return false
 		}
-	}
-
-	private fun getNameFromContentUri(contentUri: Uri): String? {
-		val returnCursor = app.contentResolver.query(contentUri, null, null, null, null)
-		val name = if (returnCursor != null && returnCursor.moveToFirst()) {
-			val columnIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-			if (columnIndex != -1) {
-				returnCursor.getString(columnIndex)
-			} else {
-				contentUri.lastPathSegment
-			}
-		} else {
-			null
-		}
-		if (returnCursor != null && !returnCursor.isClosed) {
-			returnCursor.close()
-		}
-		return name
 	}
 }
 

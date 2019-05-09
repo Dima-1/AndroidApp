@@ -43,7 +43,7 @@ import java.lang.ref.WeakReference
 class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	private val log = PlatformUtil.getLog(MainActivity::class.java)
 
-	val app get() = application as StrikeLinesApplication
+	private val app get() = application as StrikeLinesApplication
 	private val osmandHelper get() = app.osmandHelper
 	private val importHelper get() = app.importHelper
 	private val listeners = mutableListOf<WeakReference<OsmandHelperListener>>()
@@ -51,25 +51,23 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	private var purchasesTabFragment: PurchasesTabFragment? = null
 
 	private lateinit var bottomNav: BottomNavigationView
-	var mapListFragmentId: Int = -1
+	private var snackView: View? = null
 	var regionList: MutableSet<String> = mutableSetOf()
 	var regionToFilter: String = ""
-	var snackView: View? = null
 	var isActivityVisible = false
-	var isOsmandConnected = false
 
 	private var importUri: Uri? = null
 	private val importListener = object : ImportHelperListener {
 
 		override fun fileCopyStarted(fileName: String?) {
 			if (isActivityVisible) {
-				this@MainActivity.showProgressBar(true)
+				showProgressBar(true)
 			}
 		}
 
 		override fun fileCopyFinished(fileName: String?, success: Boolean) {
 			if (isActivityVisible) {
-				this@MainActivity.showProgressBar(false)
+				showProgressBar(false)
 				if (success) {
 					updateMapsList()
 					showSnackBar(getString(R.string.importFileSuccess).format(fileName), action = 2)
@@ -306,9 +304,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 
 	fun showProgressBar(isVisible: Boolean) {
 		if (isVisible)
-			loading_indicator.visibility = View.VISIBLE
+			horizontal_progress.visibility = View.VISIBLE
 		else {
-			loading_indicator.visibility = View.GONE
+			horizontal_progress.visibility = View.GONE
 		}
 	}
 
@@ -341,7 +339,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener {
 	override fun onOsmandConnectionStateChanged(connected: Boolean) {
 		if (connected) {
 			osmandHelper.registerForOsmandInitialization()
-			isOsmandConnected = true
 		}
 		listeners.forEach {
 			it.get()?.onOsmandConnectionStateChanged(connected)
