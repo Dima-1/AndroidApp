@@ -22,9 +22,8 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 				RESULT_BUSY
 			}
 			else -> {
-				val importTask = ImportTask(app, uri)
+				val importTask = ImportTask(app, uri, this)
 				this.importTask = importTask
-				importTask.listener = this
 				importTask.execute()
 				RESULT_OK
 			}
@@ -35,6 +34,10 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 
 	override fun fileCopyStarted(fileName: String?) {
 		listener?.fileCopyStarted(fileName)
+	}
+
+	override fun fileCopyProgressUpdated(fileName: String?, progress: Int) {
+		listener?.fileCopyProgressUpdated(fileName, progress)
 	}
 
 	override fun fileCopyFinished(fileName: String?, success: Boolean) {
@@ -50,19 +53,18 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 
 interface ImportHelperListener {
 	fun fileCopyStarted(fileName: String?)
+	fun fileCopyProgressUpdated(fileName: String?, progress: Int)
 	fun fileCopyFinished(fileName: String?, success: Boolean)
 }
 
 private class ImportTask(
 	val app: StrikeLinesApplication,
-	val uri: Uri
-) : AsyncTask<Void, Void, Boolean>() {
+	val uri: Uri,
+	val listener: ImportTaskListener?
+) : AsyncTask<Void, Int, Boolean>() {
 
 	private val log = PlatformUtil.getLog(ImportTask::class.java)
 	private val fileName: String? = AndroidUtils.getNameFromContentUri(app, uri)
-	var copying = false
-		private set
-	var listener: ImportTaskListener? = null
 
 	companion object {
 		const val SQLITE_EXT = ".sqlitedb"
@@ -74,17 +76,23 @@ private class ImportTask(
 
 	override fun onPreExecute() {
 		super.onPreExecute()
-		if (fileName != null && fileName.isNotEmpty()) {
-			copying = true
+		if (!fileName.isNullOrEmpty()) {
 			listener?.fileCopyStarted(fileName)
 		}
 	}
 
 	override fun doInBackground(vararg params: Void): Boolean? {
-		return if (fileName != null && fileName.isNotEmpty()) {
+		return if (!fileName.isNullOrEmpty()) {
 			handleFileImport()
 		} else {
 			false
+		}
+	}
+
+	override fun onProgressUpdate(vararg values: Int?) {
+		val progress = values.firstOrNull()
+		if (progress != null) {
+			listener?.fileCopyProgressUpdated(fileName, progress)
 		}
 	}
 
@@ -98,7 +106,7 @@ private class ImportTask(
 	}
 
 	private fun handleFileImport(): Boolean {
-		if (fileName != null && fileName.isNotEmpty()) {
+		if (!fileName.isNullOrEmpty()) {
 			if (fileName.endsWith(SQLITE_EXT)) {
 				return fileImportImpl(uri, fileName)
 			} else if (fileName.endsWith(CHARTS_EXT)) {
@@ -114,6 +122,10 @@ private class ImportTask(
 		var data = ByteArray(BUFFER_SIZE.toInt())
 		val retryInterval = COPY_FILE_MAX_LOCK_TIME_MS / 3
 		val startTime = System.currentTimeMillis()
+		val fileSize = AndroidUtils.getFileSize(app, uri)
+		var readBytes = 0L
+		val chunkSize = fileSize / 100
+		var progressCounter = 0
 		try {
 			val bis: DataInputStream = if (uri.scheme == "content") {
 				DataInputStream(app.contentResolver.openInputStream(uri))
@@ -130,6 +142,12 @@ private class ImportTask(
 			while (read != -1 && !isError) {
 				when (response) {
 					OK_RESPONSE -> {
+						readBytes += read
+						if (readBytes >= chunkSize) {
+							readBytes -= chunkSize
+							progressCounter++
+							publishProgress(progressCounter)
+						}
 						read = bis.read(data)
 						if (read > 0 && read < data.size) {
 							data = Arrays.copyOf(data, read)
@@ -180,5 +198,6 @@ private class ImportTask(
 
 private interface ImportTaskListener {
 	fun fileCopyStarted(fileName: String?)
+	fun fileCopyProgressUpdated(fileName: String?, progress: Int)
 	fun fileCopyFinished(fileName: String?, success: Boolean)
 }

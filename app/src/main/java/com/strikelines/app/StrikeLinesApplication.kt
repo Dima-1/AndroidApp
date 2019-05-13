@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.google.gson.GsonBuilder
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.domain.models.Charts
+import com.strikelines.app.utils.DownloadHelper
 import com.strikelines.app.utils.GetRequestAsync
 import com.strikelines.app.utils.OnRequestResultListener
 import java.io.File
@@ -21,6 +22,7 @@ class StrikeLinesApplication : Application() {
 	private val uiHandler = Handler()
 	lateinit var osmandHelper: OsmandHelper private set
 	lateinit var importHelper: ImportHelper private set
+	lateinit var downloadHelper: DownloadHelper private set
 
 	private lateinit var sp: SharedPreferences
 	private val gson by lazy { GsonBuilder().setLenient().create() }
@@ -31,6 +33,7 @@ class StrikeLinesApplication : Application() {
 		super.onCreate()
 		osmandHelper = OsmandHelper(this)
 		importHelper = ImportHelper(this)
+		downloadHelper = DownloadHelper(this)
 		sp = this.getSharedPreferences(spName, 0)
 		loadCharts()
 	}

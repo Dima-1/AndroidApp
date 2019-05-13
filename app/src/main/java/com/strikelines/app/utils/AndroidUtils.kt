@@ -1,5 +1,6 @@
 package com.strikelines.app.utils
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
@@ -15,6 +16,7 @@ import android.provider.OpenableColumns
 import android.support.annotation.ColorInt
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentManager
+import android.support.v4.content.ContextCompat
 import android.text.format.DateFormat
 import android.view.Gravity
 import android.view.View
@@ -99,6 +101,9 @@ object AndroidUtils {
 
 	fun isIntentSafe(ctx: Context, intent: Intent) =
 		ctx.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+
+	fun hasPermissionToWriteExternalStorage(context: Context): Boolean =
+		ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
 
 	fun createProgressDrawable(@ColorInt bgColor: Int, @ColorInt progressColor: Int): LayerDrawable {
 		val bg = ShapeDrawable()

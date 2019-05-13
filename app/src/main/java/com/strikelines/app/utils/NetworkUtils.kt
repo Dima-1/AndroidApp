@@ -1,7 +1,6 @@
 package com.strikelines.app.utils
 
 import android.os.AsyncTask
-import android.os.Environment
 import android.util.Log
 import java.io.*
 import java.lang.Exception
@@ -49,61 +48,4 @@ class GetRequestAsync(private val url: String, private val listener: OnRequestRe
 
 interface OnRequestResultListener {
 	fun onResult(result: String)
-}
-
-class DownloadFileAsync(
-	private val downloadUrl: String,
-	private val downloadCallback: DownloadCallback,
-	private val title: String = ""
-) : AsyncTask<Void, Void, Boolean>() {
-
-	private val path = "${Environment.getExternalStorageDirectory().absolutePath}/strikelines/"
-	private val fileName = downloadUrl.substringBeforeLast('/').substringAfterLast('/') +
-			".${downloadUrl.substringAfterLast('.')}"
-
-	override fun doInBackground(vararg params: Void?): Boolean {
-		var res = false
-		try {
-			val dir = File(path)
-			if (!dir.exists()) dir.mkdir()
-			val file = File(dir, fileName)
-
-			val urlcon = URL(downloadUrl).openConnection()
-			urlcon.readTimeout = 60000
-			urlcon.connectTimeout = 60000
-			urlcon.connect()
-			val inputStream = BufferedInputStream(urlcon.getInputStream(), 4096)
-
-			val outputStream = FileOutputStream(file)
-			val data = ByteArray(1024)
-			var total: Long = 0
-			var count = inputStream.read(data)
-
-			while (count != -1) {
-				total += count.toLong()
-				outputStream.write(data, 0, count)
-				count = inputStream.read(data)
-			}
-
-			outputStream.flush()
-			outputStream.close()
-			inputStream.close()
-			res = true
-		} catch (e: Exception) {
-			Log.w(e.message, e)
-		}
-		return res
-	}
-
-	override fun onPostExecute(result: Boolean?) {
-		if (result != null && result) {
-			downloadCallback.onDownloadComplete(title, path + fileName, true)
-		} else {
-			downloadCallback.onDownloadComplete(title, "", false)
-		}
-	}
-}
-
-interface DownloadCallback {
-	fun onDownloadComplete(title: String, path: String, isSuccess: Boolean)
 }
