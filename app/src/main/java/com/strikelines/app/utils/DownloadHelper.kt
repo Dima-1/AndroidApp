@@ -39,7 +39,7 @@ class DownloadHelper(private val app: StrikeLinesApplication) : DownloadTaskList
 		private val title: String = ""
 	) : AsyncTask<Void, Int, Boolean>() {
 
-		private val log = PlatformUtil.getLog(DownloadHelper::class.java)
+		private val log = PlatformUtil.getLog(DownloadFileAsync::class.java)
 
 		private val path = "${Environment.getExternalStorageDirectory().absolutePath}/strikelines/"
 		private val fileName = downloadUrl.substringBeforeLast('/').substringAfterLast('/') +
