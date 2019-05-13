@@ -2,7 +2,7 @@ package com.strikelines.app
 
 import android.net.Uri
 import android.os.AsyncTask
-import android.provider.OpenableColumns
+import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
 import net.osmand.aidl.OsmandAidlConstants.*
 import net.osmand.aidl.copyfile.CopyFileParams
@@ -16,25 +16,28 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 	private var importTask: ImportTask? = null
 	var listener: ImportHelperListener? = null
 
-	public fun importFile(uri: Uri): Int {
+	fun importFile(uri: Uri): Int {
 		return when {
 			importTask != null -> {
 				RESULT_BUSY
 			}
 			else -> {
-				val importTask = ImportTask(app, uri)
+				val importTask = ImportTask(app, uri, this)
 				this.importTask = importTask
-				importTask.listener = this
 				importTask.execute()
 				RESULT_OK
 			}
 		}
 	}
 
-	public fun isCopying(): Boolean = importTask != null
+	fun isCopying(): Boolean = importTask != null
 
 	override fun fileCopyStarted(fileName: String?) {
 		listener?.fileCopyStarted(fileName)
+	}
+
+	override fun fileCopyProgressUpdated(fileName: String?, progress: Int) {
+		listener?.fileCopyProgressUpdated(fileName, progress)
 	}
 
 	override fun fileCopyFinished(fileName: String?, success: Boolean) {
@@ -50,23 +53,18 @@ class ImportHelper(private val app: StrikeLinesApplication) : ImportTaskListener
 
 interface ImportHelperListener {
 	fun fileCopyStarted(fileName: String?)
+	fun fileCopyProgressUpdated(fileName: String?, progress: Int)
 	fun fileCopyFinished(fileName: String?, success: Boolean)
 }
 
 private class ImportTask(
 	val app: StrikeLinesApplication,
-	val uri: Uri
-) : AsyncTask<Void, Void, Boolean>() {
+	val uri: Uri,
+	val listener: ImportTaskListener?
+) : AsyncTask<Void, Int, Boolean>() {
 
 	private val log = PlatformUtil.getLog(ImportTask::class.java)
-	private val fileName: String?
-	var copying = false
-		private set
-	var listener: ImportTaskListener? = null
-
-	init {
-		fileName = getNameFromContentUri(uri)
-	}
+	private val fileName: String? = AndroidUtils.getNameFromContentUri(app, uri)
 
 	companion object {
 		const val SQLITE_EXT = ".sqlitedb"
@@ -78,17 +76,23 @@ private class ImportTask(
 
 	override fun onPreExecute() {
 		super.onPreExecute()
-		if (fileName != null && fileName.isNotEmpty()) {
-			copying = true
+		if (!fileName.isNullOrEmpty()) {
 			listener?.fileCopyStarted(fileName)
 		}
 	}
 
 	override fun doInBackground(vararg params: Void): Boolean? {
-		return if (fileName != null && fileName.isNotEmpty()) {
+		return if (!fileName.isNullOrEmpty()) {
 			handleFileImport()
 		} else {
 			false
+		}
+	}
+
+	override fun onProgressUpdate(vararg values: Int?) {
+		val progress = values.firstOrNull()
+		if (progress != null) {
+			listener?.fileCopyProgressUpdated(fileName, progress)
 		}
 	}
 
@@ -102,7 +106,7 @@ private class ImportTask(
 	}
 
 	private fun handleFileImport(): Boolean {
-		if (fileName != null && fileName.isNotEmpty()) {
+		if (!fileName.isNullOrEmpty()) {
 			if (fileName.endsWith(SQLITE_EXT)) {
 				return fileImportImpl(uri, fileName)
 			} else if (fileName.endsWith(CHARTS_EXT)) {
@@ -118,6 +122,10 @@ private class ImportTask(
 		var data = ByteArray(BUFFER_SIZE.toInt())
 		val retryInterval = COPY_FILE_MAX_LOCK_TIME_MS / 3
 		val startTime = System.currentTimeMillis()
+		val fileSize = AndroidUtils.getFileSize(app, uri)
+		var readBytes = 0L
+		val chunkSize = fileSize / 100
+		var progressCounter = 0
 		try {
 			val bis: DataInputStream = if (uri.scheme == "content") {
 				DataInputStream(app.contentResolver.openInputStream(uri))
@@ -134,6 +142,12 @@ private class ImportTask(
 			while (read != -1 && !isError) {
 				when (response) {
 					OK_RESPONSE -> {
+						readBytes += read
+						if (readBytes >= chunkSize) {
+							readBytes -= chunkSize
+							progressCounter++
+							publishProgress(progressCounter)
+						}
 						read = bis.read(data)
 						if (read > 0 && read < data.size) {
 							data = Arrays.copyOf(data, read)
@@ -180,27 +194,10 @@ private class ImportTask(
 			return false
 		}
 	}
-
-	private fun getNameFromContentUri(contentUri: Uri): String? {
-		val returnCursor = app.contentResolver.query(contentUri, null, null, null, null)
-		val name = if (returnCursor != null && returnCursor.moveToFirst()) {
-			val columnIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-			if (columnIndex != -1) {
-				returnCursor.getString(columnIndex)
-			} else {
-				contentUri.lastPathSegment
-			}
-		} else {
-			null
-		}
-		if (returnCursor != null && !returnCursor.isClosed) {
-			returnCursor.close()
-		}
-		return name
-	}
 }
 
 private interface ImportTaskListener {
 	fun fileCopyStarted(fileName: String?)
+	fun fileCopyProgressUpdated(fileName: String?, progress: Int)
 	fun fileCopyFinished(fileName: String?, success: Boolean)
 }

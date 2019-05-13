@@ -34,7 +34,6 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 		savedInstanceState: Bundle?
 	): View? {
 		val view = inflater.inflate(R.layout.maps_tab_fragment, container, false)
-		(activity as MainActivity).mapListFragmentId = this.id
 		viewAdapter.listener = this
 		listView = view.findViewById<RecyclerView>(R.id.recycler_view)
 		listView.apply {

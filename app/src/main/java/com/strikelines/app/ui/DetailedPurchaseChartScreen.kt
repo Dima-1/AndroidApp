@@ -2,33 +2,36 @@ package com.strikelines.app.ui
 
 import android.content.pm.PackageManager
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.util.Log
-import com.strikelines.app.R
-import com.strikelines.app.domain.GlideApp
-import com.strikelines.app.domain.models.Chart
-import kotlinx.android.synthetic.main.detailed_chart_screen.*
-import java.lang.Exception
-import android.os.Build
-import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
 import android.view.View
+import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.StrikeLinesApplication.Companion.DOWNLOAD_REQUEST_CODE
-import com.strikelines.app.utils.*
+import com.strikelines.app.domain.GlideApp
+import com.strikelines.app.domain.models.Chart
+import com.strikelines.app.utils.AndroidUtils
+import com.strikelines.app.utils.DownloadHelperListener
+import com.strikelines.app.utils.clearGarbadge
+import com.strikelines.app.utils.clearTitleForWrecks
+import kotlinx.android.synthetic.main.detailed_chart_screen.*
 
 
-class DetailedPurchaseChartScreen : AppCompatActivity() {
+class DetailedPurchaseChartScreen : AppCompatActivity(), DownloadHelperListener {
 
 	companion object {
 		private const val CHART_BUNDLE_KEY = "chart_details"
 	}
 
-	var isActivityVisible = false
-	var chart: Chart? = null
-	val app = StrikeLinesApplication.getApp()
+	private val app = StrikeLinesApplication.getApp()
+	private val downloadHelper get() = app?.downloadHelper
+
+	private var chart: Chart? = null
+	private var isActivityVisible = false
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -46,12 +49,42 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 
 	override fun onResume() {
 		super.onResume()
+		downloadHelper?.listener = this
 		isActivityVisible = true
 	}
 
 	override fun onPause() {
 		super.onPause()
+		downloadHelper?.listener = null
 		isActivityVisible = false
+	}
+
+	override fun onDownloadStarted(title: String, path: String) {
+
+	}
+
+	override fun onDownloadProgressUpdate(title: String, path: String, progress: Int) {
+
+	}
+
+	override fun onDownloadCompleted(title: String, path: String, isSuccess: Boolean) {
+		if (isActivityVisible) {
+			if (isSuccess) {
+				showSnackBar(resources.getString(R.string.download_success_msg).format(clearTitleForWrecks(title)),
+					findViewById(android.R.id.content), action = 3, path = path)
+			} else {
+				showSnackBar(resources.getString(R.string.download_failed_msg).format(clearTitleForWrecks(title)),
+					findViewById(android.R.id.content), action = 2)
+			}
+		}
+	}
+
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+		if (requestCode == DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			chart?.let {
+				downloadHelper?.downloadFile(it.downloadurl, it.name)
+			}
+		}
 	}
 
 	private fun populateView(chart: Chart) {
@@ -104,28 +137,13 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 
 	private fun downloadFreeChart(downloadUrl: String) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (ActivityCompat.checkSelfPermission(
-					this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-				== PackageManager.PERMISSION_GRANTED)
-			{
-				DownloadFileAsync(downloadUrl, downloadCallback, chart!!.name).execute()
+			if (AndroidUtils.hasPermissionToWriteExternalStorage(this)) {
+				downloadHelper?.downloadFile(downloadUrl, chart!!.name)
 			} else {
-				requestPermissions(
-					arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-					DOWNLOAD_REQUEST_CODE)
+				requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), DOWNLOAD_REQUEST_CODE)
 			}
 		} else {
-			DownloadFileAsync(downloadUrl, downloadCallback, chart!!.name).execute()
-		}
-	}
-
-	override fun onRequestPermissionsResult(
-		requestCode: Int,
-		permissions: Array<out String>,
-		grantResults: IntArray
-	) {
-		if (requestCode == DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			chart?.let { DownloadFileAsync(chart!!.downloadurl, downloadCallback, chart!!.name).execute() }
+			downloadHelper?.downloadFile(downloadUrl, chart!!.name)
 		}
 	}
 
@@ -139,7 +157,7 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 		}
 	}
 
-	fun showSnackBar(
+	private fun showSnackBar(
 		msg: String,
 		parentLayout: View,
 		lengths: Int = Snackbar.LENGTH_LONG,
@@ -155,19 +173,4 @@ class DetailedPurchaseChartScreen : AppCompatActivity() {
 		}
 		snackbar.show()
 	}
-
-	val downloadCallback = object: DownloadCallback {
-		override fun onDownloadComplete(title: String, path:String, isSuccess: Boolean) {
-			if (isSuccess && isActivityVisible) {
-				showSnackBar(resources.getString(R.string.download_success_msg).format(clearTitleForWrecks(title)),
-					findViewById(android.R.id.content), action = 3, path = path)
-			} else if (isActivityVisible) {
-				showSnackBar(resources.getString(R.string.download_failed_msg).format(clearTitleForWrecks(title)),
-					findViewById(android.R.id.content), action = 2)
-			}
-		}
-	}
-
-
 }
-

@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -13,12 +12,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.strikelines.app.*
+import com.strikelines.app.R
+import com.strikelines.app.StrikeLinesApplication
+import com.strikelines.app.StrikeLinesApplication.Companion.DOWNLOAD_REQUEST_CODE
 import com.strikelines.app.domain.models.Chart
 import com.strikelines.app.ui.adapters.ShopAdapter
 import com.strikelines.app.ui.adapters.ShopListener
 import com.strikelines.app.utils.AndroidUtils
-import com.strikelines.app.utils.DownloadFileAsync
 
 abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 
@@ -28,31 +28,36 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 		private const val CHART_BUNDLE_KEY = "chart_details"
 	}
 
-	protected val chartsList = mutableListOf<Chart>()
+	private val app get() = StrikeLinesApplication.getApp()
+	private val downloadHelper get() = app?.downloadHelper
 
-	lateinit var recycleView: RecyclerView
-	var adapter: ShopAdapter? = null
-	private var downloadUrl: String? = null
-	var downloadTitle:String = ""
+	private val chartsList = mutableListOf<Chart>()
+
+	private var adapter: ShopAdapter? = null
+	private var downloadUrl: String = ""
+	private var downloadTitle: String = ""
+
+	private val listener: ShopListener? = object : ShopListener {
+		override fun onDetailsClicked(item: Chart) = openDetailsScreen(item.name)
+		override fun onDownloadClicked(item: Chart) = openUrl(item)
+	}
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 		retainInstance = true
 		val view = inflater.inflate(R.layout.recycler_list_fragment, container, false)
-		recycleView = view.findViewById(R.id.recycler_view)
+
 		adapter = ShopAdapter(listener)
-		recycleView.layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
-		recycleView.adapter = this.adapter
+		view.findViewById<RecyclerView>(R.id.recycler_view).apply {
+			layoutManager = LinearLayoutManager(activity, LinearLayout.VERTICAL, false)
+			adapter = this@PurchaseSqliteDbFilesFragment.adapter
+		}
+
 		return view
 	}
 
 	override fun onResume() {
 		super.onResume()
 		getData()
-	}
-
-	private val listener: ShopListener? = object : ShopListener {
-		override fun onDetailsClicked(item: Chart) = openDetailsScreen(item.name)
-		override fun onDownloadClicked(item: Chart) = openUrl(item)
 	}
 
 	fun openDetailsScreen(chartsName: String) {
@@ -67,7 +72,7 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 			Log.d("ListFragment:", "Download clicked")
 			downloadUrl = item.downloadurl
 			downloadTitle = item.name
-			downloadFreeChart(downloadUrl!!)
+			downloadFreeChart(downloadUrl)
 		}
 	}
 
@@ -88,27 +93,20 @@ abstract class PurchaseSqliteDbFilesFragment : Fragment() {
 	abstract fun sortResults(results: List<Chart>): List<Chart>
 
 	private fun downloadFreeChart(downloadUrl: String) {
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (checkSelfPermission(activity!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-				== PackageManager.PERMISSION_GRANTED
-			) {
-				DownloadFileAsync(downloadUrl, (activity as MainActivity).downloadCallback, downloadTitle).execute()
+			if (AndroidUtils.hasPermissionToWriteExternalStorage(app!!)) {
+				downloadHelper?.downloadFile(downloadUrl, downloadTitle)
 			} else {
-				requestPermissions(
-					arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-					StrikeLinesApplication.DOWNLOAD_REQUEST_CODE
-				)
+				requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), DOWNLOAD_REQUEST_CODE)
 			}
 		} else {
-			DownloadFileAsync(downloadUrl, (activity as MainActivity).downloadCallback, downloadTitle).execute()
+			downloadHelper?.downloadFile(downloadUrl, downloadTitle)
 		}
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-		if (requestCode == StrikeLinesApplication.DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-			downloadUrl.let { DownloadFileAsync(downloadUrl!!, (activity as MainActivity).downloadCallback, downloadTitle).execute() }
+		if (requestCode == DOWNLOAD_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			downloadHelper?.downloadFile(downloadUrl, downloadTitle)
 		}
 	}
-
 }

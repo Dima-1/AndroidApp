@@ -1,16 +1,24 @@
 package com.strikelines.app.utils
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.ClipDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
+import android.support.annotation.ColorInt
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentManager
+import android.support.v4.content.ContextCompat
 import android.text.format.DateFormat
+import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import java.text.MessageFormat
@@ -89,8 +97,58 @@ object AndroidUtils {
 		} else ""
 	}
 
-	fun getIntentForBrowser(url:String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+	fun getIntentForBrowser(url: String) = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
 	fun isIntentSafe(ctx: Context, intent: Intent) =
 		ctx.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+
+	fun hasPermissionToWriteExternalStorage(context: Context): Boolean =
+		ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+
+	fun createProgressDrawable(@ColorInt bgColor: Int, @ColorInt progressColor: Int): LayerDrawable {
+		val bg = ShapeDrawable()
+		bg.paint.color = bgColor
+
+		val progress = ShapeDrawable()
+		progress.paint.color = progressColor
+
+		val res = LayerDrawable(arrayOf(bg, ClipDrawable(progress, Gravity.START, ClipDrawable.HORIZONTAL)))
+
+		res.setId(0, android.R.id.background)
+		res.setId(1, android.R.id.progress)
+
+		return res
+	}
+
+	fun getNameFromContentUri(ctx: Context, contentUri: Uri): String? {
+		val returnCursor = ctx.contentResolver.query(contentUri, null, null, null, null)
+		val name = if (returnCursor != null && returnCursor.moveToFirst()) {
+			val columnIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+			if (columnIndex != -1) {
+				returnCursor.getString(columnIndex)
+			} else {
+				contentUri.lastPathSegment
+			}
+		} else {
+			null
+		}
+		if (returnCursor != null && !returnCursor.isClosed) {
+			returnCursor.close()
+		}
+		return name
+	}
+
+	fun getFileSize(ctx: Context, uri: Uri): Long {
+		val cursor = ctx.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
+		var size: Long = -1
+		cursor?.use {
+			if (it.moveToFirst()) {
+				val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+				if (sizeIndex != -1 && !it.isNull(sizeIndex)) {
+					size = it.getLong(sizeIndex)
+				}
+			}
+		}
+		return size
+	}
 }
