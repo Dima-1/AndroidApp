@@ -81,7 +81,11 @@ import net.osmand.aidl.tiles.ASqliteDbFile;
 import net.osmand.aidl.plugins.PluginParams;
 import net.osmand.aidl.copyfile.CopyFileParams;
 
+import net.osmand.aidl.navigation.ANavigationUpdateParams;
 
+import net.osmand.aidl.contextmenu.ContextMenuButtonsParams;
+import net.osmand.aidl.contextmenu.UpdateContextMenuButtonsParams;
+import net.osmand.aidl.contextmenu.RemoveContextMenuButtonsParams;
 
 
 // NOTE: Add new methods at the end of file!!!
@@ -182,4 +186,12 @@ interface IOsmAndAidlInterface {
     boolean getBitmapForGpx(in CreateGpxBitmapParams file, IOsmAndAidlCallback callback);
 
     int copyFile(in CopyFileParams filePart);
+
+    long registerForNavigationUpdates(in ANavigationUpdateParams params, IOsmAndAidlCallback callback);
+
+    long addContextMenuButtons(in ContextMenuButtonsParams params, IOsmAndAidlCallback callback);
+
+    boolean removeContextMenuButtons(in RemoveContextMenuButtonsParams params);
+
+    boolean updateContextMenuButtons(in UpdateContextMenuButtonsParams params);
 }
