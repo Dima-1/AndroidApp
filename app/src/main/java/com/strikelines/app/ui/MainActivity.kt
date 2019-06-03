@@ -207,7 +207,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 				val uri = intent.data
 				intent.action = null
 				setIntent(null)
-				if (uri != null) {
+				val scheme = uri?.scheme
+				if (uri != null && scheme != null && ("file" == scheme || "content" == scheme)) {
 					if (importHelper.isCopying()) {
 						showToastMessage(getString(R.string.copy_file_in_progress_alert))
 					} else {
@@ -456,6 +457,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			regWidgetAvailability("map_marker_1st", none)
 			regWidgetAvailability("map_marker_2nd", none)
 			regWidgetVisibility("bearing", listOf(APP_MODE_BOAT))
+			regWidgetVisibility("ruler", all)
 
 			// top
 			regWidgetVisibility("config", none)
@@ -473,6 +475,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 				putString("default_application_mode_string", APP_MODE_BOAT)
 				putBoolean("driving_region_automatic", false)
 				putBoolean("show_osmand_welcome_screen", false)
+				putBoolean("show_coordinates_widget", true)
+				putBoolean("show_compass_ruler", true)
+				putString("map_info_controls", "ruler;")
 				putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
 				putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
 				if (!isOsmandCustomized()) {
