@@ -94,6 +94,10 @@ class LocalItemsViewAdapter : RecyclerView.Adapter<LocalItemsViewAdapter.BaseVie
 		}
 
 		if (getItemViewType(position) != ITEM_VIEW_TYPE_HEADER) {
+			holder.infoContainer?.setOnClickListener {
+				val button: CompoundButton? = if (item.multiselection) holder.checkbox else holder.radioButton
+				button?.toggle()
+			}
 			if (item.multiselection) {
 				holder.checkbox?.visibility = View.VISIBLE
 				holder.radioButton?.visibility = View.GONE
@@ -125,6 +129,7 @@ class LocalItemsViewAdapter : RecyclerView.Adapter<LocalItemsViewAdapter.BaseVie
 	abstract inner class BaseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 		val shadowTop: View? = view.findViewById(R.id.shadow_top)
 		val shadowBottom: View? = view.findViewById(R.id.shadow_bottom)
+		val infoContainer: View? = view.findViewById(R.id.info_container)
 		val image: ImageView? = view.findViewById(R.id.image)
 		val title: TextView? = view.findViewById(R.id.title)
 		val description: TextView? = view.findViewById(R.id.description)
