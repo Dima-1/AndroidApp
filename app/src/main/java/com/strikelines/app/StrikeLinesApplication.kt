@@ -32,6 +32,23 @@ class StrikeLinesApplication : Application() {
 	override fun onCreate() {
 		super.onCreate()
 		osmandHelper = OsmandHelper(this)
+		val osmandAppInitCallback = object : OsmandHelper.OsmandAppInitCallback {
+			override fun onOsmandInitialized() {
+				if (shouldOpenOsmand) {
+					osmandHelper.setupOsmand()
+					osmandHelper.openOsmand()
+				}
+			}
+		}
+		val osmandHelperListener = object : OsmandHelper.OsmandHelperListener {
+			override fun onOsmandConnectionStateChanged(connected: Boolean) {
+				if (connected) {
+					osmandHelper.registerForOsmandInitialization()
+				}
+			}
+		}
+		osmandHelper.onOsmandInitCallbacks.add(osmandAppInitCallback)
+		osmandHelper.listeners.add(osmandHelperListener)
 		importHelper = ImportHelper(this)
 		downloadHelper = DownloadHelper(this)
 		sp = this.getSharedPreferences(spName, 0)
@@ -117,6 +134,7 @@ class StrikeLinesApplication : Application() {
 		var isDataReadyFlag = false
 		var listener: AppListener? = null
 		val chartsList = mutableListOf<Chart>()
+		var shouldOpenOsmand = false
 
 		private var instance: StrikeLinesApplication? = null
 		fun getApp() = instance

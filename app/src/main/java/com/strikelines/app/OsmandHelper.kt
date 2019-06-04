@@ -43,7 +43,7 @@ class OsmandHelper(private val app: Application) {
 
 	private var selectedOsmandPackage = ""
 
-	var listener: OsmandHelperListener? = null
+	var listeners: MutableList<OsmandHelperListener> = mutableListOf()
 	var onOsmandInitCallbacks: MutableList<OsmandAppInitCallback> = mutableListOf()
 
 	interface OsmandHelperListener {
@@ -53,7 +53,6 @@ class OsmandHelper(private val app: Application) {
 	interface OsmandAppInitCallback {
 		fun onOsmandInitialized()
 	}
-
 
 	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
 		@Throws(RemoteException::class)
@@ -71,7 +70,6 @@ class OsmandHelper(private val app: Application) {
 				log.debug("osmand initialized")
 				callback.onOsmandInitialized()
 			}
-
 		}
 	}
 
@@ -88,14 +86,20 @@ class OsmandHelper(private val app: Application) {
 			// representation of that from the raw service object.
 			mIOsmAndAidlInterface = IOsmAndAidlInterface.Stub.asInterface(service)
 			initialized = true
-			listener?.onOsmandConnectionStateChanged(true)
+			log.debug("onServiceConnected")
+			listeners.forEach {
+				it.onOsmandConnectionStateChanged(true)
+			}
 		}
 
 		override fun onServiceDisconnected(name: ComponentName) {
 			// This is called when the connection with the service has been
 			// unexpectedly disconnected -- that is, its process crashed.
+			log.debug("onServiceDisconnected")
 			mIOsmAndAidlInterface = null
-			listener?.onOsmandConnectionStateChanged(false)
+			listeners.forEach {
+				it.onOsmandConnectionStateChanged(false)
+			}
 		}
 	}
 
@@ -103,11 +107,7 @@ class OsmandHelper(private val app: Application) {
 		connectOsmand()
 	}
 
-	fun isOsmandCustomized() = osmandCustomized
-
 	fun isOsmandBound() = initialized && bound
-
-	fun isSelectedOsmandNotInstalled() = initialized && !AndroidUtils.isAppInstalled(app, selectedOsmandPackage)
 
 	fun isOsmandConnected() = mIOsmAndAidlInterface != null
 
@@ -132,29 +132,168 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
-	fun openOsmand(onOsmandMissingAction: (() -> Unit)?) {
-		if (isSelectedOsmandNotInstalled() && !isOsmandConnected()) {
+	fun checkOsmandInitialization() {
+		if (!isOsmandConnected()) {
 			connectOsmand()
+		} else {
+			registerForOsmandInitialization()
 		}
+	}
+
+	fun canOpenOsmand() = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage) != null
+
+	fun openOsmand() {
 		val intent = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage)
 		if (intent != null) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
 			intent.putExtra(SHOW_OSMAND_WELCOME_SCREEN, false)
 			app.startActivity(intent)
-		} else {
-			onOsmandMissingAction?.invoke()
 		}
+	}
+
+	fun setupOsmand() {
+		val logoUri = AndroidUtils.resourceToUri(app, R.drawable.img_strikelines_nav_drawer_logo)
+
+		val exceptDefault = listOf(
+			APP_MODE_CAR,
+			APP_MODE_PEDESTRIAN,
+			APP_MODE_BICYCLE,
+			APP_MODE_BOAT,
+			APP_MODE_AIRCRAFT,
+			APP_MODE_BUS,
+			APP_MODE_TRAIN
+		)
+		val exceptPedestrianAndDefault = listOf(
+			APP_MODE_CAR,
+			APP_MODE_BICYCLE,
+			APP_MODE_BOAT,
+			APP_MODE_AIRCRAFT,
+			APP_MODE_BUS,
+			APP_MODE_TRAIN
+		)
+		val exceptAirBoatDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_PEDESTRIAN)
+		val pedestrian = listOf(APP_MODE_PEDESTRIAN)
+		val pedestrianBicycle = listOf(APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE)
+		val all = null
+		val none = emptyList<String>()
+
+		setNavDrawerLogoWithParams(logoUri, app.packageName, "strike_lines_app://main_activity")
+		setNavDrawerFooterParams(
+			app.packageName,
+			"strike_lines_app://main_activity",
+			app.resources.getString(R.string.app_name)
+		)
+		setNavDrawerItems(
+			app.packageName,
+			listOf(app.getString(R.string.aidl_menu_item_download_charts)),
+			listOf("strike_lines_app://main_activity"),
+			listOf("ic_type_archive"),
+			listOf(-1)
+		)
+
+		setDisabledPatterns(
+			listOf(
+				OsmandCustomizationConstants.DRAWER_DASHBOARD_ID,
+				OsmandCustomizationConstants.DRAWER_MY_PLACES_ID,
+				OsmandCustomizationConstants.DRAWER_SEARCH_ID,
+				OsmandCustomizationConstants.DRAWER_DIRECTIONS_ID,
+				OsmandCustomizationConstants.DRAWER_CONFIGURE_SCREEN_ID,
+				OsmandCustomizationConstants.DRAWER_OSMAND_LIVE_ID,
+				OsmandCustomizationConstants.DRAWER_TRAVEL_GUIDES_ID,
+				OsmandCustomizationConstants.DRAWER_PLUGINS_ID,
+				OsmandCustomizationConstants.DRAWER_SETTINGS_ID,
+				OsmandCustomizationConstants.DRAWER_HELP_ID,
+				OsmandCustomizationConstants.DRAWER_BUILDS_ID,
+				OsmandCustomizationConstants.DRAWER_DIVIDER_ID,
+				OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
+				OsmandCustomizationConstants.MAP_CONTEXT_MENU_ACTIONS,
+				OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
+			)
+		)
+
+		setEnabledIds(
+			listOf(
+				OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
+				OsmandCustomizationConstants.GPX_FILES_ID,
+				OsmandCustomizationConstants.MAP_SOURCE_ID,
+				OsmandCustomizationConstants.OVERLAY_MAP,
+				OsmandCustomizationConstants.UNDERLAY_MAP,
+				OsmandCustomizationConstants.CONTOUR_LINES
+			)
+		)
+
+		setDisabledIds(
+			listOf(
+				OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID,
+				OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
+			)
+		)
+
+		changePluginState(OsmandCustomizationConstants.PLUGIN_RASTER_MAPS, 1)
+
+		// left
+		regWidgetVisibility("next_turn", exceptPedestrianAndDefault)
+		regWidgetVisibility("next_turn_small", pedestrian)
+		regWidgetVisibility("next_next_turn", exceptPedestrianAndDefault)
+		regWidgetAvailability("next_turn", exceptDefault)
+		regWidgetAvailability("next_turn_small", exceptDefault)
+		regWidgetAvailability("next_next_turn", exceptDefault)
+
+		// right
+		regWidgetVisibility("intermediate_distance", all)
+		regWidgetVisibility("distance", all)
+		regWidgetVisibility("time", all)
+		regWidgetVisibility("intermediate_time", all)
+		regWidgetVisibility("speed", exceptPedestrianAndDefault)
+		regWidgetVisibility("max_speed", listOf(APP_MODE_CAR))
+		regWidgetVisibility("altitude", pedestrianBicycle)
+		regWidgetVisibility("gps_info", listOf(APP_MODE_BOAT))
+		regWidgetAvailability("intermediate_distance", all)
+		regWidgetAvailability("distance", all)
+		regWidgetAvailability("time", all)
+		regWidgetAvailability("intermediate_time", all)
+		regWidgetAvailability("map_marker_1st", none)
+		regWidgetAvailability("map_marker_2nd", none)
+		regWidgetVisibility("bearing", listOf(APP_MODE_BOAT))
+		regWidgetVisibility("ruler", all)
+
+		// top
+		regWidgetVisibility("config", none)
+		regWidgetVisibility("layers", none)
+		regWidgetVisibility("compass", none)
+		regWidgetVisibility("street_name", exceptAirBoatDefault)
+		regWidgetVisibility("back_to_location", all)
+		regWidgetVisibility("monitoring_services", none)
+		regWidgetVisibility("bgService", none)
+
+		val bundle = Bundle()
+		bundle.apply {
+			putString("available_application_modes", "$APP_MODE_BOAT,")
+			putString("application_mode", APP_MODE_BOAT)
+			putString("default_application_mode_string", APP_MODE_BOAT)
+			putBoolean("driving_region_automatic", false)
+			putBoolean("show_osmand_welcome_screen", false)
+			putBoolean("show_coordinates_widget", true)
+			putBoolean("show_compass_ruler", true)
+			putString("map_info_controls", "ruler;")
+			putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
+			putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
+			if (!osmandCustomized) {
+				putBoolean("map_online_data", true)
+			}
+		}
+		customizeOsmandSettings("strikelines", bundle)
 	}
 
 	fun isOsmandAvailiable():Boolean =
 		app.packageManager.getLaunchIntentForPackage(getOsmandPackage()) != null
 
 
-	fun registerForOsmandInitialization():Boolean {
-		if(mIOsmAndAidlInterface !=null) {
+	fun registerForOsmandInitialization(): Boolean {
+		if (mIOsmAndAidlInterface != null) {
 			try {
 				return mIOsmAndAidlInterface!!.registerForOsmandInitListener(iOsmAndAidlCallback)
-			} catch (e:RemoteException) {
+			} catch (e: RemoteException) {
 				e.printStackTrace()
 			}
 		}
