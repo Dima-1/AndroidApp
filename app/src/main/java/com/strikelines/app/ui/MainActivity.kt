@@ -137,8 +137,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			}
 		}
 		fab.setOnClickListener {
-			StrikeLinesApplication.shouldOpenOsmand = true
 			if (osmandHelper.canOpenOsmand()) {
+				StrikeLinesApplication.shouldOpenOsmand = true
+				showProgressDialog()
 				osmandHelper.checkOsmandInitialization()
 			} else {
 				installOsmandDialog()
@@ -219,11 +220,14 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		importHelper.listener = null
 		downloadHelper.listener = null
 		StrikeLinesApplication.listener = null
+		if (StrikeLinesApplication.shouldOpenOsmand && !isChangingConfigurations) {
+			StrikeLinesApplication.shouldOpenOsmand = false
+			dismissProgressDialog()
+		}
 	}
 
 	override fun onDestroy() {
 		super.onDestroy()
-		StrikeLinesApplication.shouldOpenOsmand = false
 		app.cleanupResources()
 	}
 
@@ -244,6 +248,15 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			AndroidUtils.dismissAllDialogs(supportFragmentManager)
 			bottomNav.selectedItemId = R.id.action_maps
 		}
+	}
+
+	private fun showProgressDialog() {
+		ProgressDialogFragment.showInstance(supportFragmentManager, R.string.please_wait, R.string.prepare_osmand_before_opening)
+	}
+
+	private fun dismissProgressDialog() {
+		val progressDialog = supportFragmentManager.findFragmentByTag(ProgressDialogFragment.TAG) as ProgressDialogFragment?
+		progressDialog?.dismissAllowingStateLoss()
 	}
 
 	fun selectFileForImport() {
