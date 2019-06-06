@@ -21,7 +21,6 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.strikelines.app.ImportHelperListener
-import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
@@ -176,7 +175,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	override fun onResume() {
 		super.onResume()
 		isActivityVisible = true
-		osmandHelper.listeners.add(this)
+		osmandHelper.listener = this
 		importHelper.listener = this
 		downloadHelper.listener = this
 		StrikeLinesApplication.listener = appListener
@@ -185,7 +184,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		}
 		showProgressBar(importHelper.isCopying() || downloadHelper.isDownloading())
 		checkIntentForFileImport(intent)
-		if (!OsmandHelper.openOsmandRequested) {
+		if (!osmandHelper.isOsmandOpening()) {
 			dismissProgressDialog()
 		}
 	}
@@ -219,12 +218,12 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	override fun onPause() {
 		super.onPause()
 		isActivityVisible = false
-		osmandHelper.listeners.remove(this)
+		osmandHelper.listener = null
 		importHelper.listener = null
 		downloadHelper.listener = null
 		StrikeLinesApplication.listener = null
 		if (!isChangingConfigurations) {
-			OsmandHelper.cancelOsmandOpening()
+			osmandHelper.cancelOsmandOpening()
 			dismissProgressDialog()
 		}
 	}

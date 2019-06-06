@@ -42,8 +42,9 @@ class OsmandHelper(private val app: Application) {
 	private var osmandCustomized = false
 
 	private var selectedOsmandPackage = ""
+	private var openOsmandRequested = false
 
-	var listeners: MutableList<OsmandHelperListener> = mutableListOf()
+	var listener: OsmandHelperListener? = null
 	var onOsmandInitCallbacks: MutableList<OsmandAppInitCallback> = mutableListOf()
 
 	interface OsmandHelperListener {
@@ -92,9 +93,8 @@ class OsmandHelper(private val app: Application) {
 			mIOsmAndAidlInterface = IOsmAndAidlInterface.Stub.asInterface(service)
 			initialized = true
 			log.debug("onServiceConnected")
-			listeners.forEach {
-				it.onOsmandConnectionStateChanged(true)
-			}
+			listener?.onOsmandConnectionStateChanged(true)
+			registerForOsmandInitialization()
 		}
 
 		override fun onServiceDisconnected(name: ComponentName) {
@@ -102,9 +102,7 @@ class OsmandHelper(private val app: Application) {
 			// unexpectedly disconnected -- that is, its process crashed.
 			log.debug("onServiceDisconnected")
 			mIOsmAndAidlInterface = null
-			listeners.forEach {
-				it.onOsmandConnectionStateChanged(false)
-			}
+			listener?.onOsmandConnectionStateChanged(false)
 		}
 	}
 
@@ -144,6 +142,12 @@ class OsmandHelper(private val app: Application) {
 		} else {
 			registerForOsmandInitialization()
 		}
+	}
+
+	fun isOsmandOpening() = openOsmandRequested
+
+	fun cancelOsmandOpening() {
+		openOsmandRequested = false
 	}
 
 	fun canOpenOsmand() = app.packageManager.getLaunchIntentForPackage(selectedOsmandPackage) != null
@@ -717,13 +721,6 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
 
 		const val SHOW_OSMAND_WELCOME_SCREEN = "show_osmand_welcome_screen"
-
-		var openOsmandRequested = false
-			private set
-
-		fun cancelOsmandOpening() {
-			openOsmandRequested = false
-		}
 
 		fun getSqliteDbFileHumanReadableName(fileName: String): String {
 			return getFileHumanReadableName(fileName)
