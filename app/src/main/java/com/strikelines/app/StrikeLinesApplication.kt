@@ -34,7 +34,7 @@ class StrikeLinesApplication : Application() {
 		osmandHelper = OsmandHelper(this)
 		val osmandAppInitCallback = object : OsmandHelper.OsmandAppInitCallback {
 			override fun onOsmandInitialized() {
-				if (shouldOpenOsmand) {
+				if (OsmandHelper.openOsmandRequested) {
 					osmandHelper.setupOsmand()
 					osmandHelper.openOsmand()
 				}
@@ -134,7 +134,6 @@ class StrikeLinesApplication : Application() {
 		var isDataReadyFlag = false
 		var listener: AppListener? = null
 		val chartsList = mutableListOf<Chart>()
-		var shouldOpenOsmand = false
 
 		private var instance: StrikeLinesApplication? = null
 		fun getApp() = instance

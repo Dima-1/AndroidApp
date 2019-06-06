@@ -132,8 +132,9 @@ class OsmandHelper(private val app: Application) {
 		}
 	}
 
-	fun checkOsmandInitialization() {
-		if (!isOsmandConnected()) {
+	fun initAndOpenOsmand() {
+		openOsmandRequested = true
+		if (initialized && !isOsmandConnected()) {
 			connectOsmand()
 		} else {
 			registerForOsmandInitialization()
@@ -711,6 +712,13 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
 
 		const val SHOW_OSMAND_WELCOME_SCREEN = "show_osmand_welcome_screen"
+
+		var openOsmandRequested = false
+			private set
+
+		fun cancelOsmandOpening() {
+			openOsmandRequested = false
+		}
 
 		fun getSqliteDbFileHumanReadableName(fileName: String): String {
 			return getFileHumanReadableName(fileName)

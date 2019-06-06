@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.strikelines.app.ImportHelperListener
+import com.strikelines.app.OsmandHelper
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
 import com.strikelines.app.R
 import com.strikelines.app.StrikeLinesApplication
@@ -138,9 +139,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		}
 		fab.setOnClickListener {
 			if (osmandHelper.canOpenOsmand()) {
-				StrikeLinesApplication.shouldOpenOsmand = true
 				showProgressDialog()
-				osmandHelper.checkOsmandInitialization()
+				osmandHelper.initAndOpenOsmand()
 			} else {
 				installOsmandDialog()
 				app.showToastMessage(getString(R.string.osmandIsMissing))
@@ -220,8 +220,8 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		importHelper.listener = null
 		downloadHelper.listener = null
 		StrikeLinesApplication.listener = null
-		if (StrikeLinesApplication.shouldOpenOsmand && !isChangingConfigurations) {
-			StrikeLinesApplication.shouldOpenOsmand = false
+		if (OsmandHelper.openOsmandRequested && !isChangingConfigurations) {
+			OsmandHelper.cancelOsmandOpening()
 			dismissProgressDialog()
 		}
 	}
