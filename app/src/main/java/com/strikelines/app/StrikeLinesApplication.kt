@@ -32,14 +32,6 @@ class StrikeLinesApplication : Application() {
 	override fun onCreate() {
 		super.onCreate()
 		osmandHelper = OsmandHelper(this)
-		val osmandAppInitCallback = object : OsmandHelper.OsmandAppInitCallback {
-			override fun onOsmandInitialized() {
-				if (OsmandHelper.openOsmandRequested) {
-					osmandHelper.setupOsmand()
-					osmandHelper.openOsmand()
-				}
-			}
-		}
 		val osmandHelperListener = object : OsmandHelper.OsmandHelperListener {
 			override fun onOsmandConnectionStateChanged(connected: Boolean) {
 				if (connected) {
@@ -47,7 +39,6 @@ class StrikeLinesApplication : Application() {
 				}
 			}
 		}
-		osmandHelper.onOsmandInitCallbacks.add(osmandAppInitCallback)
 		osmandHelper.listeners.add(osmandHelperListener)
 		importHelper = ImportHelper(this)
 		downloadHelper = DownloadHelper(this)

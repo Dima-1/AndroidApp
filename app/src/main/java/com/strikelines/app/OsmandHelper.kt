@@ -70,6 +70,10 @@ class OsmandHelper(private val app: Application) {
 				log.debug("osmand initialized")
 				callback.onOsmandInitialized()
 			}
+			if (openOsmandRequested) {
+				setupOsmand()
+				openOsmand()
+			}
 		}
 	}
 
