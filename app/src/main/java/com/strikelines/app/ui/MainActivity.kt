@@ -230,7 +230,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 
 	override fun onDestroy() {
 		super.onDestroy()
-		app.cleanupResources()
+		if (!isChangingConfigurations) {
+			app.cleanupResources()
+		}
 	}
 
 	override fun onAttachFragment(fragment: Fragment?) {
