@@ -71,6 +71,7 @@ class OsmandHelper(private val app: Application) {
 				callback.onOsmandInitialized()
 			}
 			if (openOsmandRequested) {
+				openOsmandRequested = false
 				setupOsmand()
 				openOsmand()
 			}

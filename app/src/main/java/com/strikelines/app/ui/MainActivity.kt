@@ -185,6 +185,9 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		}
 		showProgressBar(importHelper.isCopying() || downloadHelper.isDownloading())
 		checkIntentForFileImport(intent)
+		if (!OsmandHelper.openOsmandRequested) {
+			dismissProgressDialog()
+		}
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -220,7 +223,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		importHelper.listener = null
 		downloadHelper.listener = null
 		StrikeLinesApplication.listener = null
-		if (OsmandHelper.openOsmandRequested && !isChangingConfigurations) {
+		if (!isChangingConfigurations) {
 			OsmandHelper.cancelOsmandOpening()
 			dismissProgressDialog()
 		}
