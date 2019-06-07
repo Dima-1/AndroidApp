@@ -264,7 +264,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	}
 
 	fun selectFileForImport() {
-		if (osmandHelper.isOsmandAvailiable()) {
+		if (osmandHelper.isOsmandAvailable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (AndroidUtils.hasPermissionToWriteExternalStorage(this)) {
 					importFile()
@@ -327,7 +327,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	}
 
 	private fun processFileImport(uri: Uri) {
-		if (osmandHelper.isOsmandAvailiable()) {
+		if (osmandHelper.isOsmandAvailable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (AndroidUtils.hasPermissionToWriteExternalStorage(this)) {
 					importHelper.importFile(uri)

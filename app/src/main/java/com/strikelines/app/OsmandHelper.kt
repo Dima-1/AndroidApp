@@ -16,6 +16,7 @@ import net.osmand.aidl.IOsmAndAidlCallback
 import net.osmand.aidl.IOsmAndAidlInterface
 import net.osmand.aidl.OsmandAidlConstants.COPY_FILE_IO_ERROR
 import net.osmand.aidl.copyfile.CopyFileParams
+import net.osmand.aidl.customization.OsmandSettingsInfoParams
 import net.osmand.aidl.customization.OsmandSettingsParams
 import net.osmand.aidl.customization.SetWidgetsParams
 import net.osmand.aidl.gpx.*
@@ -39,7 +40,6 @@ class OsmandHelper(private val app: Application) {
 	private var osmandCallbackId: Long = 0
 	private var initialized = false
 	private var bound = false
-	private var osmandCustomized = false
 
 	private var selectedOsmandPackage = ""
 	private var openOsmandRequested = false
@@ -67,8 +67,8 @@ class OsmandHelper(private val app: Application) {
 
 		@Throws(RemoteException::class)
 		override fun onAppInitialized() {
-			for(callback in onOsmandInitCallbacks){
-				log.debug("osmand initialized")
+			log.debug("osmand initialized")
+			for (callback in onOsmandInitCallbacks) {
 				callback.onOsmandInitialized()
 			}
 			if (openOsmandRequested) {
@@ -276,8 +276,8 @@ class OsmandHelper(private val app: Application) {
 		regWidgetVisibility("monitoring_services", none)
 		regWidgetVisibility("bgService", none)
 
-		val bundle = Bundle()
-		bundle.apply {
+		val osmandCustomized = areOsmandSettingsCustomized(OSMAND_SHARED_PREFERENCES_NAME)
+		val bundle = Bundle().apply {
 			putString("available_application_modes", "$APP_MODE_BOAT,")
 			putString("application_mode", APP_MODE_BOAT)
 			putString("default_application_mode_string", APP_MODE_BOAT)
@@ -292,10 +292,10 @@ class OsmandHelper(private val app: Application) {
 				putBoolean("map_online_data", true)
 			}
 		}
-		customizeOsmandSettings("strikelines", bundle)
+		customizeOsmandSettings(OSMAND_SHARED_PREFERENCES_NAME, bundle)
 	}
 
-	fun isOsmandAvailiable():Boolean =
+	fun isOsmandAvailable():Boolean =
 		app.packageManager.getLaunchIntentForPackage(getOsmandPackage()) != null
 
 
@@ -436,7 +436,7 @@ class OsmandHelper(private val app: Application) {
 	fun customizeOsmandSettings(sharedPreferencesName: String, bundle: Bundle? = null) {
 		if (mIOsmAndAidlInterface != null) {
 			try {
-				osmandCustomized = mIOsmAndAidlInterface!!.customizeOsmandSettings(OsmandSettingsParams(sharedPreferencesName, bundle))
+				mIOsmAndAidlInterface!!.customizeOsmandSettings(OsmandSettingsParams(sharedPreferencesName, bundle))
 			} catch (e: RemoteException) {
 				log.error(e)
 			}
@@ -685,6 +685,17 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
+	fun areOsmandSettingsCustomized(sharedPreferencesName: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.areOsmandSettingsCustomized(OsmandSettingsInfoParams(sharedPreferencesName))
+			} catch (e: RemoteException) {
+				log.error(e)
+			}
+		}
+		return false
+	}
+
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
 			val intent = Intent("net.osmand.aidl.OsmandAidlService")
@@ -721,6 +732,8 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
 
 		const val SHOW_OSMAND_WELCOME_SCREEN = "show_osmand_welcome_screen"
+
+		const val OSMAND_SHARED_PREFERENCES_NAME = "strikelines"
 
 		fun getSqliteDbFileHumanReadableName(fileName: String): String {
 			return getFileHumanReadableName(fileName)
