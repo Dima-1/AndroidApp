@@ -71,6 +71,8 @@ import net.osmand.aidl.navigation.NavigateSearchParams;
 
 import net.osmand.aidl.customization.SetWidgetsParams;
 import net.osmand.aidl.customization.OsmandSettingsParams;
+import net.osmand.aidl.customization.OsmandSettingsInfoParams;
+import net.osmand.aidl.customization.CustomizationInfoParams;
 
 import net.osmand.aidl.gpx.AGpxFile;
 import net.osmand.aidl.gpx.AGpxFileDetails;
@@ -81,7 +83,11 @@ import net.osmand.aidl.tiles.ASqliteDbFile;
 import net.osmand.aidl.plugins.PluginParams;
 import net.osmand.aidl.copyfile.CopyFileParams;
 
+import net.osmand.aidl.navigation.ANavigationUpdateParams;
 
+import net.osmand.aidl.contextmenu.ContextMenuButtonsParams;
+import net.osmand.aidl.contextmenu.UpdateContextMenuButtonsParams;
+import net.osmand.aidl.contextmenu.RemoveContextMenuButtonsParams;
 
 
 // NOTE: Add new methods at the end of file!!!
@@ -182,4 +188,16 @@ interface IOsmAndAidlInterface {
     boolean getBitmapForGpx(in CreateGpxBitmapParams file, IOsmAndAidlCallback callback);
 
     int copyFile(in CopyFileParams filePart);
+
+    long registerForNavigationUpdates(in ANavigationUpdateParams params, IOsmAndAidlCallback callback);
+
+    long addContextMenuButtons(in ContextMenuButtonsParams params, IOsmAndAidlCallback callback);
+
+    boolean removeContextMenuButtons(in RemoveContextMenuButtonsParams params);
+
+    boolean updateContextMenuButtons(in UpdateContextMenuButtonsParams params);
+
+    boolean areOsmandSettingsCustomized(in OsmandSettingsInfoParams params);
+
+    boolean setCustomization(in CustomizationInfoParams params);
 }

@@ -20,18 +20,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
-import com.strikelines.app.*
-import com.strikelines.app.OsmandCustomizationConstants.PLUGIN_RASTER_MAPS
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_AIRCRAFT
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BICYCLE
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BOAT
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_BUS
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_CAR
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_PEDESTRIAN
-import com.strikelines.app.OsmandHelper.Companion.APP_MODE_TRAIN
-import com.strikelines.app.OsmandHelper.Companion.METRIC_CONST_NAUTICAL_MILES
-import com.strikelines.app.OsmandHelper.Companion.SPEED_CONST_NAUTICALMILES_PER_HOUR
+import com.strikelines.app.ImportHelperListener
 import com.strikelines.app.OsmandHelper.OsmandHelperListener
+import com.strikelines.app.R
+import com.strikelines.app.StrikeLinesApplication
 import com.strikelines.app.StrikeLinesApplication.Companion.DOWNLOAD_REQUEST_CODE
 import com.strikelines.app.StrikeLinesApplication.Companion.IMPORT_REQUEST_CODE
 import com.strikelines.app.ui.adapters.LockableViewPager
@@ -66,13 +58,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	var isActivityVisible = false
 
 	private var importUri: Uri? = null
-
-	private val osmandHelperInitListener = object : OsmandHelper.OsmandAppInitCallback {
-		override fun onOsmandInitialized() {
-			log.debug("Osmand Initialized!")
-			setupOsmand()
-		}
-	}
 
 	override fun fileCopyStarted(fileName: String?) {
 		if (isActivityVisible) {
@@ -120,9 +105,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	}
 
 	override fun onOsmandConnectionStateChanged(connected: Boolean) {
-		if (connected) {
-			osmandHelper.registerForOsmandInitialization()
-		}
 		listeners.forEach {
 			it.get()?.onOsmandConnectionStateChanged(connected)
 		}
@@ -131,7 +113,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
-		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
 		initChartsList()
 
 		snackView = findViewById(android.R.id.content)
@@ -155,11 +136,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 				false
 			}
 		}
-		fab.setOnClickListener { view ->
-			isOsmandFABWasClicked = true
-			osmandHelper.openOsmand {
+		fab.setOnClickListener {
+			if (osmandHelper.canOpenOsmand()) {
+				showProgressDialog()
+				osmandHelper.initAndOpenOsmand()
+			} else {
 				installOsmandDialog()
-				Toast.makeText(view.context, getString(R.string.osmandIsMissing), Toast.LENGTH_SHORT).show()
+				app.showToastMessage(getString(R.string.osmandIsMissing))
 			}
 		}
 		fab.setOnTouchListener { v, event ->
@@ -187,9 +170,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			progressDrawable = AndroidUtils.createProgressDrawable(bgColor, progressColor)
 			indeterminateDrawable.setColorFilter(progressColor, android.graphics.PorterDuff.Mode.SRC_IN)
 		}
-		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
-			osmandHelper.connectOsmand()
-		}
 	}
 
 	override fun onResume() {
@@ -199,22 +179,13 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		importHelper.listener = this
 		downloadHelper.listener = this
 		StrikeLinesApplication.listener = appListener
-		osmandHelper.onOsmandInitCallbacks.add(osmandHelperInitListener)
+		if (osmandHelper.isOsmandBound() && !osmandHelper.isOsmandConnected()) {
+			osmandHelper.connectOsmand()
+		}
 		showProgressBar(importHelper.isCopying() || downloadHelper.isDownloading())
-		val intent: Intent? = intent
-		if (Intent.ACTION_VIEW == intent?.action) {
-			if (intent.data != null) {
-				val uri = intent.data
-				intent.action = null
-				setIntent(null)
-				if (uri != null) {
-					if (importHelper.isCopying()) {
-						showToastMessage(getString(R.string.copy_file_in_progress_alert))
-					} else {
-						processFileImport(uri)
-					}
-				}
-			}
+		checkIntentForFileImport(intent)
+		if (!osmandHelper.isOsmandOpening()) {
+			dismissProgressDialog()
 		}
 	}
 
@@ -244,27 +215,24 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		}
 	}
 
-	override fun onRestart() {
-		super.onRestart()
-		setupOsmand()
-	}
-
 	override fun onPause() {
 		super.onPause()
 		isActivityVisible = false
-		if (!isOsmandFABWasClicked) {
-			osmandHelper.restoreOsmand()
-		}
-		osmandHelper.onOsmandInitCallbacks.clear()
 		osmandHelper.listener = null
 		importHelper.listener = null
 		downloadHelper.listener = null
 		StrikeLinesApplication.listener = null
+		if (!isChangingConfigurations) {
+			osmandHelper.cancelOsmandOpening()
+			dismissProgressDialog()
+		}
 	}
 
 	override fun onDestroy() {
 		super.onDestroy()
-		app.cleanupResources()
+		if (!isChangingConfigurations) {
+			app.cleanupResources()
+		}
 	}
 
 	override fun onAttachFragment(fragment: Fragment?) {
@@ -286,8 +254,17 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		}
 	}
 
+	private fun showProgressDialog() {
+		ProgressDialogFragment.showInstance(supportFragmentManager, R.string.please_wait, R.string.prepare_osmand_before_opening)
+	}
+
+	private fun dismissProgressDialog() {
+		val progressDialog = supportFragmentManager.findFragmentByTag(ProgressDialogFragment.TAG) as ProgressDialogFragment?
+		progressDialog?.dismissAllowingStateLoss()
+	}
+
 	fun selectFileForImport() {
-		if (osmandHelper.isOsmandAvailiable()) {
+		if (osmandHelper.isOsmandAvailable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (AndroidUtils.hasPermissionToWriteExternalStorage(this)) {
 					importFile()
@@ -299,6 +276,24 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			}
 		} else {
 			installOsmandDialog()
+		}
+	}
+
+	private fun checkIntentForFileImport(intent: Intent?) {
+		if (Intent.ACTION_VIEW == intent?.action) {
+			if (intent.data != null) {
+				val uri = intent.data
+				intent.action = null
+				setIntent(null)
+				val scheme = uri?.scheme
+				if (uri != null && scheme != null && ("file" == scheme || "content" == scheme)) {
+					if (importHelper.isCopying()) {
+						showToastMessage(getString(R.string.copy_file_in_progress_alert))
+					} else {
+						processFileImport(uri)
+					}
+				}
+			}
 		}
 	}
 
@@ -332,7 +327,7 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 	}
 
 	private fun processFileImport(uri: Uri) {
-		if (osmandHelper.isOsmandAvailiable()) {
+		if (osmandHelper.isOsmandAvailable()) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (AndroidUtils.hasPermissionToWriteExternalStorage(this)) {
 					importHelper.importFile(uri)
@@ -345,141 +340,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 			}
 		} else {
 			installOsmandDialog()
-		}
-	}
-
-	private fun setupOsmand() {
-		val logoUri = AndroidUtils.resourceToUri(
-			this@MainActivity, R.drawable.img_strikelines_nav_drawer_logo
-		)
-
-		val exceptDefault = listOf(
-			APP_MODE_CAR,
-			APP_MODE_PEDESTRIAN,
-			APP_MODE_BICYCLE,
-			APP_MODE_BOAT,
-			APP_MODE_AIRCRAFT,
-			APP_MODE_BUS,
-			APP_MODE_TRAIN
-		)
-		val exceptPedestrianAndDefault = listOf(
-			APP_MODE_CAR,
-			APP_MODE_BICYCLE,
-			APP_MODE_BOAT,
-			APP_MODE_AIRCRAFT,
-			APP_MODE_BUS,
-			APP_MODE_TRAIN
-		)
-		val exceptAirBoatDefault = listOf(APP_MODE_CAR, APP_MODE_BICYCLE, APP_MODE_PEDESTRIAN)
-		val pedestrian = listOf(APP_MODE_PEDESTRIAN)
-		val pedestrianBicycle = listOf(APP_MODE_PEDESTRIAN, APP_MODE_BICYCLE)
-		val all = null
-		val none = emptyList<String>()
-
-		osmandHelper.apply {
-
-			setNavDrawerLogoWithParams(logoUri, packageName, "strike_lines_app://main_activity")
-			setNavDrawerFooterParams(
-				packageName,
-				"strike_lines_app://main_activity",
-				resources.getString(R.string.app_name)
-			)
-			setNavDrawerItems(
-				packageName,
-				listOf(getString(R.string.aidl_menu_item_download_charts)),
-				listOf("strike_lines_app://main_activity"),
-				listOf("ic_type_archive"),
-				listOf(-1)
-			)
-
-			setDisabledPatterns(
-				listOf(
-					OsmandCustomizationConstants.DRAWER_DASHBOARD_ID,
-					OsmandCustomizationConstants.DRAWER_MY_PLACES_ID,
-					OsmandCustomizationConstants.DRAWER_SEARCH_ID,
-					OsmandCustomizationConstants.DRAWER_DIRECTIONS_ID,
-					OsmandCustomizationConstants.DRAWER_CONFIGURE_SCREEN_ID,
-					OsmandCustomizationConstants.DRAWER_OSMAND_LIVE_ID,
-					OsmandCustomizationConstants.DRAWER_TRAVEL_GUIDES_ID,
-					OsmandCustomizationConstants.DRAWER_PLUGINS_ID,
-					OsmandCustomizationConstants.DRAWER_SETTINGS_ID,
-					OsmandCustomizationConstants.DRAWER_HELP_ID,
-					OsmandCustomizationConstants.DRAWER_BUILDS_ID,
-					OsmandCustomizationConstants.DRAWER_DIVIDER_ID,
-					OsmandCustomizationConstants.DRAWER_DOWNLOAD_MAPS_ID,
-					OsmandCustomizationConstants.MAP_CONTEXT_MENU_ACTIONS,
-					OsmandCustomizationConstants.CONFIGURE_MAP_ITEM_ID_SCHEME
-				)
-			)
-
-			setEnabledIds(
-				listOf(
-					OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
-					OsmandCustomizationConstants.GPX_FILES_ID,
-					OsmandCustomizationConstants.MAP_SOURCE_ID,
-					OsmandCustomizationConstants.OVERLAY_MAP,
-					OsmandCustomizationConstants.UNDERLAY_MAP,
-					OsmandCustomizationConstants.CONTOUR_LINES
-				)
-			)
-
-			setDisabledIds(
-				listOf(
-					OsmandCustomizationConstants.ROUTE_PLANNING_HUD_ID,
-					OsmandCustomizationConstants.QUICK_SEARCH_HUD_ID
-				)
-			)
-
-			changePluginState(PLUGIN_RASTER_MAPS, 1)
-
-			// left
-			regWidgetVisibility("next_turn", exceptPedestrianAndDefault)
-			regWidgetVisibility("next_turn_small", pedestrian)
-			regWidgetVisibility("next_next_turn", exceptPedestrianAndDefault)
-			regWidgetAvailability("next_turn", exceptDefault)
-			regWidgetAvailability("next_turn_small", exceptDefault)
-			regWidgetAvailability("next_next_turn", exceptDefault)
-
-			// right
-			regWidgetVisibility("intermediate_distance", all)
-			regWidgetVisibility("distance", all)
-			regWidgetVisibility("time", all)
-			regWidgetVisibility("intermediate_time", all)
-			regWidgetVisibility("speed", exceptPedestrianAndDefault)
-			regWidgetVisibility("max_speed", listOf(APP_MODE_CAR))
-			regWidgetVisibility("altitude", pedestrianBicycle)
-			regWidgetVisibility("gps_info", listOf(APP_MODE_BOAT))
-			regWidgetAvailability("intermediate_distance", all)
-			regWidgetAvailability("distance", all)
-			regWidgetAvailability("time", all)
-			regWidgetAvailability("intermediate_time", all)
-			regWidgetAvailability("map_marker_1st", none)
-			regWidgetAvailability("map_marker_2nd", none)
-			regWidgetVisibility("bearing", listOf(APP_MODE_BOAT))
-
-			// top
-			regWidgetVisibility("config", none)
-			regWidgetVisibility("layers", none)
-			regWidgetVisibility("compass", none)
-			regWidgetVisibility("street_name", exceptAirBoatDefault)
-			regWidgetVisibility("back_to_location", all)
-			regWidgetVisibility("monitoring_services", none)
-			regWidgetVisibility("bgService", none)
-
-			val bundle = Bundle()
-			bundle.apply {
-				putString("available_application_modes", "$APP_MODE_BOAT,")
-				putString("application_mode", APP_MODE_BOAT)
-				putString("default_application_mode_string", APP_MODE_BOAT)
-				putBoolean("driving_region_automatic", false)
-				putBoolean("show_osmand_welcome_screen", false)
-				putString("default_metric_system", METRIC_CONST_NAUTICAL_MILES)
-				putString("default_speed_system", SPEED_CONST_NAUTICALMILES_PER_HOUR)
-				if (!isOsmandCustomized()) {
-					putBoolean("map_online_data", true)
-				}
-			}
-			customizeOsmandSettings("strikelines", bundle)
 		}
 	}
 
@@ -576,7 +436,6 @@ class MainActivity : AppCompatActivity(), OsmandHelperListener, ImportHelperList
 		private const val DOWNLOADS_TAB_POS = 1
 
 		val fragmentNotifier = mutableMapOf<Int, FragmentDataNotifier?>()
-		var isOsmandFABWasClicked = false
 		var chartsDataIsReady = false
 	}
 }
