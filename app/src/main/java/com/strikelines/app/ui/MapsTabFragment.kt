@@ -115,30 +115,30 @@ class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 		fetchListItems()
 	}
 
-	override fun onCheckedChanged(@NonNull listItem: ListItem, isChecked: Boolean) {
+	override fun onCheckedChanged(@NonNull listItem: ListItem, isChecked: Boolean): Boolean {
+		var itemVisibilityChanged: Boolean? = null
 		when (listItem) {
 			is LocalGpxItem -> {
 				val gpx = listItem.data as? AGpxFile
 				if (gpx != null) {
-					if (isChecked) {
+					itemVisibilityChanged = if (isChecked) {
 						osmandHelper?.showGpx(gpx.fileName)
 					} else {
 						osmandHelper?.hideGpx(gpx.fileName)
 					}
-					app?.runInUI(this::fetchListItems, 1000)
 				}
 			}
 			is Local3DChartItem -> {
 				val sqliteDbFile = listItem.data as? ASqliteDbFile
 				if (sqliteDbFile != null) {
-					if (isChecked) {
+					itemVisibilityChanged = if (isChecked) {
 						osmandHelper?.showSqliteDbFile(sqliteDbFile.fileName)
 					} else {
 						osmandHelper?.hideSqliteDbFile(sqliteDbFile.fileName)
 					}
-					app?.runInUI(this::fetchListItems, 500)
 				}
 			}
 		}
+		return itemVisibilityChanged ?: false
 	}
 }

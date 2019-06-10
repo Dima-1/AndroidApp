@@ -24,7 +24,7 @@ class LocalItemsViewAdapter : RecyclerView.Adapter<LocalItemsViewAdapter.BaseVie
 	}
 
 	interface OnCheckedListener {
-		fun onCheckedChanged(listItem: ListItem, isChecked: Boolean)
+		fun onCheckedChanged(listItem: ListItem, isChecked: Boolean): Boolean
 	}
 
 	var listener: OnCheckedListener? = null
@@ -94,22 +94,25 @@ class LocalItemsViewAdapter : RecyclerView.Adapter<LocalItemsViewAdapter.BaseVie
 		}
 
 		if (getItemViewType(position) != ITEM_VIEW_TYPE_HEADER) {
-			holder.infoContainer?.setOnClickListener {
+			val clickListener = View.OnClickListener {
 				val button: CompoundButton? = if (item.multiselection) holder.checkbox else holder.radioButton
-				button?.toggle()
+				if (button != null && (!item.multiselection && !item.selected || item.multiselection)) {
+					updateItemVisibility(button, item, !item.selected)
+				}
 			}
+			holder.infoContainer?.setOnClickListener(clickListener)
 			if (item.multiselection) {
 				holder.checkbox?.visibility = View.VISIBLE
 				holder.radioButton?.visibility = View.GONE
 				holder.checkbox?.tag = position
-				holder.checkbox?.setOnCheckedChangeListener(null)
+				holder.checkbox?.setOnClickListener(null)
 				holder.checkbox?.isChecked = item.selected
-				holder.checkbox?.setOnCheckedChangeListener(onCheckedListener)
+				holder.checkbox?.setOnClickListener(clickListener)
 			} else {
 				holder.radioButton?.tag = position
-				holder.radioButton?.setOnCheckedChangeListener(null)
+				holder.radioButton?.setOnClickListener(null)
 				holder.radioButton?.isChecked = item.selected
-				holder.radioButton?.setOnCheckedChangeListener(onCheckedListener)
+				holder.radioButton?.setOnClickListener(clickListener)
 				holder.checkbox?.visibility = View.GONE
 				holder.radioButton?.visibility = View.VISIBLE
 			}
@@ -118,11 +121,19 @@ class LocalItemsViewAdapter : RecyclerView.Adapter<LocalItemsViewAdapter.BaseVie
 
 	override fun getItemCount() = items.size
 
-	private val onCheckedListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+	private fun updateItemVisibility(buttonView: CompoundButton, item: ListItem, isChecked: Boolean) {
 		val position = buttonView.tag
-		if (position != null) {
-			val item = items[position as Int]
-			listener?.onCheckedChanged(item, isChecked)
+		val visibilityChanged = listener?.onCheckedChanged(item, isChecked)
+		if (visibilityChanged != null) {
+			items.forEachIndexed { index, listItem ->
+				if (position == index) {
+					listItem.selected = if (visibilityChanged) !listItem.selected else listItem.selected
+					buttonView.isChecked = listItem.selected
+				} else if (listItem !is HeaderItem && visibilityChanged && !item.multiselection && !listItem.multiselection && listItem.selected) {
+					listItem.selected = false
+					notifyItemChanged(index)
+				}
+			}
 		}
 	}
 
