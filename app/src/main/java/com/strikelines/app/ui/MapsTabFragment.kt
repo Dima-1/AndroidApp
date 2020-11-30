@@ -17,8 +17,8 @@ import com.strikelines.app.ui.adapters.LocalItemsViewAdapter
 import com.strikelines.app.ui.adapters.LocalItemsViewAdapter.*
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.UiUtils
-import net.osmand.aidl.gpx.AGpxFile
-import net.osmand.aidl.tiles.ASqliteDbFile
+import net.osmand.aidlapi.gpx.AGpxFile
+import net.osmand.aidlapi.tiles.ASqliteDbFile
 
 class MapsTabFragment : Fragment(), OsmandHelperListener, OnCheckedListener {
 

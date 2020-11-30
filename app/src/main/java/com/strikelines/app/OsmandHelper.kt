@@ -5,30 +5,35 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.AssetManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
+import android.support.v4.content.FileProvider
 import android.text.TextUtils
+import android.view.KeyEvent
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
-import net.osmand.aidl.IOsmAndAidlCallback
-import net.osmand.aidl.IOsmAndAidlInterface
-import net.osmand.aidl.OsmandAidlConstants.COPY_FILE_IO_ERROR
-import net.osmand.aidl.copyfile.CopyFileParams
-import net.osmand.aidl.customization.CustomizationInfoParams
-import net.osmand.aidl.customization.OsmandSettingsInfoParams
-import net.osmand.aidl.customization.OsmandSettingsParams
-import net.osmand.aidl.customization.SetWidgetsParams
-import net.osmand.aidl.gpx.*
-import net.osmand.aidl.navdrawer.NavDrawerFooterParams
-import net.osmand.aidl.navdrawer.NavDrawerHeaderParams
-import net.osmand.aidl.navdrawer.NavDrawerItem
-import net.osmand.aidl.navdrawer.SetNavDrawerItemsParams
-import net.osmand.aidl.plugins.PluginParams
-import net.osmand.aidl.search.SearchResult
-import net.osmand.aidl.tiles.ASqliteDbFile
+import net.osmand.aidlapi.IOsmAndAidlCallback
+import net.osmand.aidlapi.IOsmAndAidlInterface
+import net.osmand.aidlapi.OsmandAidlConstants.COPY_FILE_IO_ERROR
+import net.osmand.aidlapi.copyfile.CopyFileParams
+import net.osmand.aidlapi.customization.*
+import net.osmand.aidlapi.gpx.*
+import net.osmand.aidlapi.navdrawer.NavDrawerFooterParams
+import net.osmand.aidlapi.navdrawer.NavDrawerHeaderParams
+import net.osmand.aidlapi.navdrawer.NavDrawerItem
+import net.osmand.aidlapi.navdrawer.SetNavDrawerItemsParams
+import net.osmand.aidlapi.navigation.ADirectionInfo
+import net.osmand.aidlapi.navigation.OnVoiceNavigationParams
+import net.osmand.aidlapi.plugins.PluginParams
+import net.osmand.aidlapi.profile.AExportSettingsType
+import net.osmand.aidlapi.search.SearchResult
+import net.osmand.aidlapi.tiles.ASqliteDbFile
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.*
 
 class OsmandHelper(private val app: Application) {
@@ -59,6 +64,13 @@ class OsmandHelper(private val app: Application) {
 	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
 		@Throws(RemoteException::class)
 		override fun onGpxBitmapCreated(bitmap: AGpxBitmap?) {}
+		override fun updateNavigationInfo(directionInfo: ADirectionInfo?) {}
+
+		override fun onKeyEvent(params: KeyEvent?) {}
+
+		override fun onVoiceRouterNotify(params: OnVoiceNavigationParams?) {}
+
+		override fun onContextMenuButtonClicked(buttonId: Int, pointId: String?, layerId: String?) {}
 
 		@Throws(RemoteException::class)
 		override fun onSearchComplete(resultSet: List<SearchResult>) {}
@@ -74,8 +86,8 @@ class OsmandHelper(private val app: Application) {
 			}
 			if (openOsmandRequested) {
 				openOsmandRequested = false
-				setupOsmand()
 				openOsmand()
+				setupOsmand()
 			}
 		}
 	}
@@ -163,34 +175,41 @@ class OsmandHelper(private val app: Application) {
 	}
 
 	fun setupOsmand() {
+
+		val featuresEnabledIds = getFeaturesEnabledIds()
+		setEnabledIds(featuresEnabledIds)
+		val featuresDisabledIds = getFeaturesDisabledIds()
+		setDisabledIds(featuresDisabledIds)
+		val intent = "strike_lines_app://main_activity"
 		val logoUri = AndroidUtils.resourceToUri(app, R.drawable.img_strikelines_nav_drawer_logo)
+		setNavDrawerLogoWithParams(logoUri, app.packageName, intent)
+		val profile = createProfile()
+		importProfile(profile)
+
+	/*	val logoUri = AndroidUtils.resourceToUri(app, R.drawable.img_strikelines_nav_drawer_logo)
 		val intent = "strike_lines_app://main_activity"
 		val navDrawerHeaderParams = NavDrawerHeaderParams(logoUri.toString(), app.packageName, intent)
 		val navDrawerFooterParams = NavDrawerFooterParams(app.packageName, intent, app.resources.getString(R.string.app_name))
 		val navDrawerItemsParams = SetNavDrawerItemsParams(app.packageName, listOf(NavDrawerItem(app.getString(R.string.aidl_menu_item_download_charts), intent, "ic_type_archive", -1)))
-
-		val featuresEnabledIds = getFeaturesEnabledIds()
-		val featuresDisabledIds = getFeaturesDisabledIds()
 		val featuresDisabledPatterns = getFeaturesDisabledPatterns()
 		val visibilityWidgetsParams = getVisibilityWidgetsParams()
 		val availabilityWidgetsParams = getAvailabilityWidgetsParams()
 		val settingsParams = getCustomOsmandSettingsParams()
 		val pluginParams = arrayListOf(PluginParams(OsmandCustomizationConstants.PLUGIN_RASTER_MAPS, 1))
-
 		val customizationInfoParams = CustomizationInfoParams(
-			settingsParams,
-			navDrawerHeaderParams,
-			navDrawerFooterParams,
-			navDrawerItemsParams,
-			visibilityWidgetsParams,
-			availabilityWidgetsParams,
-			pluginParams,
-			featuresEnabledIds,
-			featuresDisabledIds,
-			null,
-			featuresDisabledPatterns
+				settingsParams,
+				navDrawerHeaderParams,
+				navDrawerFooterParams,
+				navDrawerItemsParams,
+				visibilityWidgetsParams,
+				availabilityWidgetsParams,
+				pluginParams,
+				featuresEnabledIds,
+				featuresDisabledIds,
+				null,
+				featuresDisabledPatterns
 		)
-		setCustomization(customizationInfoParams)
+		setCustomization(customizationInfoParams)*/
 	}
 
 	fun isOsmandAvailable():Boolean =
@@ -604,14 +623,27 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
+	fun importProfile(profileSettingsParams: ProfileSettingsParams): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				app.grantUriPermission(selectedOsmandPackage, profileSettingsParams.profileSettingsUri,
+						Intent.FLAG_GRANT_READ_URI_PERMISSION);
+				return mIOsmAndAidlInterface!!.importProfile(profileSettingsParams)
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return false
+	}
+
 	private fun getFeaturesEnabledIds(): List<String> {
 		return listOf(
-			OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
-			OsmandCustomizationConstants.GPX_FILES_ID,
-			OsmandCustomizationConstants.MAP_SOURCE_ID,
-			OsmandCustomizationConstants.OVERLAY_MAP,
-			OsmandCustomizationConstants.UNDERLAY_MAP,
-			OsmandCustomizationConstants.CONTOUR_LINES
+				OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
+				OsmandCustomizationConstants.GPX_FILES_ID,
+				OsmandCustomizationConstants.MAP_SOURCE_ID,
+				OsmandCustomizationConstants.OVERLAY_MAP,
+				OsmandCustomizationConstants.UNDERLAY_MAP,
+				OsmandCustomizationConstants.CONTOUR_LINES
 		)
 	}
 
@@ -681,6 +713,30 @@ class OsmandHelper(private val app: Application) {
 		)
 	}
 
+	private fun createProfile(): ProfileSettingsParams {
+		val fileName = "strikelines.osf"
+		val sharedDir = File(app.cacheDir, "share")
+		if (!sharedDir.exists()) {
+			sharedDir.mkdir()
+		}
+		val file = File(sharedDir, fileName)
+		val am: AssetManager = app.assets
+		val inStream: InputStream = am.open(fileName)
+		val outStream = FileOutputStream(file)
+		val buffer = ByteArray(1024)
+		var length = inStream.read(buffer)
+		while (length > 0) {
+			outStream.write(buffer, 0, length)
+			length = inStream.read(buffer)
+		}
+		inStream.close()
+		outStream.close()
+		val fileUri = FileProvider.getUriForFile(app, app.packageName + ".provider", file)
+		val settingsTypeList = arrayListOf(AExportSettingsType.PROFILE)
+		val replace = true
+		return ProfileSettingsParams(fileUri,settingsTypeList,replace, null, -1)
+	}
+
 	private fun getCustomOsmandSettingsParams(): OsmandSettingsParams {
 		val areOsmandCustomized = areOsmandSettingsCustomized(OSMAND_SHARED_PREFERENCES_NAME)
 		log.debug("areOsmandCustomized $areOsmandCustomized")
@@ -704,7 +760,7 @@ class OsmandHelper(private val app: Application) {
 
 	private fun bindService(packageName: String): Boolean {
 		return if (mIOsmAndAidlInterface == null) {
-			val intent = Intent("net.osmand.aidl.OsmandAidlService")
+			val intent = Intent("net.osmand.aidl.OsmandAidlServiceV2")
 			intent.`package` = packageName
 			app.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
 		} else {

@@ -4,8 +4,8 @@ import android.net.Uri
 import android.os.AsyncTask
 import com.strikelines.app.utils.AndroidUtils
 import com.strikelines.app.utils.PlatformUtil
-import net.osmand.aidl.OsmandAidlConstants.*
-import net.osmand.aidl.copyfile.CopyFileParams
+import net.osmand.aidlapi.OsmandAidlConstants.*
+import net.osmand.aidlapi.copyfile.CopyFileParams
 import java.io.DataInputStream
 import java.io.FileInputStream
 import java.io.IOException
@@ -183,7 +183,7 @@ private class ImportTask(
 					}
 				}
 				if (!isError) {
-					response = app.osmandHelper.copyFile(CopyFileParams(fileName, data, startTime, read == -1))
+					response = app.osmandHelper.copyFile(CopyFileParams("",fileName, data, startTime, read == -1))
 				}
 			}
 			bis.close()
