@@ -183,8 +183,12 @@ class OsmandHelper(private val app: Application) {
 		val intent = "strike_lines_app://main_activity"
 		val logoUri = AndroidUtils.resourceToUri(app, R.drawable.img_strikelines_nav_drawer_logo)
 		setNavDrawerLogoWithParams(logoUri, app.packageName, intent)
-		val profile = createProfile()
-		importProfile(profile)
+
+		val version = getPluginVersion()
+		if (version < PLUGIN_VERSION) {
+			val profile = createProfile()
+			importProfile(profile)
+		}
 
 	/*	val logoUri = AndroidUtils.resourceToUri(app, R.drawable.img_strikelines_nav_drawer_logo)
 		val intent = "strike_lines_app://main_activity"
@@ -636,6 +640,17 @@ class OsmandHelper(private val app: Application) {
 		return false
 	}
 
+	fun getPluginVersion(): Int {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.getPluginVersion(CustomPluginParams(app.packageName))
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return -1
+	}
+
 	private fun getFeaturesEnabledIds(): List<String> {
 		return listOf(
 				OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
@@ -772,6 +787,8 @@ class OsmandHelper(private val app: Application) {
 		osmandPackages.firstOrNull { AndroidUtils.isAppInstalled(app, it) } ?: ""
 
 	companion object {
+		const val PLUGIN_VERSION = 1
+
 		const val APP_MODE_CAR = "car"
 		const val APP_MODE_PEDESTRIAN = "pedestrian"
 		const val APP_MODE_BICYCLE = "bicycle"
