@@ -34,7 +34,6 @@ import net.osmand.aidlapi.tiles.ASqliteDbFile
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.*
 
 class OsmandHelper(private val app: Application) {
 
@@ -61,7 +60,7 @@ class OsmandHelper(private val app: Application) {
 		fun onOsmandInitialized()
 	}
 
-	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub? = object: IOsmAndAidlCallback.Stub() {
+	private val iOsmAndAidlCallback: IOsmAndAidlCallback.Stub = object: IOsmAndAidlCallback.Stub() {
 		@Throws(RemoteException::class)
 		override fun onGpxBitmapCreated(bitmap: AGpxBitmap?) {}
 		override fun updateNavigationInfo(directionInfo: ADirectionInfo?) {}
@@ -185,7 +184,11 @@ class OsmandHelper(private val app: Application) {
 		setNavDrawerLogoWithParams(logoUri, app.packageName, intent)
 
 		val version = getPluginVersion()
-		if (version < PLUGIN_VERSION) {
+		val hasProfile = hasSavedProfile()
+		if (hasProfile) {
+			selectStrikelinesProfile(STRIKELINES_PROFILE_KEY)
+		}
+		if (version < PLUGIN_VERSION || !hasProfile) {
 			val profile = createProfile()
 			importProfile(profile)
 		}
@@ -651,6 +654,30 @@ class OsmandHelper(private val app: Application) {
 		return -1
 	}
 
+	fun selectStrikelinesProfile(profileKey: String): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				return mIOsmAndAidlInterface!!.selectProfile(SelectProfileParams(profileKey))
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return false
+	}
+
+	fun hasSavedProfile(): Boolean {
+		if (mIOsmAndAidlInterface != null) {
+			try {
+				val profiles = arrayListOf<AProfile>()
+				mIOsmAndAidlInterface!!.getProfiles(profiles)
+				return profiles.any { it.stringKey == STRIKELINES_PROFILE_KEY }
+			} catch (e: RemoteException) {
+				e.printStackTrace()
+			}
+		}
+		return false
+	}
+
 	private fun getFeaturesEnabledIds(): List<String> {
 		return listOf(
 				OsmandCustomizationConstants.MAP_CONTEXT_MENU_MEASURE_DISTANCE,
@@ -809,6 +836,8 @@ class OsmandHelper(private val app: Application) {
 		const val METRIC_CONST_MILES_AND_METERS = "MILES_AND_METERS"
 		const val METRIC_CONST_MILES_AND_YARDS = "MILES_AND_YARDS"
 		const val METRIC_CONST_NAUTICAL_MILES = "NAUTICAL_MILES"
+
+		const val STRIKELINES_PROFILE_KEY = "strikelines"
 
 		const val SHOW_OSMAND_WELCOME_SCREEN = "show_osmand_welcome_screen"
 
