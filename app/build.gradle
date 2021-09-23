@@ -41,7 +41,7 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.0.1'
     kapt 'com.github.bumptech.glide:compiler:4.8.0'
 //    implementation "com.github.osmandapp:Osmand:master-SNAPSHOT"
-    implementation group : "net.osmand", name : "OsmAnd", version : "0.1-SNAPSHOT", classifier : "release", ext : "aar"
+    implementation "net.osmand:android-aidl-lib:master-snapshot@aar"
 
     implementation 'commons-logging:commons-logging-api:1.1'
     testImplementation 'junit:junit:4.12'
