@@ -21,6 +21,7 @@ import net.osmand.aidlapi.OsmandAidlConstants.COPY_FILE_IO_ERROR
 import net.osmand.aidlapi.copyfile.CopyFileParams
 import net.osmand.aidlapi.customization.*
 import net.osmand.aidlapi.gpx.*
+import net.osmand.aidlapi.logcat.OnLogcatMessageParams
 import net.osmand.aidlapi.navdrawer.NavDrawerFooterParams
 import net.osmand.aidlapi.navdrawer.NavDrawerHeaderParams
 import net.osmand.aidlapi.navdrawer.NavDrawerItem
@@ -89,6 +90,7 @@ class OsmandHelper(private val app: Application) {
 				setupOsmand()
 			}
 		}
+		override fun onLogcatMessage(params: OnLogcatMessageParams?) {}
 	}
 
 	/**
